@@ -1,0 +1,244 @@
+import React, { useEffect, useState } from 'react';
+import { useScheduleStore } from '../../store/useScheduleStore';
+import { useStaffQuery } from '../../hooks/api/useStaff';
+import { useBranchesQuery } from '../../hooks/api/useBranches';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { Calendar, Clock, Plus, Users, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export const ScheduleBuilder: React.FC = () => {
+  const { shifts, fetchShiftsByBranch, createShift, publishShifts, isLoading } = useScheduleStore();
+  const { data: staffData } = useStaffQuery(0, 100);
+  const { data: branches } = useBranchesQuery();
+  const staff = staffData?.content || [];
+  
+  const [selectedBranchId, setSelectedBranchId] = useState<number>(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Form State
+  const [shiftStaffId, setShiftStaffId] = useState<number>(0);
+  const [shiftDate, setShiftDate] = useState<string>('');
+  const [startTime, setStartTime] = useState<string>('09:00');
+  const [endTime, setEndTime] = useState<string>('17:00');
+  const [shiftType, setShiftType] = useState<string>('REGULAR');
+
+  useEffect(() => {
+    if (branches && branches.length > 0 && selectedBranchId === 1) {
+      setSelectedBranchId(branches[0].id);
+    }
+  }, [branches]);
+
+  useEffect(() => {
+    if (selectedBranchId) {
+      fetchShiftsByBranch(selectedBranchId);
+    }
+  }, [selectedBranchId, fetchShiftsByBranch]);
+
+  const handleCreateShift = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shiftStaffId || !shiftDate || !startTime || !endTime) return;
+    
+    try {
+      const startDateTime = new Date(`${shiftDate}T${startTime}:00`).toISOString();
+      const endDateTime = new Date(`${shiftDate}T${endTime}:00`).toISOString();
+
+      await createShift({
+        staffId: shiftStaffId,
+        branchId: selectedBranchId,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        type: shiftType as any
+      });
+      setIsModalOpen(false);
+    } catch (error) {
+      alert("Failed to create shift. It might overlap with an existing one.");
+    }
+  };
+
+  const draftShifts = shifts.filter(s => s.status === 'DRAFT');
+
+  const handlePublish = async () => {
+    if (draftShifts.length > 0) {
+      await publishShifts(draftShifts.map(s => s.id));
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Schedule Builder</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage staff shifts and publish schedules</p>
+        </div>
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-end sm:items-center">
+          <select 
+            className="rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            value={selectedBranchId}
+            onChange={(e) => setSelectedBranchId(Number(e.target.value))}
+          >
+            {branches?.map(branch => (
+              <option key={branch.id} value={branch.id}>{branch.name}</option>
+            ))}
+          </select>
+
+          <Button variant="outline" onClick={() => setIsModalOpen(true)} disabled={isLoading}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Shift
+          </Button>
+          <Button onClick={handlePublish} disabled={draftShifts.length === 0 || isLoading}>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Publish Drafts ({draftShifts.length})
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          {shifts.length === 0 ? (
+            <Card className="p-8 text-center">
+              <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">No Shifts Scheduled</h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">Click "Add Shift" to start building the schedule.</p>
+            </Card>
+          ) : (
+            shifts.map((shift, i) => (
+              <motion.div
+                key={shift.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Card className="p-4 flex flex-col sm:flex-row items-center justify-between">
+                  <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+                    <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                      <Users className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{shift.staffName}</h4>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(shift.startTime).toLocaleDateString()}
+                        <Clock className="h-3 w-3 ml-3 mr-1" />
+                        {new Date(shift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                        {new Date(shift.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium mb-2 ${
+                      shift.status === 'PUBLISHED' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}>
+                      {shift.status}
+                    </span>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">{shift.type}</span>
+                  </div>
+                </Card>
+              </motion.div>
+            ))
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <Card className="p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Summary</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">Total Shifts</span>
+                <span className="font-medium text-gray-900 dark:text-white">{shifts.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">Drafts</span>
+                <span className="font-medium text-yellow-600 dark:text-yellow-400">{draftShifts.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">Published</span>
+                <span className="font-medium text-green-600 dark:text-green-400">{shifts.length - draftShifts.length}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Create New Shift"
+      >
+        <form onSubmit={handleCreateShift} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Staff Member</label>
+            <select
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:text-white"
+              value={shiftStaffId}
+              onChange={(e) => setShiftStaffId(Number(e.target.value))}
+              required
+            >
+              <option value={0} disabled>Select Staff</option>
+              {staff.map(s => (
+                <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+            <input
+              type="date"
+              required
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:text-white"
+              value={shiftDate}
+              onChange={(e) => setShiftDate(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+              <input
+                type="time"
+                required
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+              <input
+                type="time"
+                required
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:text-white"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shift Type</label>
+            <select
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:text-white"
+              value={shiftType}
+              onChange={(e) => setShiftType(e.target.value)}
+              required
+            >
+              <option value="REGULAR">Regular</option>
+              <option value="OVERTIME">Overtime</option>
+              <option value="ON_CALL">On Call</option>
+              <option value="CUSTOM">Custom</option>
+            </select>
+          </div>
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Create Shift
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+};

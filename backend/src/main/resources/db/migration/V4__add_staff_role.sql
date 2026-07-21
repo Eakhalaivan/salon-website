@@ -1,0 +1,8 @@
+-- Ensure basic roles are present
+INSERT INTO roles (name)
+SELECT 'CUSTOMER' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'CUSTOMER');
+
+INSERT INTO roles (name)
+SELECT 'STAFF' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'STAFF');

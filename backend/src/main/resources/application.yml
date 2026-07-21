@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: LuxeSuite
+  mail:
+    host: localhost
+    port: 1025
+  config:
+    import: optional:file:.env[.properties]
+  
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 20
+      idle-timeout: 60000
+      connection-timeout: 20000
+      max-lifetime: 300000
+      keepalive-time: 120000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 50
+          min-idle: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL_AUTO:none}
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: ${DB_DIALECT:org.hibernate.dialect.TiDBDialect}
+
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 50
+
+jwt:
+  secret: ${JWT_SECRET:dGhpcy1pcy1hLXZlcnktc2VjdXJlLWp3dC1zZWNyZXQta2V5LXRoYXQtaXMtMjU2LWJpdHM=}
+  expiration: ${JWT_EXPIRATION_MS:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:5175,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:5175}
+
+app:
+  cookie-secure: ${APP_COOKIE_SECURE:false}
+  seed-demo-data: ${APP_SEED_DEMO_DATA:false}
+  loyalty:
+    points-per-100: 1
+
+stripe:
+  key:
+    id: ${STRIPE_KEY_ID:pk_test_TYooMQauvdEDq54NiTphI7jx}
+    secret: ${STRIPE_KEY_SECRET}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET:whsec_test_secret}
+
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:dummy_key_id}
+    secret: ${RAZORPAY_KEY_SECRET:dummy_key_secret}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:dummy_webhook_secret}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    enable:
+      hikaricp: true
+
+ai:
+  provider:
+    anthropic:
+      key: ${ANTHROPIC_API_KEY:}
+      model: claude-3-haiku-20240307
+      
+

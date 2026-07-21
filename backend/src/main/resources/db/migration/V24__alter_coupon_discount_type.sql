@@ -1,0 +1,1 @@
+ALTER TABLE coupons MODIFY COLUMN discount_type VARCHAR(255) NOT NULL;

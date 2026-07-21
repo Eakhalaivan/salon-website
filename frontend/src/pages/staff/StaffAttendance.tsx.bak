@@ -1,0 +1,143 @@
+import React, { useEffect, useState } from 'react';
+import { useScheduleStore } from '../../store/useScheduleStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
+
+export const StaffAttendance: React.FC = () => {
+  const { attendances, fetchAttendanceByStaff, clockIn, clockOut, isLoading } = useScheduleStore();
+  const { user } = useAuthStore();
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  
+  const staffId = user?.staffId;
+
+  useEffect(() => {
+    if (staffId) {
+      fetchAttendanceByStaff(staffId);
+    }
+  }, [staffId]);
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayAttendance = attendances.find(a => a.date === today);
+
+  const handleClockIn = () => {
+    if (!staffId) return;
+    
+    setIsGettingLocation(true);
+    setGeoError(null);
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clockIn(staffId, position.coords.latitude, position.coords.longitude)
+            .finally(() => setIsGettingLocation(false));
+        },
+        (error) => {
+          setGeoError("Location access denied. Location is required to clock in.");
+          setIsGettingLocation(false);
+        }
+      );
+    } else {
+      setGeoError("Geolocation is not supported by this browser.");
+      setIsGettingLocation(false);
+    }
+  };
+
+  const handleClockOut = () => {
+    if (staffId) {
+      clockOut(staffId);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Attendance</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Clock in/out and view your history</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Today's Status</h3>
+          
+          <div className="flex flex-col items-center justify-center py-8">
+            <Clock className="h-16 w-16 text-gray-400 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </h2>
+            
+            {geoError && (
+              <div className="flex items-center text-sm text-red-600 mb-4 bg-red-50 p-3 rounded-lg w-full">
+                <AlertCircle className="h-4 w-4 mr-2" />
+                {geoError}
+              </div>
+            )}
+            
+            {!todayAttendance ? (
+              <Button 
+                onClick={handleClockIn} 
+                disabled={isLoading || isGettingLocation}
+                className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
+              >
+                {isGettingLocation ? 'Getting Location...' : 'Clock In'}
+              </Button>
+            ) : todayAttendance.checkOutTime === null ? (
+              <div className="w-full space-y-4">
+                <div className="flex items-center justify-center text-green-600 bg-green-50 p-4 rounded-lg">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Clocked In at {new Date(todayAttendance.checkInTime!).toLocaleTimeString()}
+                </div>
+                <Button 
+                  onClick={handleClockOut} 
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full h-14 text-lg text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                >
+                  Clock Out
+                </Button>
+              </div>
+            ) : (
+              <div className="w-full flex flex-col items-center justify-center space-y-2 text-gray-500 bg-gray-50 p-6 rounded-lg">
+                <CheckCircle className="h-8 w-8 text-green-500 mb-2" />
+                <p className="font-medium text-gray-900 dark:text-white">Shift Completed</p>
+                <p className="text-sm">In: {new Date(todayAttendance.checkInTime!).toLocaleTimeString()}</p>
+                <p className="text-sm">Out: {new Date(todayAttendance.checkOutTime).toLocaleTimeString()}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent History</h3>
+          <div className="space-y-4">
+            {attendances.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-4">No attendance history available.</p>
+            ) : (
+              attendances.slice().reverse().slice(0, 5).map((log) => (
+                <div key={log.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{new Date(log.date).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500 flex items-center mt-1">
+                      {log.checkInTime ? new Date(log.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'} 
+                      {' → '} 
+                      {log.checkOutTime ? new Date(log.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    log.status === 'ON_TIME' ? 'bg-green-100 text-green-800' : 
+                    log.status === 'LATE' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {log.status.replace('_', ' ')}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,10 @@
+CREATE TABLE reviews (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  customer_id BIGINT NOT NULL,
+  rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  title VARCHAR(120),
+  body TEXT,
+  is_approved BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);

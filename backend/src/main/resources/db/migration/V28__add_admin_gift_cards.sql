@@ -1,0 +1,6 @@
+ALTER TABLE gift_cards
+ADD COLUMN sent_by_admin_id BIGINT NULL REFERENCES users(id),
+ADD COLUMN recipient_customer_id BIGINT NULL REFERENCES customers(id),
+ADD COLUMN message TEXT NULL,
+ADD COLUMN redeemed_at TIMESTAMP NULL,
+ADD COLUMN source VARCHAR(20) NOT NULL DEFAULT 'PURCHASED';

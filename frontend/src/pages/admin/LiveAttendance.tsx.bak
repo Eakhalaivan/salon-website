@@ -1,0 +1,113 @@
+import React, { useEffect } from 'react';
+import { useScheduleStore } from '../../store/useScheduleStore';
+import { useStaffQuery } from '../../hooks/api/useStaff';
+import { Card } from '../../components/ui/Card';
+import { Users, Clock, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export const LiveAttendance: React.FC = () => {
+  const { attendances, fetchLiveAttendance } = useScheduleStore();
+  
+  
+  useEffect(() => {
+    fetchLiveAttendance();
+    
+    const interval = setInterval(fetchLiveAttendance, 10000); // refresh every 10s
+    return () => clearInterval(interval);
+  }, [fetchLiveAttendance]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Live Attendance</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Real-time tracking of staff check-ins</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-6 bg-gradient-to-br from-indigo-500 to-blue-600 text-white">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium opacity-90">Present</h3>
+            <Users className="h-6 w-6 opacity-75" />
+          </div>
+          <p className="text-4xl font-bold mt-4">{attendances.filter(a => a.checkOutTime === null).length}</p>
+        </Card>
+        
+        <Card className="p-6 bg-gradient-to-br from-emerald-500 to-green-600 text-white">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium opacity-90">On Time</h3>
+            <CheckCircle className="h-6 w-6 opacity-75" />
+          </div>
+          <p className="text-4xl font-bold mt-4">{attendances.filter(a => a.status === 'ON_TIME').length}</p>
+        </Card>
+        
+        <Card className="p-6 bg-gradient-to-br from-rose-500 to-red-600 text-white">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium opacity-90">Late / Absent</h3>
+            <AlertTriangle className="h-6 w-6 opacity-75" />
+          </div>
+          <p className="text-4xl font-bold mt-4">{attendances.filter(a => a.status === 'LATE' || a.status === 'ABSENT').length}</p>
+        </Card>
+      </div>
+
+      <Card className="overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Today's Logs</h3>
+        </div>
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {attendances.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              No attendance logs for today yet.
+            </div>
+          ) : (
+            attendances.map((log, i) => (
+              <motion.div
+                key={log.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-medium text-gray-600 dark:text-gray-300">
+                    {log.staffName.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white">{log.staffName}</h4>
+                    <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                      {log.checkInTime && (
+                        <span className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1 text-green-500" /> 
+                          In: {new Date(log.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                      {log.checkOutTime && (
+                        <span className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1 text-red-500" /> 
+                          Out: {new Date(log.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                      {(log.locationLat && log.locationLng) && (
+                        <span className="flex items-center text-blue-500">
+                          <MapPin className="h-3 w-3 mr-1" /> GPS Logged
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    log.status === 'ON_TIME' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
+                    log.status === 'LATE' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                  }`}>
+                    {log.status.replace('_', ' ')}
+                  </span>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+};
