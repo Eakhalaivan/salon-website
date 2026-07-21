@@ -43,17 +43,17 @@ public class AuthController {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(24 * 60 * 60)
-                .sameSite("Lax")
+                .sameSite("None")  // None required for cross-site XHR (Vercel → Render)
                 .build();
-        
+
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/v1/auth/refresh")
+                .path("/")
                 .maxAge(7 * 24 * 60 * 60)
-                .sameSite("Lax")
+                .sameSite("None")  // None required for cross-site XHR (Vercel → Render)
                 .build();
-        
+
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
@@ -64,17 +64,17 @@ public class AuthController {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")  // Must match the SameSite used at set time
                 .build();
-        
+
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/v1/auth/refresh")
+                .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")  // Must match the SameSite used at set time
                 .build();
-        
+
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }

@@ -265,13 +265,10 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Resolve base URL the same way axiosClient does — always ending in /api/v1
-    const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
-    const baseUrl = raw
-      ? (raw.replace(/\/$/, '').endsWith('/api/v1') ? raw.replace(/\/$/, '') : `${raw.replace(/\/$/, '')}/api/v1`)
-      : '/api/v1';
-
-    const eventSource = new EventSource(`${baseUrl}/events/stream`);
+    // Always use the relative path so the Vercel proxy handles routing.
+    // This makes the request same-origin from the browser's perspective,
+    // ensuring cookies are always sent without any SameSite restrictions.
+    const eventSource = new EventSource('/api/v1/events/stream', { withCredentials: true });
 
     eventSource.addEventListener('appointment_booked', () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
@@ -285,6 +282,7 @@ function App() {
       eventSource.close();
     };
   }, []);
+
 
 
   return (
