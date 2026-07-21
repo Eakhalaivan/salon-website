@@ -265,7 +265,12 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    // Resolve base URL the same way axiosClient does — always ending in /api/v1
+    const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
+    const baseUrl = raw
+      ? (raw.replace(/\/$/, '').endsWith('/api/v1') ? raw.replace(/\/$/, '') : `${raw.replace(/\/$/, '')}/api/v1`)
+      : '/api/v1';
+
     const eventSource = new EventSource(`${baseUrl}/events/stream`);
 
     eventSource.addEventListener('appointment_booked', () => {
@@ -280,6 +285,7 @@ function App() {
       eventSource.close();
     };
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>

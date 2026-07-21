@@ -1,20 +1,23 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
+// Ensure the base URL always ends with /api/v1 regardless of how VITE_API_BASE_URL is set.
+// e.g. "https://salon-website-o8qe.onrender.com" → "https://salon-website-o8qe.onrender.com/api/v1"
+function resolveBaseUrl(): string {
+  const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (!raw) return '/api/v1';
+  const trimmed = raw.replace(/\/$/, '');
+  return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`;
+}
+
+const BASE_URL = resolveBaseUrl();
+
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-});
-
-// Strip duplicate /api/v1 if it exists in the url
-axiosClient.interceptors.request.use((config) => {
-  if (config.url && config.url.startsWith('/api/v1')) {
-    config.url = config.url.replace('/api/v1', '');
-  }
-  return config;
 });
 
 // We rely on withCredentials: true to send the HttpOnly cookies for JWT automatically.
@@ -29,19 +32,16 @@ axiosClient.interceptors.response.use(
       }
 
       originalRequest._retry = true;
-      
+
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/auth/refresh`,
+          `${BASE_URL}/auth/refresh`,
           {},
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
-        
+
         if (response.status === 200) {
           const { role, branchId, staffId, customerId } = response.data;
-
           useAuthStore.getState().setAuth(role, branchId || null, { staffId, customerId });
           return axiosClient(originalRequest);
         }
