@@ -51,12 +51,7 @@ public class SecurityConfig {
         }
 
         http
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
-                .ignoringRequestMatchers("/api/v1/payments/stripe/webhook", "/api/v1/payments/razorpay/webhook", "/api/v1/auth/**")
-            )
-            .addFilterAfter(new com.luxesuite.api.security.CsrfCookieFilter(), org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
+            .csrf(AbstractHttpConfigurer::disable)
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; frame-src 'none'; object-src 'none';"))
             )
