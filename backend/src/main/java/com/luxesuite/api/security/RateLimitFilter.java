@@ -65,7 +65,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (ip == null || ip.isEmpty()) {
             ip = request.getRemoteAddr();
         }
-        return ip;
+        return (ip != null && !ip.isEmpty()) ? ip : "unknown-client";
     }
 
     private BucketConfiguration getBucketConfigurationForUser() {
