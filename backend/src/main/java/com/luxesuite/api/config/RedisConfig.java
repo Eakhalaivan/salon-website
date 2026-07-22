@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Duration;
 
+@Configuration
 public class RedisConfig {
 
 
