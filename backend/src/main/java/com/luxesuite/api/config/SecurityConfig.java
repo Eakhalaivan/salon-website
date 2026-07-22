@@ -92,8 +92,8 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED))
             )
             .authenticationProvider(authenticationProvider)
-            .addFilterBefore(rateLimitFilter(), JwtAuthenticationFilter.class)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(rateLimitFilter(), BasicAuthenticationFilter.class)
             .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class);
 
         return http.build();
