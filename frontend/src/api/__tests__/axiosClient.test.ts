@@ -16,8 +16,8 @@ vi.mock('axios', async (importOriginal) => {
     }))
   };
   return {
-    default: mockAxios,
-    ...mockAxios
+    ...mockAxios,
+    default: mockAxios
   };
 });
 
@@ -104,7 +104,7 @@ describe('axiosClient interceptors', () => {
       });
 
       // Mock axiosClient call for retry
-      const mockAxiosClient = vi.spyOn(axiosClient, 'request').mockResolvedValueOnce({ data: 'retried' } as any);
+      vi.spyOn(axiosClient, 'request').mockResolvedValueOnce({ data: 'retried' } as any);
 
       // In real scenario, axiosClient is a function, so spyOn works if we call axiosClient.request
       // For this test, we might just expect the refresh call to happen.
