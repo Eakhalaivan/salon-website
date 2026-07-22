@@ -17,7 +17,7 @@ export const useAiRecommendations = () => {
     queryKey: ['ai-recommendations', user?.id],
     queryFn: async (): Promise<AiRecommendationDto[]> => {
       if (!user?.id) return [];
-      const { data } = await axiosClient.get(`/api/v1/recommendations/services/${user.id}`);
+      const { data } = await axiosClient.get(`/recommendations/services/${user.id}`);
       return data;
     },
     enabled: !!user?.id,
@@ -36,7 +36,7 @@ export const useAiMarketingSuggestions = () => {
   return useQuery({
     queryKey: ['ai-marketing-suggestions'],
     queryFn: async (): Promise<AiMarketingSuggestionDto[]> => {
-      const { data } = await axiosClient.post('/api/v1/admin/ai/marketing-suggestions');
+      const { data } = await axiosClient.post('/admin/ai/marketing-suggestions');
       return data;
     },
     staleTime: 60 * 60 * 1000, // 1 hour (save API calls)
@@ -56,8 +56,8 @@ export const useAiSalesForecast = (branchId?: number | null) => {
     queryKey: ['ai-sales-forecast', branchId],
     queryFn: async (): Promise<AiSalesForecastDto> => {
       const url = branchId 
-        ? `/api/v1/admin/ai/sales-forecast?branchId=${branchId}`
-        : `/api/v1/admin/ai/sales-forecast`;
+        ? `/admin/ai/sales-forecast?branchId=${branchId}`
+        : `/admin/ai/sales-forecast`;
       const { data } = await axiosClient.get(url);
       return data;
     },
@@ -78,8 +78,8 @@ export const useAiInventoryAlerts = (branchId?: number | null) => {
     queryKey: ['ai-inventory-alerts', branchId],
     queryFn: async (): Promise<AiInventoryAlertDto[]> => {
       const url = branchId 
-        ? `/api/v1/admin/ai/inventory-alerts?branchId=${branchId}`
-        : `/api/v1/admin/ai/inventory-alerts`;
+        ? `/admin/ai/inventory-alerts?branchId=${branchId}`
+        : `/admin/ai/inventory-alerts`;
       const { data } = await axiosClient.get(url);
       return data;
     },

@@ -37,7 +37,7 @@ export default function Payroll() {
     queryKey: ['payroll', staffIdInput],
     queryFn: async () => {
       if (!staffIdInput) return [];
-      const response = await axiosClient.get(`/api/v1/payroll/staff/${staffIdInput}`);
+      const response = await axiosClient.get(`/payroll/staff/${staffIdInput}`);
       return response.data.content as PayrollRecord[];
     },
     enabled: !!staffIdInput
@@ -51,7 +51,7 @@ export default function Payroll() {
     
     setIsGenerating(true);
     try {
-      await axiosClient.post('/api/v1/payroll/generate', {
+      await axiosClient.post('/payroll/generate', {
         staffId: Number(staffIdInput),
         periodStart: new Date(periodStart).toISOString(),
         periodEnd: new Date(periodEnd).toISOString()

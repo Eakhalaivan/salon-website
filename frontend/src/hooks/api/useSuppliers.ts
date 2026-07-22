@@ -5,7 +5,7 @@ export const useSuppliersQuery = (page = 0, size = 10) => {
   return useQuery({
     queryKey: ['suppliers', page, size],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/v1/suppliers?page=${page}&size=${size}`);
+      const response = await axiosClient.get(`/suppliers?page=${page}&size=${size}`);
       return response.data;
     },
   });
@@ -15,7 +15,7 @@ export const useCreateSupplier = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: any) => {
-      const response = await axiosClient.post('/api/v1/suppliers', data);
+      const response = await axiosClient.post('/suppliers', data);
       return response.data;
     },
     onSuccess: () => {
@@ -28,7 +28,7 @@ export const useUpdateSupplier = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await axiosClient.put(`/api/v1/suppliers/${id}`, data);
+      const response = await axiosClient.put(`/suppliers/${id}`, data);
       return response.data;
     },
     onSuccess: () => {

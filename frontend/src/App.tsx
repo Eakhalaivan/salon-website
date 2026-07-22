@@ -9,6 +9,7 @@ import { Toaster } from './components/ui/Toaster';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { StaffLayout } from './components/layout/StaffLayout';
 import { CustomerLayout } from './components/layout/CustomerLayout';
+import { ManagerLayout } from './components/layout/ManagerLayout';
 
 // Public Pages
 const Home = React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
@@ -157,11 +158,11 @@ const AnimatedRoutes = () => {
         <Route path="/careers" element={<PageTransition><Careers /></PageTransition>} />
         <Route path="/franchise" element={<PageTransition><Franchise /></PageTransition>} />
 
-        {/* Admin and Manager Routes */}
+        {/* Admin Routes */}
         <Route 
           path="/admin" 
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+            <ProtectedRoute allowedRoles={['ADMIN']}>
               <AdminLayout />
             </ProtectedRoute>
           } 
@@ -184,6 +185,25 @@ const AnimatedRoutes = () => {
           <Route path="branch-comparison" element={<PageTransition><BranchComparison /></PageTransition>} />
           <Route path="cms" element={<PageTransition><CmsEditor /></PageTransition>} />
           <Route path="settings" element={<PageTransition><Placeholder title="Settings" /></PageTransition>} />
+        </Route>
+
+        {/* Manager Routes */}
+        <Route 
+          path="/manager" 
+          element={
+            <ProtectedRoute allowedRoles={['MANAGER']}>
+              <ManagerLayout />
+            </ProtectedRoute>
+          } 
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="customers" element={<PageTransition><Customers /></PageTransition>} />
+          <Route path="staff" element={<PageTransition><Staff /></PageTransition>} />
+          <Route path="appointments" element={<PageTransition><ScheduleBuilder /></PageTransition>} />
+          <Route path="revenue" element={<PageTransition><Billing /></PageTransition>} />
+          <Route path="inventory" element={<PageTransition><AdminProducts /></PageTransition>} />
+          <Route path="reports" element={<PageTransition><Placeholder title="Manager Reports" /></PageTransition>} />
         </Route>
         
         {/* Fallbacks */}

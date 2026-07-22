@@ -118,7 +118,7 @@ export default function GiftCards() {
   const { data: myGiftCards, isLoading: isLoadingPurchased } = useQuery({
     queryKey: ['myGiftCards'],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/v1/gift-cards/me');
+      const response = await axiosClient.get('/gift-cards/me');
       return response.data.content as GiftCard[];
     },
     enabled: !!customerId,
@@ -127,7 +127,7 @@ export default function GiftCards() {
   const { data: receivedGiftCards, isLoading: isLoadingReceived } = useQuery({
     queryKey: ['receivedGiftCards'],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/v1/gift-cards/me/received');
+      const response = await axiosClient.get('/gift-cards/me/received');
       return response.data.content as GiftCard[];
     },
     enabled: !!customerId,
@@ -150,7 +150,7 @@ export default function GiftCards() {
     
     setIsPurchasing(true);
     try {
-      await axiosClient.post('/api/v1/gift-cards/purchase', {
+      await axiosClient.post('/gift-cards/purchase', {
         amount: Number(purchaseAmount),
         recipientEmail,
         recipientName

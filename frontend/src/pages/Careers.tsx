@@ -21,7 +21,7 @@ export default function Careers() {
   const { data: jobs, isLoading } = useQuery({
     queryKey: ['activeJobs'],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/v1/content/careers');
+      const response = await axiosClient.get('/content/careers');
       return response.data.content as JobOpening[];
     },
   });

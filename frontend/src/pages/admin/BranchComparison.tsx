@@ -24,14 +24,14 @@ export const BranchComparison = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data: branchData } = await axiosClient.get('/api/v1/branches');
+        const { data: branchData } = await axiosClient.get('/branches');
         setBranches(branchData.content || branchData); // handle paginated response just in case
 
         const branchesList = branchData.content || branchData;
         const statsData: Record<number, DashboardStatsDto> = {};
         for (const branch of branchesList) {
           try {
-            const { data } = await axiosClient.get(`/api/v1/analytics/dashboard?branchId=${branch.id}`);
+            const { data } = await axiosClient.get(`/analytics/dashboard?branchId=${branch.id}`);
             statsData[branch.id] = data;
           } catch (e) {
             console.error(`Failed to load stats for branch ${branch.id}`);

@@ -70,4 +70,14 @@ public class SecurityUtils {
             throw new ForbiddenException("Unauthorized: You can only access data for your assigned branch.");
         }
     }
+
+    public Long getStaffBranchId() {
+        User currentUser = getCurrentUser();
+        Staff staff = staffRepository.findByUserId(currentUser.getId())
+                .orElseThrow(() -> new ForbiddenException("Unauthorized: No staff profile found for current user."));
+        if (staff.getBranch() == null) {
+            throw new ForbiddenException("Unauthorized: Staff is not assigned to any branch.");
+        }
+        return staff.getBranch().getId();
+    }
 }

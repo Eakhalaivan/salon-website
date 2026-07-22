@@ -13,7 +13,7 @@ export const useAdminGiftCardsHistory = (page = 0, size = 10) => {
   return useQuery({
     queryKey: ['adminGiftCards', page, size],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/v1/gift-cards/admin/history?page=${page}&size=${size}`);
+      const response = await axiosClient.get(`/gift-cards/admin/history?page=${page}&size=${size}`);
       return response.data;
     },
   });
@@ -25,7 +25,7 @@ export const useSendAdminGiftCard = () => {
 
   return useMutation({
     mutationFn: async (data: AdminGiftCardSendRequest) => {
-      const response = await axiosClient.post('/api/v1/gift-cards/admin/send', data);
+      const response = await axiosClient.post('/gift-cards/admin/send', data);
       return response.data;
     },
     onSuccess: () => {

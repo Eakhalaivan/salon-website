@@ -3,9 +3,10 @@ import { format } from 'date-fns';
 import { useMySubscriptionsQuery, useSubscriptionPlansQuery, usePurchaseSubscription } from '../../hooks/api/useSubscriptions';
 import { GoldRibbon } from '../../components/ui/GoldRibbon';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { LuxuryCard } from '../../components/luxury/LuxuryCard';
-import { ShimmerText } from '../../components/luxury/ShimmerText';
 import { AnimatedSection, AnimatedItem } from '../../components/ui/AnimatedSection';
+import { Card } from '../../components/ui/Card';
+import { PrimaryButton } from '../../components/ui/PrimaryButton';
+import { PricingCard } from '../../components/ui/PricingCard';
 import { AnimatePresence } from 'framer-motion';
 
 export const Membership = () => {
@@ -26,14 +27,14 @@ export const Membership = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-[var(--color-primary)] text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-gold-500 text-4xl">progress_activity</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-[var(--color-error)]/10 text-[var(--color-error)] p-6 rounded-2xl border border-[var(--color-error)]/20 font-body-md text-center max-w-2xl mx-auto mt-12">
+      <div className="bg-danger-bg text-danger-text p-6 rounded-2xl border border-danger-bg/50 font-sans text-center max-w-2xl mx-auto mt-12">
         {error}
       </div>
     );
@@ -43,11 +44,11 @@ export const Membership = () => {
     <div className="space-y-12 animate-fade-in pb-12 relative">
       <GoldRibbon position="top-right" />
 
-      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16 relative z-10 pt-8">
-        <h2 className="font-serif text-6xl mb-4 tracking-wide text-[var(--color-on-surface)]">
-          <ShimmerText text="My Memberships" />
+      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-12 relative z-10 pt-4">
+        <h2 className="font-serif text-5xl mb-3 text-ink-900">
+          My Memberships
         </h2>
-        <p className="font-sans text-[var(--color-on-surface-variant)] text-lg mb-10 tracking-wide">
+        <p className="font-sans text-ink-400 text-[15px] mb-10">
           Manage your exclusive salon memberships and subscriptions.
         </p>
       </header>
@@ -59,79 +60,79 @@ export const Membership = () => {
             <AnimatePresence mode="popLayout">
               {activeSubscriptions.map((sub) => (
                 <AnimatedItem key={sub.id}>
-                  <LuxuryCard className="bg-[var(--color-surface)] glass-card p-8 relative overflow-hidden group hover:shadow-[0_8px_32px_0_rgba(212,175,55,0.15)] transition-all duration-500">
-                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-[var(--color-primary)]/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-[var(--color-primary)]/20 transition-colors duration-700"></div>
+                  <Card className="p-8 relative overflow-hidden group border-none shadow-sm">
+                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-gold-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-gold-500/10 transition-colors duration-700"></div>
                     
                     <div className="flex justify-between items-start mb-8 relative z-10">
                       <div>
-                        <span className="inline-block px-4 py-1.5 bg-[var(--color-surface)]/40 backdrop-blur-md text-[var(--color-primary)] font-sans text-xs font-semibold rounded-full mb-4 uppercase tracking-widest border border-[var(--color-primary)]/20 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                        <span className="inline-block px-4 py-1.5 bg-surface text-gold-500 font-sans text-[11px] font-semibold rounded-full mb-4 uppercase tracking-widest border border-gold-500/20 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
                           {sub.status}
                         </span>
-                        <h3 className="font-serif text-3xl text-[var(--color-on-surface)] leading-tight">{sub.plan.name}</h3>
+                        <h3 className="font-serif text-3xl text-ink-900 leading-tight">{sub.plan.name}</h3>
                       </div>
                       <div className="text-right">
-                        <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-[var(--color-on-surface-variant)] mb-1">Valid Until</p>
-                        <p className="font-serif text-xl text-[var(--color-on-surface)]">{format(new Date(sub.endDate), 'MMM dd, yyyy')}</p>
+                        <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-ink-400 mb-1">Valid Until</p>
+                        <p className="font-serif text-xl text-ink-900">{format(new Date(sub.endDate), 'MMM dd, yyyy')}</p>
                       </div>
                     </div>
                     
-                    <div className="bg-[var(--color-surface)]/60 backdrop-blur-md rounded-2xl p-6 mb-8 relative z-10 border border-[var(--color-border)] shadow-inner flex justify-between items-center">
+                    <div className="bg-surface-muted rounded-2xl p-6 mb-8 relative z-10 border border-ink-200/50 flex justify-between items-center">
                       {sub.plan.planType === 'WALLET' ? (
                         <div>
-                          <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-[var(--color-on-surface-variant)] mb-2">Remaining Balance</p>
-                          <p className="font-serif text-4xl text-[var(--color-primary)]">₹{sub.remainingBalance.toFixed(2)}</p>
+                          <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-ink-400 mb-2">Remaining Balance</p>
+                          <p className="font-serif text-4xl text-gold-500">₹{sub.remainingBalance.toFixed(2)}</p>
                         </div>
                       ) : (
                         <div>
-                          <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-[var(--color-on-surface-variant)] mb-2">Remaining Sessions</p>
-                          <p className="font-serif text-4xl text-[var(--color-primary)]">{sub.remainingBalance}</p>
+                          <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-ink-400 mb-2">Remaining Sessions</p>
+                          <p className="font-serif text-4xl text-gold-500">{sub.remainingBalance}</p>
                         </div>
                       )}
                     </div>
                     
                     <div className="flex gap-4 relative z-10">
-                      <button 
-                        className="flex-1 gradient-btn px-6 py-3 rounded-full font-sans text-sm font-semibold tracking-wider transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                      <PrimaryButton 
+                        className="flex-1 disabled:opacity-70 disabled:cursor-not-allowed"
                         onClick={() => purchaseMutation.mutate(sub.plan.id)}
                         disabled={purchaseMutation.isPending}
                       >
                         {purchaseMutation.isPending ? 'Processing...' : 'Renew Plan'}
-                      </button>
-                      <button className="flex-1 px-6 py-3 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10">
+                      </PrimaryButton>
+                      <button className="flex-1 px-6 py-3 rounded-full font-sans text-sm font-medium tracking-wider transition-all border border-gold-500 text-gold-500 hover:bg-gold-50">
                         View History
                       </button>
                     </div>
-                  </LuxuryCard>
+                  </Card>
                 </AnimatedItem>
               ))}
             </AnimatePresence>
             
             {subPageData && subPageData.totalPages > 1 && (
-              <div className="xl:col-span-2 mt-8 p-4 border border-[var(--color-primary)]/20 bg-[var(--color-surface)]/30 backdrop-blur-md flex justify-between items-center rounded-2xl">
+              <div className="xl:col-span-2 mt-8 p-4 border border-ink-200/50 bg-surface/50 backdrop-blur-md flex justify-between items-center rounded-2xl">
                 <button 
-                  className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+                  className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                     subPage === 0 
-                      ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                      : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                      ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                      : 'border-gold-500 text-gold-500 hover:bg-gold-50'
                   }`}
                   disabled={subPage === 0} 
                   onClick={() => setSubPage(p => Math.max(0, p - 1))}
                 >
-                  Previous
+                  PREVIOUS
                 </button>
-                <span className="text-[var(--color-on-surface-variant)] font-sans text-sm font-semibold tracking-wider uppercase">
+                <span className="text-ink-400 font-sans text-sm font-semibold tracking-wider uppercase">
                   Page {subPageData.pageNo + 1} of {subPageData.totalPages}
                 </span>
                 <button 
-                  className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+                  className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                     subPageData.last 
-                      ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                      : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                      ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                      : 'border-gold-500 text-gold-500 hover:bg-gold-50'
                   }`}
                   disabled={subPageData.last} 
                   onClick={() => setSubPage(p => p + 1)}
                 >
-                  Next
+                  NEXT
                 </button>
               </div>
             )}
@@ -142,94 +143,78 @@ export const Membership = () => {
             title="No Active Membership" 
             description="Elevate your experience with our exclusive membership tiers."
             action={
-              <button 
-                className="gradient-btn px-8 py-3 mt-4 rounded-full font-sans text-sm font-semibold tracking-wider"
+              <PrimaryButton 
+                className="mt-4"
                 onClick={() => document.getElementById('available-plans')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Explore Plans Below
-              </button>
+              </PrimaryButton>
             }
           />
         )}
       </AnimatedSection>
 
       {/* Available Plans Section */}
-      <AnimatedSection id="available-plans" stagger delay={0.2} className="pt-16 mt-8 border-t border-[var(--color-border)]">
-        <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16 relative z-10">
-          <h3 className="font-serif text-4xl text-[var(--color-on-surface)] mb-4">Available Plans</h3>
-          <p className="font-sans text-[var(--color-on-surface-variant)] text-lg tracking-wide">
+      <AnimatedSection id="available-plans" stagger delay={0.2} className="pt-16 mt-8 border-t border-ink-200/50">
+        <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-12 relative z-10">
+          <h3 className="font-serif text-4xl text-ink-900 mb-4">Available Plans</h3>
+          <p className="font-sans text-ink-400 text-[15px] tracking-wide">
             Select a curated membership designed to elevate your personal luxury.
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
-            {availablePlans.map((plan) => (
-              <AnimatedItem key={plan.id}>
-                <LuxuryCard className="h-full flex flex-col p-8 bg-[var(--color-surface)]/50 glass-card">
-                  
-                  <div className="relative z-10 flex flex-col flex-grow">
-                    <h4 className="font-serif text-2xl text-[var(--color-on-surface)] mb-4 leading-tight">{plan.name}</h4>
-                    <div className="flex items-baseline gap-2 mb-6 border-b border-[var(--color-border)] pb-6">
-                      <p className="font-serif text-5xl text-[var(--color-primary)]">₹{plan.price.toFixed(0)}</p>
-                      <p className="font-sans text-[10px] font-semibold uppercase tracking-widest text-[var(--color-on-surface-variant)]">/ {plan.validityDays} days</p>
-                    </div>
-                    
-                    <p className="font-sans text-sm text-[var(--color-on-surface-variant)] mb-8 flex-grow leading-relaxed">{plan.description}</p>
-                    
-                    <ul className="space-y-4 mb-10">
-                      <li className="flex items-start font-sans text-sm text-[var(--color-on-surface-variant)] leading-relaxed">
-                        <span className="material-symbols-outlined text-[var(--color-primary)] text-[20px] mr-3 shrink-0">verified</span>
-                        {plan.discountRate}% privileges on all services
-                      </li>
-                      {plan.planType === 'SESSION_COUNT' && (
-                        <li className="flex items-start font-sans text-sm text-[var(--color-on-surface-variant)] leading-relaxed">
-                          <span className="material-symbols-outlined text-[var(--color-primary)] text-[20px] mr-3 shrink-0">verified</span>
-                          {plan.totalSessions} complimentary sessions
-                        </li>
-                      )}
-                    </ul>
-                    
-                    <button 
-                      className="w-full gradient-btn px-6 py-3 rounded-full font-sans text-sm font-semibold tracking-wider mt-auto disabled:opacity-70 disabled:cursor-not-allowed"
-                      onClick={() => purchaseMutation.mutate(plan.id)}
-                      disabled={purchaseMutation.isPending}
-                    >
-                      {purchaseMutation.isPending ? 'Processing...' : 'Select Ritual'}
-                    </button>
-                  </div>
-                </LuxuryCard>
+            {availablePlans.map((plan, index) => {
+              const isPremium = index === 1; // Highlight the middle one if there are 3
+              
+              const features = [
+                `${plan.discountRate}% privileges on all services`,
+                ...(plan.planType === 'SESSION_COUNT' ? [`${plan.totalSessions} complimentary sessions`] : [])
+              ];
+              
+              return (
+              <AnimatedItem key={plan.id} className="h-full">
+                <PricingCard
+                  title={plan.name}
+                  price={`₹${plan.price.toFixed(0)}`}
+                  period={`/ ${plan.validityDays} days`}
+                  features={features}
+                  isHighlighted={isPremium}
+                  onSelect={() => purchaseMutation.mutate(plan.id)}
+                  buttonText={purchaseMutation.isPending ? 'Processing...' : 'Select Ritual'}
+                />
               </AnimatedItem>
-            ))}
+            )})}
           </AnimatePresence>
         </div>
         
         {planPageData && planPageData.totalPages > 1 && (
-          <div className="mt-12 p-4 border border-[var(--color-primary)]/20 bg-[var(--color-surface)]/30 backdrop-blur-md flex justify-between items-center rounded-2xl">
+          <div className="mt-12 p-4 border border-ink-200/50 bg-surface/50 backdrop-blur-md flex justify-between items-center rounded-2xl">
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                 planPage === 0 
-                  ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                  : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                  : 'border-gold-500 text-gold-500 hover:bg-gold-50'
               }`}
               disabled={planPage === 0} 
               onClick={() => setPlanPage(p => Math.max(0, p - 1))}
             >
-              Previous
+              PREVIOUS
             </button>
-            <span className="text-[var(--color-on-surface-variant)] font-sans text-sm font-semibold tracking-wider uppercase">
+            <span className="text-ink-400 font-sans text-sm font-semibold tracking-wider uppercase">
               Page {planPageData.pageNo + 1} of {planPageData.totalPages}
             </span>
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                 planPageData.last 
-                  ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                  : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                  : 'border-gold-500 text-gold-500 hover:bg-gold-50'
               }`}
               disabled={planPageData.last} 
               onClick={() => setPlanPage(p => p + 1)}
             >
-              Next
+              NEXT
             </button>
           </div>
         )}

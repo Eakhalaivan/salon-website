@@ -66,7 +66,7 @@ export const StripeWalletTopup = (props: StripeWalletTopupProps) => {
     useEffect(() => {
         const fetchClientSecret = async () => {
             try {
-                const response = await axiosClient.post(`/api/v1/wallet/topup`, { amount: props.amount });
+                const response = await axiosClient.post(`/wallet/topup`, { amount: props.amount });
                 setClientSecret(response.data.clientSecret);
             } catch (error) {
                 console.error('Failed to create payment intent:', error);

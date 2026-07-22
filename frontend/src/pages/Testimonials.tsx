@@ -31,7 +31,7 @@ const Testimonials: React.FC = () => {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/v1/reviews?size=20');
+      const response = await axiosClient.get('/reviews?size=20');
       return response.data.content as Review[];
     }
   });

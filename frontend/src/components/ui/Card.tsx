@@ -7,9 +7,10 @@ interface CardProps {
   className?: string;
   onClick?: () => void;
   tilt?: boolean;
+  hoverable?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', onClick, tilt = false }) => {
+export const Card: React.FC<CardProps> = ({ children, className = '', onClick, tilt = false, hoverable = false }) => {
   const { rotateX, rotateY, sheenX, sheenY, handleMouseMove, handleMouseLeave } = use3DTilt();
   const [isEligible, setIsEligible] = useState(false);
 
@@ -33,7 +34,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick, t
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{ rotateX, rotateY, transformPerspective: 1000 }}
-        className={`glass-panel rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-xl overflow-hidden relative ${className} ${onClick ? 'cursor-pointer' : ''}`}
+        className={`bg-surface rounded-2xl shadow-[0_4px_24px_rgba(33,29,23,0.04)] transition-all duration-500 hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)] overflow-hidden relative ${className} ${onClick ? 'cursor-pointer' : ''}`}
       >
         {children}
         <motion.div 
@@ -48,10 +49,12 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick, t
     );
   }
 
+  const hoverClass = hoverable ? 'hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)] transition-all duration-300' : '';
+
   return (
     <div 
       onClick={onClick}
-      className={`glass-panel rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-xl hover:-translate-y-1 hover:border-primary/50 overflow-hidden ${className} ${onClick ? 'cursor-pointer' : ''}`}
+      className={`bg-surface rounded-2xl shadow-[0_4px_24px_rgba(33,29,23,0.04)] border border-[#E4DFD3]/40 ${hoverClass} ${className} ${onClick ? 'cursor-pointer' : ''}`}
     >
       {children}
     </div>

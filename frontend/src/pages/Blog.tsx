@@ -22,7 +22,7 @@ export default function Blog() {
   const { data: posts, isLoading } = useQuery({
     queryKey: ['blogPosts'],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/v1/content/blog');
+      const response = await axiosClient.get('/content/blog');
       return response.data.content as BlogPost[];
     },
   });

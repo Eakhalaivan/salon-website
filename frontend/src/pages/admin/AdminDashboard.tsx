@@ -19,11 +19,14 @@ interface DashboardStatsDto {
 
 export const AdminDashboard = () => {
   const { selectedBranchId } = useBranchStore();
-  const { user, role } = useAuthStore();
+  const { user, role, branchId: userBranchId } = useAuthStore();
+  
+  const effectiveBranchId = role === 'ADMIN' ? selectedBranchId : userBranchId;
+  
   const [stats, setStats] = useState<DashboardStatsDto | null>(null);
   
   const { data: marketingSuggestions, isLoading: isMarketingLoading } = useAiMarketingSuggestions();
-  const { data: salesForecast, isLoading: isForecastLoading } = useAiSalesForecast(selectedBranchId);
+  const { data: salesForecast, isLoading: isForecastLoading } = useAiSalesForecast(effectiveBranchId);
 
   // Real data hooks
   const todayStart = new Date();
@@ -31,7 +34,7 @@ export const AdminDashboard = () => {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
   
-  const { data: appointmentsResponse } = useAppointmentsByBranchQuery(selectedBranchId, todayStart.toISOString(), todayEnd.toISOString(), 0, 5);
+  const { data: appointmentsResponse } = useAppointmentsByBranchQuery(effectiveBranchId, todayStart.toISOString(), todayEnd.toISOString(), 0, 5);
   const { data: productsResponse } = useAdminProductsQuery(0, 5);
   const { data: attendanceResponse } = useLiveAttendanceQuery();
   const { data: servicesResponse } = useServicesQuery(0, 4);
@@ -39,9 +42,9 @@ export const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const url = selectedBranchId 
-          ? `/api/v1/analytics/dashboard?branchId=${selectedBranchId}`
-          : '/api/v1/analytics/dashboard';
+        const url = effectiveBranchId 
+          ? `/analytics/dashboard?branchId=${effectiveBranchId}`
+          : '/analytics/dashboard';
           
         const { data } = await axiosClient.get(url);
         setStats(data);
@@ -50,7 +53,7 @@ export const AdminDashboard = () => {
       }
     };
     fetchStats();
-  }, [selectedBranchId]);
+  }, [effectiveBranchId]);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -64,7 +67,7 @@ export const AdminDashboard = () => {
           <div className="text-right hidden sm:block">
             <p className="font-label-md text-on-surface font-bold">{user?.firstName || 'Admin User'}</p>
             <p className="font-label-sm text-on-surface-variant opacity-60">
-              {role === 'ADMIN' ? (selectedBranchId ? 'Branch View' : 'Global Admin') : 'Branch Manager'}
+              {role === 'ADMIN' ? (effectiveBranchId ? 'Branch View' : 'Global Admin') : 'Branch Manager'}
             </p>
           </div>
           <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container-high flex items-center justify-center font-display-sm text-primary">

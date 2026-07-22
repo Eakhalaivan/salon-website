@@ -26,9 +26,10 @@ public class AnalyticsController {
         if (branchId != null) {
             securityUtils.validateBranchAccess(branchId);
         } else {
-            // Only ADMIN can see global stats
-            if (!securityUtils.hasRole("ADMIN")) {
-                throw new com.luxesuite.api.exception.ForbiddenException("Unauthorized: Managers must specify a branchId");
+            if (securityUtils.hasRole("MANAGER")) {
+                branchId = securityUtils.getStaffBranchId();
+            } else if (!securityUtils.hasRole("ADMIN")) {
+                throw new com.luxesuite.api.exception.ForbiddenException("Unauthorized: Managers must specify a branchId or have one assigned");
             }
         }
         return ResponseEntity.ok(analyticsService.getDashboardStats(branchId));

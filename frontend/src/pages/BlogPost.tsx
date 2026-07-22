@@ -23,7 +23,7 @@ export default function BlogPost() {
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['blogPost', slug],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/v1/content/blog/${slug}`);
+      const response = await axiosClient.get(`/content/blog/${slug}`);
       return response.data as BlogPost;
     },
     enabled: !!slug

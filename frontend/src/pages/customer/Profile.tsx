@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useMyProfileQuery, useUpdateMyProfileMutation } from '../../hooks/api/useCustomers';
 import type { CustomerDto } from '../../api/types';
 import { Input } from '../../components/ui/Input';
-import { LuxuryCard } from '../../components/luxury/LuxuryCard';
-import { ShimmerText } from '../../components/luxury/ShimmerText';
+import { Card } from '../../components/ui/Card';
+import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { GoldRibbon } from '../../components/ui/GoldRibbon';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -59,7 +59,7 @@ export const Profile = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-[var(--color-primary)] text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-gold-500 text-4xl">progress_activity</span>
       </div>
     );
   }
@@ -68,18 +68,18 @@ export const Profile = () => {
     <div className="space-y-8 animate-fade-in pb-12 relative">
       <GoldRibbon position="top-right" />
 
-      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16 relative z-10 pt-8">
-        <h2 className="font-serif text-6xl mb-4 tracking-wide text-[var(--color-on-surface)]">
-          <ShimmerText text="My Profile" />
+      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-10 relative z-10 pt-4">
+        <h2 className="font-serif text-[40px] leading-[48px] mb-2 text-ink-900">
+          My Profile
         </h2>
-        <p className="font-sans text-[var(--color-on-surface-variant)] text-lg tracking-wide mb-8">
+        <p className="font-sans text-ink-400 text-[15px] mb-8">
           Manage your personal information and preferences.
         </p>
 
         {profile.totalPoints !== undefined && (
-          <div className="bg-[var(--color-surface)] px-8 py-4 rounded-3xl text-center border border-[var(--color-primary)]/20 shadow-[0_4px_20px_rgba(212,175,55,0.15)] flex flex-col items-center">
-            <span className="block font-serif text-4xl bg-gradient-to-r from-[#fedebb] via-[#e5ae85] to-[#b1724a] bg-clip-text text-transparent">{profile.totalPoints}</span>
-            <span className="font-sans text-[10px] font-semibold uppercase tracking-widest text-[var(--color-primary)] mt-1 block">Luxe Points</span>
+          <div className="bg-surface px-8 py-4 rounded-3xl text-center border border-ink-200/50 flex flex-col items-center shadow-inner">
+            <span className="block font-serif text-4xl text-gold-500">{profile.totalPoints}</span>
+            <span className="font-sans text-[10px] font-semibold uppercase tracking-widest text-gold-500 mt-1 block">Luxe Points</span>
           </div>
         )}
       </header>
@@ -96,7 +96,7 @@ export const Profile = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 p-4 rounded-lg mb-6 text-center font-sans text-sm font-semibold"
+              className="bg-danger-surface text-danger-text border border-danger-border p-4 rounded-lg mb-6 text-center font-sans text-sm font-semibold"
             >
               {error}
             </motion.div>
@@ -107,7 +107,7 @@ export const Profile = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-green-500/10 text-green-500 border border-green-500/20 p-4 rounded-lg mb-6 flex items-center justify-center font-sans text-sm font-semibold"
+              className="bg-green-50 text-green-700 border border-green-700/20 p-4 rounded-lg mb-6 flex items-center justify-center font-sans text-sm font-semibold"
             >
               <span className="material-symbols-outlined mr-2 text-[20px]">check_circle</span>
               Profile updated successfully!
@@ -115,73 +115,73 @@ export const Profile = () => {
           )}
         </AnimatePresence>
 
-        <LuxuryCard className="p-10 bg-[var(--color-surface)] glass-card">
+        <Card className="p-10 border-none shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block font-sans text-xs font-semibold tracking-widest uppercase text-[var(--color-on-surface-variant)] mb-3">First Name</label>
+                  <label className="block font-sans text-[11px] font-semibold tracking-widest uppercase text-ink-400 mb-3">First Name</label>
                   <Input 
                     type="text" 
                     name="firstName"
                     value={profile.firstName}
                     onChange={handleChange}
                     required
-                    className="bg-[var(--color-surface)]/30 border-[var(--color-border)] text-[var(--color-on-surface)] focus-visible:border-[var(--color-primary)]/50 h-12"
+                    className="bg-surface border-ink-200/50 text-ink-900 focus-visible:border-gold-500 h-12"
                   />
                 </div>
                 <div>
-                  <label className="block font-sans text-xs font-semibold tracking-widest uppercase text-[var(--color-on-surface-variant)] mb-3">Last Name</label>
+                  <label className="block font-sans text-[11px] font-semibold tracking-widest uppercase text-ink-400 mb-3">Last Name</label>
                   <Input 
                     type="text" 
                     name="lastName"
                     value={profile.lastName}
                     onChange={handleChange}
                     required
-                    className="bg-[var(--color-surface)]/30 border-[var(--color-border)] text-[var(--color-on-surface)] focus-visible:border-[var(--color-primary)]/50 h-12"
+                    className="bg-surface border-ink-200/50 text-ink-900 focus-visible:border-gold-500 h-12"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-sans text-xs font-semibold tracking-widest uppercase text-[var(--color-on-surface-variant)] mb-3">Email Address</label>
+                <label className="block font-sans text-[11px] font-semibold tracking-widest uppercase text-ink-400 mb-3">Email Address</label>
                 <Input 
                   type="email" 
                   name="email"
                   value={profile.email}
                   disabled
-                  className="bg-[var(--color-surface)]/10 text-[var(--color-on-surface-variant)] cursor-not-allowed opacity-50 border-[var(--color-border)]/50 h-12"
+                  className="bg-page text-ink-400 cursor-not-allowed opacity-70 border-ink-200/50 h-12"
                 />
-                <p className="font-sans text-xs text-[var(--color-on-surface-variant)] mt-2 tracking-wide">Email cannot be changed online.</p>
+                <p className="font-sans text-xs text-ink-400 mt-2 tracking-wide">Email cannot be changed online.</p>
               </div>
 
               <div>
-                <label className="block font-sans text-xs font-semibold tracking-widest uppercase text-[var(--color-on-surface-variant)] mb-3">Phone Number</label>
+                <label className="block font-sans text-[11px] font-semibold tracking-widest uppercase text-ink-400 mb-3">Phone Number</label>
                 <Input 
                   type="tel" 
                   name="phone"
                   value={profile.phone || ''}
                   onChange={handleChange}
-                  className="bg-[var(--color-surface)]/30 border-[var(--color-border)] text-[var(--color-on-surface)] focus-visible:border-[var(--color-primary)]/50 h-12"
+                  className="bg-surface border-ink-200/50 text-ink-900 focus-visible:border-gold-500 h-12"
                 />
               </div>
 
               <div>
-                <label className="block font-sans text-xs font-semibold tracking-widest uppercase text-[var(--color-on-surface-variant)] mb-3">Special Requests or Notes</label>
+                <label className="block font-sans text-[11px] font-semibold tracking-widest uppercase text-ink-400 mb-3">Special Requests or Notes</label>
                 <textarea 
                   name="notes"
                   value={profile.notes || ''}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-[var(--color-surface)]/30 text-[var(--color-on-surface)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)]/50 focus:ring-1 focus:ring-[var(--color-primary)]/50 transition-colors resize-none placeholder-[var(--color-on-surface-variant)]/30 font-sans text-sm"
+                  className="w-full px-4 py-3 bg-surface text-ink-900 border border-ink-200/50 rounded-lg focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors resize-none placeholder-ink-400/50 font-sans text-sm"
                   placeholder="E.g., allergic to lavender, prefer quiet sessions..."
                 ></textarea>
               </div>
 
-              <div className="flex justify-end pt-8 border-t border-[var(--color-border)]">
-                <button 
+              <div className="flex justify-end pt-8 border-t border-ink-200/50">
+                <PrimaryButton 
                   type="submit" 
                   disabled={saving}
-                  className="gradient-btn px-8 py-3 rounded-full font-sans text-sm font-semibold tracking-wider flex items-center disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="px-8 h-12 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <>
@@ -189,10 +189,10 @@ export const Profile = () => {
                       Saving...
                     </>
                   ) : 'Save Changes'}
-                </button>
+                </PrimaryButton>
               </div>
             </form>
-        </LuxuryCard>
+        </Card>
       </motion.div>
     </div>
   );

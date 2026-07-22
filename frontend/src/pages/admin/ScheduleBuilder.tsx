@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useShiftsByBranchQuery, useCreateShiftMutation, usePublishShiftsMutation } from '../../hooks/api/useSchedule';
 import { useStaffQuery } from '../../hooks/api/useStaff';
 import { useBranchesQuery } from '../../hooks/api/useBranches';
+import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
@@ -9,8 +10,11 @@ import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const ScheduleBuilder: React.FC = () => {
+  const { role, branchId: userBranchId } = useAuthStore();
   const [selectedBranchId, setSelectedBranchId] = useState<number>(1);
-  const { data: shifts = [], isLoading: isShiftsLoading } = useShiftsByBranchQuery(selectedBranchId);
+  const effectiveBranchId = role === 'ADMIN' ? selectedBranchId : (userBranchId || 1);
+  
+  const { data: shifts = [], isLoading: isShiftsLoading } = useShiftsByBranchQuery(effectiveBranchId);
   const { mutateAsync: createShift, isPending: isCreating } = useCreateShiftMutation();
   const { mutateAsync: publishShifts, isPending: isPublishing } = usePublishShiftsMutation();
   const isLoading = isShiftsLoading || isCreating || isPublishing;
@@ -44,7 +48,7 @@ export const ScheduleBuilder: React.FC = () => {
 
       await createShift({
         staffId: shiftStaffId,
-        branchId: selectedBranchId,
+        branchId: effectiveBranchId,
         startTime: startDateTime,
         endTime: endDateTime,
         type: shiftType as any
@@ -71,15 +75,17 @@ export const ScheduleBuilder: React.FC = () => {
           <p className="font-body-lg text-on-surface-variant">Manage staff shifts and publish schedules.</p>
         </div>
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-end sm:items-center">
-          <select 
-            className="rounded-lg border-outline-variant/30 bg-surface text-on-surface focus:border-primary focus:ring-primary font-body-md py-2 px-4 shadow-sm"
-            value={selectedBranchId}
-            onChange={(e) => setSelectedBranchId(Number(e.target.value))}
-          >
-            {branches?.map(branch => (
-              <option key={branch.id} value={branch.id}>{branch.name}</option>
-            ))}
-          </select>
+          {role === 'ADMIN' && (
+            <select 
+              className="rounded-lg border-outline-variant/30 bg-surface text-on-surface focus:border-primary focus:ring-primary font-body-md py-2 px-4 shadow-sm"
+              value={selectedBranchId}
+              onChange={(e) => setSelectedBranchId(Number(e.target.value))}
+            >
+              {branches?.map(branch => (
+                <option key={branch.id} value={branch.id}>{branch.name}</option>
+              ))}
+            </select>
+          )}
 
           <Button variant="outline" onClick={() => setIsModalOpen(true)} disabled={isLoading} className="shrink-0">
             <span className="material-symbols-outlined font-light mr-2">add</span>

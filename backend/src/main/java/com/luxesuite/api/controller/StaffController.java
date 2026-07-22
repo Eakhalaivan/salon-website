@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.luxesuite.api.security.SecurityUtils;
 
 import java.util.List;
 
@@ -17,14 +18,18 @@ import java.util.List;
 public class StaffController {
 
     private final StaffService staffService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @org.springframework.cache.annotation.Cacheable(value = "staff", key = "'all_' + #page + '_' + #size")
     public com.luxesuite.api.dto.PageResponse<StaffDto> getAllStaff(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        if (securityUtils.hasRole("MANAGER")) {
+            Long branchId = securityUtils.getStaffBranchId();
+            return staffService.getStaffByBranch(branchId, page, size);
+        }
         return staffService.getAllStaff(page, size);
     }
 

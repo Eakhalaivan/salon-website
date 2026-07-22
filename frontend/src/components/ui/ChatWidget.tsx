@@ -33,7 +33,7 @@ export const ChatWidget = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosClient.post('/api/v1/chat/assistant', {
+      const response = await axiosClient.post('/chat/assistant', {
         messages: [...messages, userMessage]
       });
       setMessages(prev => [...prev, response.data]);

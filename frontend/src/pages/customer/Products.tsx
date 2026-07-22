@@ -2,30 +2,30 @@ import { useState } from 'react';
 import { useRetailProductsQuery } from '../../hooks/api/useProducts';
 import { GoldRibbon } from '../../components/ui/GoldRibbon';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { LuxuryCard } from '../../components/luxury/LuxuryCard';
-import { Input } from '../../components/ui/Input';
-import { ShimmerText } from '../../components/luxury/ShimmerText';
+import { Card } from '../../components/ui/Card';
 import { AnimatedSection, AnimatedItem } from '../../components/ui/AnimatedSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../store/useCartStore';
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
-
+import { Search, Heart, ShoppingCart } from 'lucide-react';
+import clsx from 'clsx';
 
 export const Products = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('All');
   const { data: pageData, isLoading: loading, isError } = useRetailProductsQuery(page, 10);
   const products = pageData?.content || [];
   
-  const addItem = useCartStore((state) => state.addItem);
-  // Optional wishlist state (local for now)
+  const { items: cartItems, addItem } = useCartStore();
+  const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
   const queryClient = useQueryClient();
   const { data: wishlistData } = useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
-      const res = await axiosClient.get('/api/v1/customers/me/wishlist');
+      const res = await axiosClient.get('/customers/me/wishlist');
       return res.data;
     }
   });
@@ -35,7 +35,7 @@ export const Products = () => {
 
   const toggleWishlistMutation = useMutation({
     mutationFn: async (productId: number) => {
-      await axiosClient.post(`/api/v1/customers/me/wishlist/${productId}`);
+      await axiosClient.post(`/customers/me/wishlist/${productId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
@@ -51,14 +51,14 @@ export const Products = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-[var(--color-primary)] text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-gold-500 text-4xl">progress_activity</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-[var(--color-error)]/10 text-[var(--color-error)] p-6 rounded-2xl border border-[var(--color-error)]/20 font-body-md text-center max-w-2xl mx-auto mt-12">
+      <div className="bg-danger-bg text-danger-text p-6 rounded-2xl border border-danger-bg/50 font-sans text-center max-w-2xl mx-auto mt-12">
         {error}
       </div>
     );
@@ -68,26 +68,60 @@ export const Products = () => {
     <div className="space-y-10 animate-fade-in pb-12 relative">
       <GoldRibbon position="top-right" />
       
-      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-16 relative z-10 pt-8">
-        <h2 className="font-serif text-6xl mb-4 tracking-wide text-[var(--color-on-surface)]">
-          <ShimmerText text="Our Products" />
+      <header className="flex flex-col items-center text-center max-w-5xl mx-auto mb-10 relative z-10 pt-4">
+        <h2 className="font-serif text-[40px] leading-[48px] mb-2 text-ink-900">
+          Our Collection
         </h2>
-        <p className="font-sans text-[var(--color-on-surface-variant)] text-lg mb-10 tracking-wide">
+        <p className="font-sans text-ink-400 text-[15px] mb-8">
           Premium retail products for your at-home rituals.
         </p>
         
-        <div className="w-full max-w-md">
-          <Input 
-            icon={<span className="material-symbols-outlined text-[20px]">search</span>}
-            type="text" 
-            placeholder="Search our collection..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        {/* Search and Icons Row */}
+        <div className="w-full flex items-center justify-between gap-6 mb-8">
+           <div className="flex-1 max-w-md ml-auto relative">
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 w-5 h-5 stroke-[1.5]" />
+             <input 
+               type="text" 
+               placeholder="Search our collection..." 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+               className="w-full pl-11 pr-4 py-3 rounded-full border border-ink-200/50 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none text-sm bg-surface text-ink-900 shadow-[0_2px_8px_rgba(33,29,23,0.04)] placeholder:text-ink-400"
+             />
+           </div>
+           
+           <div className="flex items-center gap-4 mr-auto">
+             <button className="p-2 text-ink-400 hover:text-ink-900 transition-colors">
+               <Heart className="w-6 h-6 stroke-[1.5]" />
+             </button>
+             <button className="p-2 text-ink-400 hover:text-ink-900 transition-colors relative">
+               <ShoppingCart className="w-6 h-6 stroke-[1.5]" />
+               {cartItemCount > 0 && (
+                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#D4AF37] rounded-full border-2 border-page"></span>
+               )}
+             </button>
+           </div>
+        </div>
+
+        {/* Temporary static categories since we don't have them in the endpoint yet */}
+        <div className="flex flex-wrap justify-center gap-3 w-full max-w-3xl">
+            {['All', 'Skincare', 'Haircare', 'Bodycare', 'Wellness', 'Accessories'].map((cat) => (
+              <button 
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={clsx(
+                  "px-6 py-2.5 rounded-full font-sans text-[13px] font-semibold transition-all duration-300 border",
+                  activeCategory === cat 
+                    ? "bg-[#D4AF37] text-white border-[#D4AF37] shadow-[0_4px_12px_rgba(212,175,55,0.3)]" 
+                    : "bg-surface text-ink-900 border-ink-200/50 hover:border-[#D4AF37] hover:text-[#D4AF37]"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
         </div>
       </header>
 
-      <AnimatedSection stagger className="relative z-10">
+      <AnimatedSection stagger className="relative z-10 max-w-6xl mx-auto">
         {filteredProducts.length === 0 ? (
           <EmptyState 
             icon="inventory_2" 
@@ -95,61 +129,50 @@ export const Products = () => {
             description="We couldn't find any products matching your search criteria."
           />
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product) => {
                 const inWishlist = wishlist.includes(product.id);
                 
                 return (
                 <AnimatedItem key={product.id}>
-                  <LuxuryCard className="h-full flex flex-col p-0 overflow-hidden glass-card bg-[var(--color-surface)] group">
+                  <Card className="h-full flex flex-col p-4 group border-none shadow-[0_4px_24px_rgba(33,29,23,0.04)] hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)] bg-surface rounded-3xl" hoverable>
                     
-                    {/* Full Bleed Image Area */}
-                    <div className="h-56 relative bg-[var(--color-surface)] overflow-hidden">
-                      {/* Placeholder background representing an image */}
-                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface)] to-transparent" />
+                    {/* Image Area */}
+                    <div className="h-64 relative overflow-hidden rounded-2xl bg-white mb-6">
+                      {/* Using a clear product-like background */}
+                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
                       
                       {/* Top Action Bar (Wishlist Heart) */}
                       <button 
-                        className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-colors z-20 backdrop-blur-sm border ${
+                        className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-20 bg-white shadow-sm border border-ink-200/50 ${
                           inWishlist 
-                            ? 'bg-[var(--color-error)]/20 border-[var(--color-error)] text-[var(--color-error)]' 
-                            : 'bg-[var(--color-surface)]/80 border-[var(--color-border)] text-[var(--color-on-surface-variant)] hover:text-[var(--color-error)] hover:border-[var(--color-error)]/50'
+                            ? 'text-[#D4AF37]' 
+                            : 'text-ink-400 hover:text-[#D4AF37]'
                         }`}
                         onClick={(e) => toggleWishlist(product.id, e)}
                       >
-                        <span className={`material-symbols-outlined text-[20px] ${inWishlist ? 'icon-fill' : ''}`}>favorite</span>
+                        <Heart className={`w-4 h-4 stroke-[1.5] ${inWishlist ? 'fill-current' : ''}`} />
                       </button>
-
-                      {/* Title & Price positioned at bottom of image area */}
-                      <div className="absolute bottom-4 left-6 right-6 flex flex-col z-20">
-                        <div className="font-sans text-[10px] text-[var(--color-primary)] uppercase tracking-widest mb-1 font-semibold">{product.sku}</div>
-                        <h3 className="font-serif text-xl text-[var(--color-on-surface)] leading-tight line-clamp-1">{product.name}</h3>
-                      </div>
                     </div>
                     
-                    <div className="p-6 flex flex-col flex-grow">
-                      <p className="font-sans text-sm text-[var(--color-on-surface-variant)] flex-grow mb-6 leading-relaxed line-clamp-3">
-                        {product.description || 'Experience the pinnacle of luxury with our signature collection, designed to elevate your daily routine.'}
-                      </p>
+                    <div className="flex flex-col flex-grow items-center text-center px-2">
+                      <h3 className="font-serif text-lg text-ink-900 leading-tight mb-2">{product.name}</h3>
+                      <span className="font-sans text-[15px] font-bold text-[#D4AF37] mb-6">₹{product.price.toFixed(2)}</span>
                       
-                      <div className="flex items-end justify-between pt-4 mt-auto border-t border-[var(--color-border)]">
-                        <span className="font-serif text-2xl text-[var(--color-primary)]">₹{product.price.toFixed(0)}</span>
-                        
+                      <div className="mt-auto w-full pt-4 border-t border-ink-200/50">
                         <button 
-                          className="gradient-btn px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider flex items-center gap-2"
+                          className="w-full text-center text-[#D4AF37] font-sans text-[13px] font-semibold transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             addItem(product);
                           }}
                         >
-                          <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
-                          Add
+                          Add to Cart
                         </button>
                       </div>
                     </div>
-                  </LuxuryCard>
+                  </Card>
                 </AnimatedItem>
               )})}
             </AnimatePresence>
@@ -157,31 +180,31 @@ export const Products = () => {
         )}
         
         {!loading && !error && filteredProducts.length > 0 && (
-          <div className="mt-12 p-4 border border-[var(--color-primary)]/20 bg-[var(--color-surface)]/30 backdrop-blur-md flex justify-between items-center rounded-2xl">
+          <div className="mt-12 p-4 border border-ink-200/50 bg-surface/50 backdrop-blur-md flex justify-between items-center rounded-2xl max-w-6xl mx-auto">
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                 page === 0 
-                  ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                  : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                  : 'border-[#D4AF37] text-[#D4AF37] hover:bg-gold-50'
               }`}
               disabled={page === 0} 
               onClick={() => setPage(p => Math.max(0, p - 1))}
             >
-              Previous
+              PREVIOUS
             </button>
-            <span className="text-[var(--color-on-surface-variant)] font-sans text-sm font-semibold tracking-wider uppercase">
+            <span className="text-ink-400 font-sans text-sm font-semibold tracking-wider uppercase">
               Page {pageData ? pageData.pageNo + 1 : 1} of {pageData ? pageData.totalPages : 1}
             </span>
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-semibold tracking-wider transition-all border ${
+              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
                 pageData?.last 
-                  ? 'opacity-50 cursor-not-allowed border-[var(--color-border)] text-[var(--color-on-surface-variant)]' 
-                  : 'border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
+                  : 'border-[#D4AF37] text-[#D4AF37] hover:bg-gold-50'
               }`}
               disabled={pageData ? pageData.last : true} 
               onClick={() => setPage(p => p + 1)}
             >
-              Next
+              NEXT
             </button>
           </div>
         )}
