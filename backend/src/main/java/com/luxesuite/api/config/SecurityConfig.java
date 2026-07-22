@@ -18,7 +18,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import com.luxesuite.api.security.CsrfCookieFilter;
 import com.luxesuite.api.security.RateLimitFilter;
-import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -38,14 +37,13 @@ public class SecurityConfig {
     private final CsrfCookieFilter csrfCookieFilter;
     private final AuthenticationProvider authenticationProvider;
     private final Environment env;
-    private final LettuceBasedProxyManager<byte[]> proxyManager;
 
     @Value("${jwt.secret:dGhpcy1pcy1hLXZlcnktc2VjdXJlLWp3dC1zZWNyZXQta2V5LXRoYXQtaXMtMjU2LWJpdHM=}")
     private String jwtSecret;
 
     @Bean
     public RateLimitFilter rateLimitFilter() {
-        return new RateLimitFilter(proxyManager);
+        return new RateLimitFilter();
     }
 
     @PostConstruct

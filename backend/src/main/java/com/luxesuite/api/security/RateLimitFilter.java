@@ -4,36 +4,31 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.Refill;
-import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.StatefulRedisConnection;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Order(1) // High precedence
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private final LettuceBasedProxyManager<byte[]> proxyManager;
+    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,7 +37,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (request.getRequestURI().startsWith("/api/")) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String clientId = getClientId(authentication, request);
-            Bucket bucket = proxyManager.builder().build(clientId.getBytes(), this::getBucketConfigurationForUser);
+            
+            Bucket bucket = buckets.computeIfAbsent(clientId, k -> {
+                BucketConfiguration config = getBucketConfigurationForUser();
+                return Bucket.builder()
+                        .addLimit(config.getBandwidths()[0])
+                        .build();
+            });
 
             if (bucket.tryConsume(1)) {
                 filterChain.doFilter(request, response);
