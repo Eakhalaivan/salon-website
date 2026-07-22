@@ -59,7 +59,7 @@ cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:5175,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:5175}
 
 app:
-  cookie-secure: ${APP_COOKIE_SECURE:false}
+  cookie-secure: ${APP_COOKIE_SECURE:true}
   seed-demo-data: ${APP_SEED_DEMO_DATA:false}
   loyalty:
     points-per-100: 1
