@@ -4,6 +4,12 @@ import { useAuthStore } from '../store/useAuthStore';
 // Ensure the base URL always ends with /api/v1 regardless of how VITE_API_BASE_URL is set.
 // e.g. "https://salon-website-o8qe.onrender.com" → "https://salon-website-o8qe.onrender.com/api/v1"
 function resolveBaseUrl(): string {
+  // In production, force relative URL to use the Vercel rewrite proxy.
+  // This prevents third-party cookie blocking issues from cross-origin requests.
+  if (import.meta.env.PROD) {
+    return '/api/v1';
+  }
+
   const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
   if (!raw) return '/api/v1';
   const trimmed = raw.replace(/\/$/, '');
