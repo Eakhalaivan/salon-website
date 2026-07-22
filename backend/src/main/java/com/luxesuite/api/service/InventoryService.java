@@ -36,11 +36,10 @@ public class InventoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<InventoryDto> getInventoryByBranch(Long branchId) {
+    public com.luxesuite.api.dto.PageResponse<InventoryDto> getInventoryByBranch(Long branchId, int page, int size) {
         securityUtils.validateBranchAccess(branchId);
-        return inventoryRepository.findByBranchId(branchId).stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+        org.springframework.data.domain.Page<Inventory> inventoryPage = inventoryRepository.findByBranchId(branchId, org.springframework.data.domain.PageRequest.of(page, size));
+        return com.luxesuite.api.dto.PageResponse.of(inventoryPage.map(this::mapToDto));
     }
 
     @Transactional(readOnly = true)

@@ -1,14 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useServicesQuery } from '../../hooks/api/useAppointments';
-import { GoldRibbon } from '../../components/ui/GoldRibbon';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
-import { Card } from '../../components/ui/Card';
-import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { motion, AnimatePresence } from 'framer-motion';
-import clsx from 'clsx';
-import { Heart, Clock } from 'lucide-react';
 
 export const Services = () => {
   const { data: pageData, isLoading: loading, isError } = useServicesQuery();
@@ -31,14 +26,14 @@ export const Services = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-gold-500 text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-danger-bg text-danger-text p-6 rounded-2xl border border-danger-bg/50 font-sans text-center max-w-2xl mx-auto mt-12">
+      <div className="bg-error-container text-on-error-container p-6 rounded-2xl font-body-md text-center max-w-2xl mx-auto mt-12">
         {error}
       </div>
     );
@@ -49,110 +44,113 @@ export const Services = () => {
   );
 
   return (
-    <div className="space-y-10 animate-fade-in pb-12 relative">
-      <GoldRibbon position="top-right" />
-      
-      <header className="flex flex-col items-start max-w-7xl mx-auto mb-10 relative z-10 pt-4">
-        <h2 className="font-serif text-[40px] leading-[48px] mb-2 text-ink-900">
-          Our Rituals
-        </h2>
-        <p className="font-sans text-ink-400 text-[15px] mb-8">
-          Discover our tailored experiences designed for your absolute serenity.
-        </p>
-        
+    <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative overflow-hidden py-12 animate-fade-in">
+      {/* Abstract background elements */}
+      <div className="absolute -right-20 -top-20 opacity-10">
+        <span className="material-symbols-outlined text-[400px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>spa</span>
+      </div>
+
+      <div className="relative z-10">
+        <div className="mb-10">
+          <h2 className="font-headline-lg text-headline-lg text-on-surface">Our Rituals</h2>
+          <p className="font-body-md text-secondary mt-2">Discover our tailored experiences designed for your absolute serenity.</p>
+        </div>
+
         {/* Category Selector Tabs */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4 mb-10">
             {categories.map((cat) => (
               <button 
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={clsx(
-                  "px-6 py-2.5 rounded-full font-sans text-sm font-semibold transition-all duration-300 border",
+                className={`px-8 py-3 rounded-full font-label-md transition-colors ${
                   activeCategory === cat 
-                    ? "bg-[#D4AF37] text-white border-[#D4AF37] shadow-[0_4px_12px_rgba(212,175,55,0.3)]" 
-                    : "bg-surface text-ink-900 border-ink-200/50 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-                )}
+                    ? 'bg-primary-container text-on-primary-container shadow-sm' 
+                    : 'bg-surface-container-high text-secondary hover:bg-surface-container-highest'
+                }`}
               >
                 {cat}
               </button>
             ))}
           </div>
         )}
-      </header>
 
-      <AnimatedSection stagger className="relative z-10 max-w-7xl mx-auto">
-        {filteredServices.length === 0 ? (
-          <EmptyState 
-            icon="spa" 
-            title="No services found" 
-            description={`We couldn't find any services in this category.`}
-          />
-        ) : (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence mode="popLayout">
-              {filteredServices.map((service) => (
-                <motion.div
-                  key={service.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4 }}
-                  className="h-full"
-                >
-                  <Card className="flex flex-col p-4 pb-6 overflow-hidden group cursor-pointer h-full border border-ink-200/50 shadow-[0_4px_24px_rgba(33,29,23,0.04)] hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)] bg-surface rounded-3xl" onClick={() => handleBook(service.id)}>
-                    
-                    {/* Image Area with Padding */}
-                    <div className="relative mb-5">
-                      <div className="h-56 relative overflow-hidden rounded-2xl bg-page">
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center group-hover:scale-105 transition-transform duration-700" />
-                        
-                        {/* Top Action Bar (Wishlist Heart) */}
-                        <button 
-                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-ink-400 hover:text-[#D4AF37] transition-colors z-20"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Wishlist logic
-                          }}
-                        >
-                          <Heart className="w-4 h-4 stroke-[1.5]" />
-                        </button>
-                      </div>
+        <AnimatedSection stagger className="max-w-7xl">
+          {filteredServices.length === 0 ? (
+            <EmptyState 
+              icon="spa" 
+              title="No services found" 
+              description={`We couldn't find any services in this category.`}
+            />
+          ) : (
+            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[24px]">
+              <AnimatePresence mode="popLayout">
+                {filteredServices.map((service) => (
+                  <motion.div
+                    key={service.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] group hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col cursor-pointer"
+                    onClick={() => handleBook(service.id)}
+                  >
+                    {/* Image Area */}
+                    <div className="h-64 relative overflow-hidden bg-surface-container">
+                      <img 
+                        src={service.imageUrl || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop'} 
+                        alt={service.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <button 
+                        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Wishlist logic
+                        }}
+                      >
+                        <span className="material-symbols-outlined">favorite</span>
+                      </button>
                     </div>
-                    
-                    <div className="flex flex-col flex-grow px-1">
-                      <h3 className="font-serif text-lg text-ink-900 leading-tight font-medium mb-3 pr-2">{service.name}</h3>
-                      
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center text-ink-400 text-[11px] uppercase tracking-widest font-semibold">
-                          <Clock className="w-[14px] h-[14px] mr-1.5 text-gold-500 stroke-[1.5]" />
-                          {service.durationMins} MINS
+
+                    {/* Content Area */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex justify-between items-start mb-2 gap-4">
+                        <h3 className="font-headline-md text-headline-md text-on-surface">{service.name}</h3>
+                        <div className="flex items-center text-primary font-bold shrink-0">
+                          <span className="text-sm mr-0.5">₹</span>
+                          <span className="text-xl">{service.price.toFixed(0)}</span>
                         </div>
-                        <span className="font-sans text-[15px] text-[#D4AF37] font-bold shrink-0 tracking-wide">₹{service.price.toFixed(0)}</span>
                       </div>
-                      
-                      <p className="font-sans text-[13px] text-ink-400 flex-grow mb-6 leading-relaxed line-clamp-3 pr-2">
-                        {service.description || "A bespoke full body massage using warm basalt stones and botanical oils."}
+
+                      <div className="flex items-center gap-2 text-secondary font-label-sm mb-4">
+                        <span className="material-symbols-outlined text-sm">schedule</span>
+                        <span>{service.durationMins} MINS</span>
+                      </div>
+
+                      <p className="font-body-md text-secondary mb-8 flex-1">
+                        {service.description || "A bespoke treatment designed for your absolute serenity."}
                       </p>
-                      
-                      <PrimaryButton 
-                        className="w-full text-[13px] h-11"
+
+                      <button 
+                        className="w-full py-3 rounded-full bg-primary-container text-on-primary-container font-label-md hover:brightness-110 active:scale-95 transition-all shadow-md mt-auto"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleBook(service.id);
                         }}
                       >
                         Reserve
-                      </PrimaryButton>
+                      </button>
                     </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatedSection>
-    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatedSection>
+      </div>
+    </main>
   );
 };

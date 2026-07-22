@@ -2,11 +2,15 @@ package com.luxesuite.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "branches")
+@SQLDelete(sql = "UPDATE branches SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,6 +44,9 @@ public class Branch {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+        @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

@@ -52,6 +52,7 @@ export interface ServiceDto {
   genderCategory?: 'MEN' | 'WOMEN' | 'UNISEX';
   category: string;
   isActive?: boolean;
+  imageUrl?: string;
 }
 
 export interface StaffDto {

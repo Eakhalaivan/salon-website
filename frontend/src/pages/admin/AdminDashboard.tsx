@@ -316,7 +316,7 @@ export const AdminDashboard = () => {
               <div className="aspect-square w-full rounded-xl bg-surface-container-high overflow-hidden mb-4 relative flex items-center justify-center">
                 <span className="material-symbols-outlined text-[48px] text-on-surface-variant/50">spa</span>
                 <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-3xl">edit</span>
+                  <span className="material-symbols-outlined text-primary text-3xl">edit</span>
                 </div>
               </div>
               <p className="font-label-md text-label-md text-on-surface text-center line-clamp-1">{service.name}</p>

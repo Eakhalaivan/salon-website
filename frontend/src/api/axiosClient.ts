@@ -35,6 +35,15 @@ axiosClient.interceptors.request.use((config) => {
       config.url = '/';
     }
   }
+  
+  // CSRF Protection: read XSRF-TOKEN cookie and attach as header
+  if (config.method && config.method.toLowerCase() !== 'get') {
+    const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+    if (match) {
+      config.headers['X-XSRF-TOKEN'] = decodeURIComponent(match[2]);
+    }
+  }
+  
   return config;
 });
 

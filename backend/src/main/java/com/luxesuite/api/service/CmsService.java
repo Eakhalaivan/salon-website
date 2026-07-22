@@ -21,6 +21,7 @@ public class CmsService {
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "cms", key = "#pageKey")
     public List<CmsContentBlockDto> getPageContent(String pageKey) {
         return cmsRepository.findByPageKey(pageKey).stream()
                 .map(this::mapToDto)
@@ -28,6 +29,7 @@ public class CmsService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "cms", key = "#pageKey")
     public CmsContentBlockDto updateBlockContent(String pageKey, String blockKey, String contentValue) {
         CmsContentBlock block = cmsRepository.findByPageKeyAndBlockKey(pageKey, blockKey)
                 .orElseThrow(() -> new ResourceNotFoundException("CMS Block not found for page: " + pageKey + " and block: " + blockKey));

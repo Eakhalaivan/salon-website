@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
 import { useParams, Link } from 'react-router-dom';
 import { Loader2, Calendar, ArrowLeft } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import React, { Suspense } from 'react';
 import { AnimatedSection } from '../components/ui/AnimatedSection';
+
+const MarkdownRenderer = React.lazy(() => import('../components/ui/MarkdownRenderer'));
 import { TextReveal } from '../components/ui/TextReveal';
 
 interface BlogPost {
@@ -85,7 +87,9 @@ export default function BlogPost() {
             prose-strong:text-on-surface prose-strong:font-semibold
             prose-blockquote:border-l-primary prose-blockquote:text-on-surface prose-blockquote:font-style-italic
           ">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+            <Suspense fallback={<div className="animate-pulse h-32 bg-surface-container rounded-xl"></div>}>
+              <MarkdownRenderer content={post.content} />
+            </Suspense>
           </div>
         </AnimatedSection>
       </div>

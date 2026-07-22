@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAttendanceByStaffQuery, useClockInMutation, useClockOutMutation } from '../../hooks/api/useAttendance';
 import { useAuthStore } from '../../store/useAuthStore';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 
 export const StaffAttendance: React.FC = () => {
@@ -110,7 +111,11 @@ export const StaffAttendance: React.FC = () => {
           <h3 className="font-display-sm text-[24px] text-on-surface mb-6">Recent History</h3>
           <div className="space-y-4">
             {attendances.length === 0 ? (
-              <p className="text-on-surface-variant text-body-md text-center py-8">No attendance history available.</p>
+              <EmptyState 
+                icon="history" 
+                title="No History" 
+                description="No attendance history available." 
+              />
             ) : (
               attendances.slice().reverse().slice(0, 5).map((log: any) => (
                 <div key={log.id} className="flex justify-between items-center p-4 bg-surface-container-lowest border border-outline-variant rounded-2xl hover:border-outline transition-colors">

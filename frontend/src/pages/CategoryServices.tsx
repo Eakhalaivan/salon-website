@@ -3,6 +3,7 @@ import { useServicesQuery } from '../hooks/api/useAppointments';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Skeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import { motion } from 'framer-motion';
 import { transitionSpring } from '../utils/motion';
 
@@ -103,13 +104,13 @@ export const CategoryServices = () => {
             ))}
           </div>
         ) : services.length === 0 ? (
-          <div className="text-center py-20 bg-[var(--color-surface)] rounded-3xl border border-[var(--color-border)] shadow-sm">
-            <span className="material-symbols-outlined text-6xl text-[var(--color-outline)] mb-4 font-light">category</span>
-            <h3 className="font-display-sm text-2xl text-[var(--color-on-surface)] mb-2">No Services Found</h3>
-            <p className="text-[var(--color-on-surface-variant)] font-body-md max-w-md mx-auto mb-8">
-              We currently do not offer any services in this category.
-            </p>
-            <Button onClick={() => navigate('/book')} variant="outline">Browse Other Categories</Button>
+          <div className="py-12">
+            <EmptyState 
+              icon="category" 
+              title="No Services Found" 
+              description="We currently do not offer any services in this category." 
+              action={<Button onClick={() => navigate('/book')} variant="outline">Browse Other Categories</Button>}
+            />
           </div>
         ) : (
           <motion.div 

@@ -135,6 +135,7 @@ export const Navbar = () => {
           <button 
             className="text-primary z-50 p-2 relative"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

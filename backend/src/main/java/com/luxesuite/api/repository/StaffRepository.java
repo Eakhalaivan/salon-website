@@ -11,9 +11,17 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "branch"})
     List<Staff> findByBranchId(Long branchId);
+    
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "branch"})
     java.util.Optional<Staff> findByUserId(Long userId);
+    
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "branch"})
     java.util.Optional<Staff> findByUserEmail(String email);
+    
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "branch"})
+    java.util.Optional<Staff> findById(Long id);
     
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("SELECT s FROM Staff s WHERE s.id = :id")

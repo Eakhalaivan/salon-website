@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Building2, Mail, Phone, MapPin, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -100,10 +101,12 @@ export const Suppliers = () => {
               <span className="material-symbols-outlined animate-spin text-primary text-5xl">progress_activity</span>
             </div>
           ) : filteredSuppliers.length === 0 ? (
-            <div className="col-span-full glass-panel p-16 text-center rounded-[32px] shadow-sm">
-              <Building2 className="mx-auto h-16 w-16 text-on-surface-variant mb-6 opacity-50" />
-              <h3 className="font-display-sm text-2xl text-on-surface mb-2">No Suppliers Found</h3>
-              <p className="font-body-md text-on-surface-variant">No suppliers match your search, or none have been added yet.</p>
+            <div className="col-span-full">
+              <EmptyState 
+                icon="domain_disabled" 
+                title="No Suppliers Found" 
+                description="No suppliers match your search, or none have been added yet." 
+              />
             </div>
           ) : (
             filteredSuppliers.map((supplier: any, i: number) => (

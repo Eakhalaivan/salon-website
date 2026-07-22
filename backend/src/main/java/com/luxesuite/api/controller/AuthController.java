@@ -2,6 +2,8 @@ package com.luxesuite.api.controller;
 
 import com.luxesuite.api.dto.AuthResponse;
 import com.luxesuite.api.dto.LoginRequest;
+import com.luxesuite.api.dto.ForgotPasswordRequest;
+import com.luxesuite.api.dto.ResetPasswordRequest;
 import com.luxesuite.api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -167,5 +169,31 @@ public class AuthController {
         clearCookies(response);
         
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String clientIp = httpRequest.getRemoteAddr();
+        if (redisService.isRateLimited("forgotPassword:" + clientIp, 3, 3600000)) { // 3 per hour
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Too many password reset requests. Please try again later.");
+        }
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("If the email exists, a password reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String clientIp = httpRequest.getRemoteAddr();
+        if (redisService.isRateLimited("resetPassword:" + clientIp, 5, 3600000)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Too many reset attempts.");
+        }
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Password has been reset successfully.");
     }
 }

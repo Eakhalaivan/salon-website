@@ -18,6 +18,7 @@ public class BranchService {
     private final BranchRepository branchRepository;
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "branches")
     public List<BranchDto> getAllBranches() {
         return branchRepository.findAll().stream()
                 .map(this::mapToDto)
@@ -25,6 +26,7 @@ public class BranchService {
     }
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "branches", key = "#id")
     public BranchDto getBranchById(Long id) {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch not found with id " + id));
@@ -32,6 +34,7 @@ public class BranchService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "branches", allEntries = true)
     public BranchDto createBranch(BranchDto dto) {
         Branch branch = Branch.builder()
                 .name(dto.getName())
@@ -47,6 +50,7 @@ public class BranchService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "branches", allEntries = true)
     public BranchDto updateBranch(Long id, BranchDto dto) {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch not found with id " + id));
@@ -65,6 +69,7 @@ public class BranchService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "branches", allEntries = true)
     public void deleteBranch(Long id) {
         Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch not found with id " + id));

@@ -28,6 +28,7 @@ public class SubscriptionService {
     private final CustomerRepository customerRepository;
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "subscription_plans", key = "'active_' + #page + '_' + #size")
     public com.luxesuite.api.dto.PageResponse<SubscriptionPlanDto> getActivePlans(int page, int size) {
         org.springframework.data.domain.Page<SubscriptionPlan> plans = planRepository.findByIsActiveTrue(org.springframework.data.domain.PageRequest.of(page, size));
         return com.luxesuite.api.dto.PageResponse.of(plans.map(this::mapToPlanDto));

@@ -1,38 +1,10 @@
 import { Link } from 'react-router-dom';
-import { AnimatedSection, AnimatedItem } from '../../components/ui/AnimatedSection';
-import { StatTile } from '../../components/ui/StatTile';
-
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { useAuthStore, selectUser } from '../../store/useAuthStore';
 
-import { Calendar, Crown, ShoppingBag, Sparkles } from 'lucide-react';
-
-interface ActivityDto {
-  title: string;
-  description: string;
-  date: string;
-  icon: string;
-}
-
 export const Dashboard = () => {
   const user = useAuthStore(selectUser);
-
-  useQuery({
-    queryKey: ['dashboardStats'],
-    queryFn: async () => {
-      const res = await axiosClient.get('/customers/me/activity/stats');
-      return res.data;
-    }
-  });
-
-  useQuery({
-    queryKey: ['loyaltyPoints'],
-    queryFn: async () => {
-      const res = await axiosClient.get('/loyalty/me');
-      return res.data;
-    }
-  });
 
   const { data: walletData } = useQuery({
     queryKey: ['walletBalance'],
@@ -50,183 +22,169 @@ export const Dashboard = () => {
     }
   });
 
-  useQuery<ActivityDto[]>({
-    queryKey: ['recentActivity'],
-    queryFn: async () => {
-      const res = await axiosClient.get('/customers/me/activity');
-      return res.data;
-    }
-  });
-
   const balance = walletData?.balance || 0;
-  const membershipTier = membershipData?.plan?.name || 'Premium'; // Default for the mockup
+  const membershipTier = membershipData?.plan?.name || 'Premium'; 
 
   const formattedBalance = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(balance);
 
   return (
-    <div className="space-y-10 animate-fade-in pb-12 pt-8">
-      {/* Header */}
-      <header className="mb-10 relative z-10 flex flex-col items-start text-left">
-        <h2 className="font-serif text-[36px] leading-[44px] mb-1 text-ink-900 flex items-center gap-2">
-          Welcome back, {user?.firstName || 'Elite Guest'} <span className="text-gold-500 font-sans text-2xl">✦</span>
+    <section className="px-[16px] lg:px-[40px] py-[32px] max-w-[1200px] mx-auto animate-fade-in">
+      {/* Header Section */}
+      <div className="mb-10">
+        <h2 className="font-headline-lg text-headline-lg text-on-surface flex items-center gap-3">
+          Welcome back, {user?.firstName || 'Elite Guest'} <span className="text-2xl">✨</span>
         </h2>
-        <p className="font-sans text-ink-400 text-[14px] tracking-wide">
-          Here's your wellness overview.
-        </p>
-      </header>
-
-      {/* Analytics Overview Stats (4 Cards) */}
-      <AnimatedSection stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-        <AnimatedItem>
-          <StatTile 
-            label="Upcoming Appointment"
-            value={<span className="text-[20px] font-sans font-medium text-ink-900">24 May 2024, 4:00 PM</span>}
-            caption="Swedish Massage"
-            actionSlot={
-              <Link to="/book" className="inline-block text-[12px] font-semibold text-[#D4AF37] bg-[#FDF9F1] rounded-full px-5 py-1.5 hover:bg-[#F3E7D3] transition-colors">
-                View Details
-              </Link>
-            }
-          />
-        </AnimatedItem>
-
-        <AnimatedItem>
-          <StatTile 
-            label="Luxe Points"
-            value={<span className="text-[32px] font-serif text-[#5C4D3C]">2,450</span>}
-            actionSlot={
-              <Link to="/customer/profile" className="inline-block text-[12px] font-semibold text-[#D4AF37] bg-[#FDF9F1] rounded-full px-5 py-1.5 hover:bg-[#F3E7D3] transition-colors">
-                View Details
-              </Link>
-            }
-          />
-        </AnimatedItem>
-
-        <AnimatedItem>
-          <StatTile 
-            label="Wallet Balance"
-            value={<span className="text-[32px] font-serif text-[#5C4D3C]">{formattedBalance}</span>}
-            actionSlot={
-              <Link to="/customer/wallet" className="inline-block text-[12px] font-semibold text-[#D4AF37] bg-[#FDF9F1] rounded-full px-5 py-1.5 hover:bg-[#F3E7D3] transition-colors">
-                Add Funds
-              </Link>
-            }
-          />
-        </AnimatedItem>
-
-        <AnimatedItem>
-          <StatTile 
-            label="Membership"
-            value={<span className="text-[32px] font-serif text-[#5C4D3C]">{membershipTier}</span>}
-            actionSlot={
-              <div className="flex justify-center mt-2">
-                <Crown className="w-10 h-10 text-[#D4AF37] stroke-[1.5]" />
-              </div>
-            }
-          />
-        </AnimatedItem>
-      </AnimatedSection>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content Area (Left: 2 columns wide) */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Quick Actions */}
-          <AnimatedSection delay={0.2}>
-            <div className="bg-white rounded-[20px] shadow-[0_4px_24px_rgba(33,29,23,0.04)] p-8 border border-[#E4DFD3]/40 h-full">
-              <h3 className="font-serif text-2xl text-ink-900 mb-8">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <Link to="/book">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[120px] rounded-2xl hover:bg-[#FDF9F1] transition-colors cursor-pointer group">
-                    <div className="w-12 h-12 flex items-center justify-center mb-2">
-                      <Calendar className="text-[#D4AF37] w-8 h-8 stroke-[1.5] group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="font-sans text-[12px] text-ink-900 font-medium">Book Appointment</span>
-                  </div>
-                </Link>
-                
-                <Link to="/customer/services">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[120px] rounded-2xl hover:bg-[#FDF9F1] transition-colors cursor-pointer group">
-                    <div className="w-12 h-12 flex items-center justify-center mb-2">
-                      <Sparkles className="text-[#D4AF37] w-8 h-8 stroke-[1.5] group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="font-sans text-[12px] text-ink-900 font-medium">View Services</span>
-                  </div>
-                </Link>
-                
-                <Link to="/customer/products">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[120px] rounded-2xl hover:bg-[#FDF9F1] transition-colors cursor-pointer group">
-                    <div className="w-12 h-12 flex items-center justify-center mb-2">
-                      <ShoppingBag className="text-[#D4AF37] w-8 h-8 stroke-[1.5] group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="font-sans text-[12px] text-ink-900 font-medium">Shop Products</span>
-                  </div>
-                </Link>
-
-                <Link to="/customer/gift-cards">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[120px] rounded-2xl hover:bg-[#FDF9F1] transition-colors cursor-pointer group">
-                    <div className="w-12 h-12 flex items-center justify-center mb-2">
-                      <span className="material-symbols-outlined text-[#D4AF37] text-[32px] group-hover:scale-110 transition-transform">redeem</span>
-                    </div>
-                    <span className="font-sans text-[12px] text-ink-900 font-medium">Buy Gift Card</span>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </AnimatedSection>
-        </div>
-
-        {/* Sidebar Area (Right: 1 column wide) - Recent Activity */}
-        <AnimatedSection delay={0.3}>
-          <div className="h-full">
-            <div className="bg-white rounded-[20px] shadow-[0_4px_24px_rgba(33,29,23,0.04)] p-8 border border-[#E4DFD3]/40 h-full flex flex-col">
-              <h3 className="font-serif text-2xl text-ink-900 mb-8">Recent Activity</h3>
-              <div className="space-y-0 flex-1">
-                {/* Mock data to perfectly match screenshot */}
-                <div className="flex gap-4 items-center py-5 border-b border-ink-100/50">
-                  <div className="w-10 h-10 rounded-xl bg-[#FDF9F1] flex items-center justify-center text-[#D4AF37] shrink-0">
-                    <Calendar className="w-5 h-5 stroke-[1.5]" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-sans text-[13px] font-medium text-ink-900">Appointment Booked</p>
-                    <p className="font-sans text-[11px] text-ink-400 mt-1">Swedish Massage</p>
-                  </div>
-                  <div className="text-right">
-                      <p className="font-sans text-[11px] text-ink-400">22 May 2024</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 items-center py-5 border-b border-ink-100/50">
-                  <div className="w-10 h-10 rounded-xl bg-[#FDF9F1] flex items-center justify-center text-[#D4AF37] shrink-0">
-                    <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-sans text-[13px] font-medium text-ink-900">Order Placed</p>
-                    <p className="font-sans text-[11px] text-ink-400 mt-1">Botanical Body Oil</p>
-                  </div>
-                  <div className="text-right">
-                      <p className="font-sans text-[11px] text-ink-400">20 May 2024</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 items-center py-5">
-                  <div className="w-10 h-10 rounded-xl bg-[#FDF9F1] flex items-center justify-center text-[#D4AF37] shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">loyalty</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-sans text-[13px] font-medium text-ink-900">Points Earned</p>
-                    <p className="font-sans text-[11px] text-ink-400 mt-1">Referral Bonus</p>
-                  </div>
-                  <div className="text-right">
-                      <p className="font-sans text-[11px] text-ink-400">18 May 2024</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </AnimatedSection>
+        <p className="font-body-md text-body-md text-secondary mt-2">Here's your wellness overview for today.</p>
       </div>
 
-    </div>
+      {/* Bento Grid - Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[24px] mb-[32px]">
+        
+        {/* Upcoming Appointment */}
+        <div className="lg:col-span-1 bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col border border-outline-variant/30">
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-3">Upcoming Appointment</p>
+          <div className="mb-4">
+            <p className="font-body-lg text-body-lg font-bold text-on-surface">24 May 2024, 4:00 PM</p>
+            <p className="font-body-md text-body-md text-secondary">Swedish Massage</p>
+          </div>
+          <Link to="/book" className="mt-auto py-2 px-4 rounded-lg bg-primary-container/10 text-primary font-label-md text-label-md hover:bg-primary-container/20 transition-all border border-primary/20 text-center">
+            View Details
+          </Link>
+        </div>
+
+        {/* Lure Points */}
+        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border border-outline-variant/30">
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Lure Points</p>
+          <p className="font-display-lg text-display-lg text-primary">2,450</p>
+          <Link to="/customer/profile" className="mt-4 text-primary font-label-md text-label-md hover:underline">View History</Link>
+        </div>
+
+        {/* Wallet Balance */}
+        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border border-outline-variant/30">
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Wallet Balance</p>
+          <p className="font-display-lg text-display-lg text-on-surface">{formattedBalance}</p>
+          <Link to="/customer/wallet" className="mt-4 px-6 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:shadow-lg transition-all active:scale-95 inline-block">
+            Add Funds
+          </Link>
+        </div>
+
+        {/* Membership Status */}
+        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border border-outline-variant/30 relative overflow-hidden">
+          <div className="absolute -top-2 -right-2 w-16 h-16 bg-primary-fixed/30 rounded-full blur-2xl"></div>
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Membership</p>
+          <p className="font-display-lg text-display-lg text-primary-container">{membershipTier}</p>
+          <div className="mt-4">
+            <span className="material-symbols-outlined text-primary-container text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Lower Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[24px]">
+        
+        {/* Quick Actions */}
+        <section>
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-[16px]">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/book" className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/40 hover:-translate-y-1 transition-all group cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <span className="material-symbols-outlined text-primary text-2xl">calendar_month</span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary group-hover:text-primary">Book Appointment</span>
+            </Link>
+            
+            <Link to="/customer/services" className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/40 hover:-translate-y-1 transition-all group cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <span className="material-symbols-outlined text-primary text-2xl">spa</span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary group-hover:text-primary">View Services</span>
+            </Link>
+            
+            <Link to="/customer/products" className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/40 hover:-translate-y-1 transition-all group cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <span className="material-symbols-outlined text-primary text-2xl">shopping_bag</span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary group-hover:text-primary">Shop Products</span>
+            </Link>
+            
+            <Link to="/customer/gift-cards" className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/40 hover:-translate-y-1 transition-all group cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <span className="material-symbols-outlined text-primary text-2xl">redeem</span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary group-hover:text-primary">Buy Gift Card</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* Recent Activity */}
+        <section>
+          <div className="flex items-center justify-between mb-[16px]">
+            <h3 className="font-headline-md text-headline-md text-on-surface">Recent Activity</h3>
+            <button className="text-primary font-label-md text-label-md hover:underline">View All</button>
+          </div>
+          <div className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl overflow-hidden">
+            <div className="divide-y divide-outline-variant/30">
+              
+              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-xl">event_available</span>
+                  </div>
+                  <div>
+                    <p className="font-body-md text-body-md font-bold text-on-surface">Appointment Booked</p>
+                    <p className="font-label-sm text-label-sm text-secondary">Swedish Massage</p>
+                  </div>
+                </div>
+                <span className="font-label-sm text-label-sm text-outline">22 May 2024</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-xl">shopping_cart</span>
+                  </div>
+                  <div>
+                    <p className="font-body-md text-body-md font-bold text-on-surface">Order Placed</p>
+                    <p className="font-label-sm text-label-sm text-secondary">Botanical Body Oil</p>
+                  </div>
+                </div>
+                <span className="font-label-sm text-label-sm text-outline">20 May 2024</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-xl">loyalty</span>
+                  </div>
+                  <div>
+                    <p className="font-body-md text-body-md font-bold text-on-surface">Points Earned</p>
+                    <p className="font-label-sm text-label-sm text-secondary">Referral Bonus</p>
+                  </div>
+                </div>
+                <span className="font-label-sm text-label-sm text-outline">18 May 2024</span>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Bottom Wellness Banner */}
+      <div className="mt-12 w-full h-[300px] rounded-2xl relative overflow-hidden spa-card-shadow group">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" 
+          style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDQlyK9aLgdN-z8nmnuZ9I-qmNEk-WV1yAnSJoPERRHA9PMqz2S7ijZDDbaPxvT8Ov5SFurq0AEkRowNnuu6NJayv_Awut9s9FbAZZbFG_-Xi3VkXpg-lSCrQY8uC9KrAfJ7JzAlyRe09a7fLzKnzjc7aVKL7byWOripNnnSkZFR0nah8hRrgNOKx3nlZIH0QpA2rjNVlr8x6UaaMNKi-q_-874aoF1sOqCLp5lQfT5SivrkhSENC-dWzlEu_HkxVcgb1KplZJIvi-h')" }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent flex flex-col justify-center px-12">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="material-symbols-outlined text-primary text-4xl">spa</span>
+            <h4 className="font-headline-lg text-headline-lg text-on-surface">LUMINA SPA</h4>
+          </div>
+          <p className="font-headline-md text-headline-md italic text-primary/80 max-w-md leading-relaxed">
+            "Indulge in luxury. Experience tranquility."
+          </p>
+        </div>
+      </div>
+    </section>
   );
 };

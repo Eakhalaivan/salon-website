@@ -31,18 +31,21 @@ public class ProductService {
     private final BranchRepository branchRepository;
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "'retail_' + #page + '_' + #size")
     public PageResponse<ProductDto> getRetailProducts(int page, int size) {
         Page<Product> productPage = productRepository.findByIsActiveTrueAndTypeIgnoreCase("RETAIL", PageRequest.of(page, size));
         return PageResponse.of(productPage.map(this::mapToDto));
     }
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "'all_' + #page + '_' + #size")
     public PageResponse<ProductDto> getAllProducts(int page, int size) {
         Page<Product> productPage = productRepository.findByIsActiveTrue(PageRequest.of(page, size));
         return PageResponse.of(productPage.map(this::mapToDto));
     }
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "#id")
     public ProductDto getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -50,6 +53,7 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "products", allEntries = true)
     public ProductDto createProduct(ProductDto dto) {
         Product product = Product.builder()
                 .name(dto.getName())
@@ -86,6 +90,7 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "products", allEntries = true)
     public ProductDto updateProduct(Long id, ProductDto dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -123,6 +128,7 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "products", allEntries = true)
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));

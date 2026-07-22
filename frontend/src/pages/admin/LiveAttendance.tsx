@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLiveAttendanceQuery } from '../../hooks/api/useAttendance';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Users, Clock, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -61,8 +62,12 @@ export const LiveAttendance: React.FC = () => {
           </div>
           <div className="divide-y divide-outline-variant/20">
             {attendances.length === 0 ? (
-              <div className="p-12 text-center text-on-surface-variant">
-                No attendance logs for today yet.
+              <div className="p-6">
+                <EmptyState 
+                  icon="event_busy" 
+                  title="No logs found" 
+                  description="No attendance logs for today yet." 
+                />
               </div>
             ) : (
               attendances.map((log: any, i: number) => (

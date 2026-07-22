@@ -394,7 +394,7 @@ export const CustomerBooking = () => {
                       const isSelected = selectedServices.includes(rec.serviceId);
                       return (
                         <Card 
-                          key={`rec-${rec.serviceId}`} 
+                          key={`rec-₹{rec.serviceId}`} 
                           className={clsx(
                             "p-6 cursor-pointer border-2 transition-all duration-300 relative",
                             isSelected ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5" : "border-[var(--color-primary)]/20 hover:border-[var(--color-primary)]/50"

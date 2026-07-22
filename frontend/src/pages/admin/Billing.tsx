@@ -3,6 +3,7 @@ import { useAllInvoicesQuery } from '../../hooks/api/useBilling';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Button } from '../../components/ui/Button';
 import { CountUp } from '../../components/ui/CountUp';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Receipt, Download, RefreshCcw } from 'lucide-react';
 
 export const Billing = () => {
@@ -81,8 +82,12 @@ export const Billing = () => {
                   </tr>
                 ) : invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
-                      No invoices found.
+                    <td colSpan={6} className="px-6 py-12">
+                      <EmptyState 
+                        icon="receipt_long" 
+                        title="No invoices found" 
+                        description="There are currently no invoices to display." 
+                      />
                     </td>
                   </tr>
                 ) : (

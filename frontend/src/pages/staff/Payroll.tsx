@@ -16,7 +16,7 @@ export const Payroll = () => {
         <p className="text-on-surface-variant text-body-lg">View your earnings, commissions, and payroll history.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="glass-panel p-6 rounded-[24px]">
           <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Total Earnings (YTD)</h3>
           <p className="font-display-md text-[36px] text-primary">
@@ -24,15 +24,9 @@ export const Payroll = () => {
           </p>
         </div>
         <div className="glass-panel p-6 rounded-[24px]">
-          <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Total Commissions</h3>
-          <p className="font-display-md text-[36px] text-on-surface">
-            ${response?.content?.reduce((acc: number, curr: any) => acc + curr.commissionAmount, 0).toFixed(2) || '0.00'}
-          </p>
-        </div>
-        <div className="glass-panel p-6 rounded-[24px]">
           <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Latest Payout</h3>
           <p className="font-display-md text-[36px] text-on-surface">
-            ${response?.content?.[0]?.totalAmount?.toFixed(2) || '0.00'}
+            ₹{response?.content?.[0]?.totalAmount?.toFixed(2) || '0.00'}
           </p>
         </div>
       </div>
@@ -75,10 +69,10 @@ export const Payroll = () => {
                         {new Date(record.periodStart).toLocaleDateString()} - {new Date(record.periodEnd).toLocaleDateString()}
                       </p>
                     </td>
-                    <td className="p-4 text-right text-on-surface-variant font-body-md">${record.baseSalary?.toFixed(2)}</td>
-                    <td className="p-4 text-right text-success font-body-md">+${record.commissionAmount?.toFixed(2)}</td>
-                    <td className="p-4 text-right text-error font-body-md">-${record.deductionAmount?.toFixed(2)}</td>
-                    <td className="p-4 text-right font-headline-sm text-on-surface">${record.totalAmount?.toFixed(2)}</td>
+                    <td className="p-4 text-right text-on-surface-variant font-body-md">₹{record.baseSalary?.toFixed(2)}</td>
+                    <td className="p-4 text-right text-success font-body-md">+₹{record.commissionAmount?.toFixed(2)}</td>
+                    <td className="p-4 text-right text-error font-body-md">-₹{record.deductionAmount?.toFixed(2)}</td>
+                    <td className="p-4 text-right font-headline-sm text-on-surface">₹{record.totalAmount?.toFixed(2)}</td>
                     <td className="p-4 text-right">
                       <span className={`status-pill ${record.status === 'PAID' ? 'success' : 'warning'}`}>
                         {record.status}

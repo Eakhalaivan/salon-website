@@ -1,12 +1,16 @@
 package com.luxesuite.api.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gift_cards")
+@SQLDelete(sql = "UPDATE gift_cards SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -67,6 +71,9 @@ public class GiftCard {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+        @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

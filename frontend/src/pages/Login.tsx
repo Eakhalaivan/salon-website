@@ -24,7 +24,7 @@ export const Login = () => {
 
     try {
       const response = await axiosClient.post('/auth/login', { email, password });
-      const { role, branchId, staffId, customerId } = response.data;
+      const { role, branchId, staffId, customerId, firstName, lastName, email: userEmail } = response.data;
       
       const path = window.location.pathname;
       const isAdminLogin = path === '/admin/login' || path === '/staff/login';
@@ -44,7 +44,7 @@ export const Login = () => {
       // Tokens are now stored securely in HttpOnly cookies by the backend
 
       // Set auth state (zustand set() is synchronous — no setTimeout needed)
-      setAuth(role, branchId || null, { staffId, customerId });
+      setAuth(role, branchId || null, { staffId, customerId, firstName, lastName, email: userEmail });
 
       // Per-role routing — any unrecognised role goes to /unauthorized
       let destination: string;
@@ -154,15 +154,16 @@ export const Login = () => {
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center z-20"
+                  aria-label="Toggle password visibility"
                 >
                   <span className="material-symbols-outlined font-light text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
             </motion.div>
 
-            {/* <motion.div variants={itemVariants} className="flex justify-end pt-1">
-              <a href="#" className="font-label-sm text-xs text-primary hover:opacity-70 transition-opacity uppercase tracking-widest">Forgot Password?</a>
-            </motion.div> */}
+            <motion.div variants={itemVariants} className="flex justify-end pt-1">
+              <Link to="/forgot-password" className="font-label-sm text-xs text-primary hover:opacity-70 transition-opacity uppercase tracking-widest">Forgot Password?</Link>
+            </motion.div>
 
             <motion.div variants={itemVariants} className="pt-2">
               <Button 

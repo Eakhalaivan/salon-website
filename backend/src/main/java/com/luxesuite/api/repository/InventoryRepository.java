@@ -12,5 +12,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     java.util.List<Inventory> findByBranchId(Long branchId);
     
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"product", "branch"})
+    org.springframework.data.domain.Page<Inventory> findByBranchId(Long branchId, org.springframework.data.domain.Pageable pageable);
+    
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"product", "branch"})
     org.springframework.data.domain.Page<Inventory> findAll(org.springframework.data.domain.Pageable pageable);
 }

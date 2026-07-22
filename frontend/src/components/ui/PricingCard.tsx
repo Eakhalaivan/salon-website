@@ -1,8 +1,4 @@
 import React from 'react';
-import { Card } from './Card';
-import { PrimaryButton } from './PrimaryButton';
-import { Check, Crown } from 'lucide-react';
-import { Badge } from './Badge';
 
 interface PricingCardProps {
   title: string;
@@ -25,70 +21,73 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   buttonText = 'Choose Plan',
   isActive = false,
 }) => {
+  const isElite = title.toLowerCase().includes('elite');
+
+  if (isHighlighted) {
+    return (
+      <div className="bg-surface-container-lowest spa-card-shadow rounded-2xl p-[32px] border-2 border-primary-container relative md:scale-105 z-10 transition-transform hover:scale-[1.07] duration-300 h-full flex flex-col mt-4 md:mt-0">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-container px-6 py-1.5 rounded-full shadow-lg">
+          <span className="text-white text-[10px] font-bold tracking-widest uppercase">{isActive ? 'ACTIVE PLAN' : 'MOST POPULAR'}</span>
+        </div>
+        <div className="text-center mb-8 mt-4">
+          <span className="material-symbols-outlined text-primary-container text-5xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+          <h3 className="font-headline-md text-headline-md text-on-surface uppercase tracking-widest mb-2">{title}</h3>
+          <div className="flex items-center justify-center gap-1">
+            <span className="text-on-surface font-bold text-3xl">{price}</span>
+            <span className="text-outline font-label-md">{period}</span>
+          </div>
+        </div>
+        <div className="space-y-4 mb-10 flex-1">
+          {features.map((feature, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-xl">check</span>
+              <span className="text-on-surface font-label-md">{feature}</span>
+            </div>
+          ))}
+        </div>
+        <button 
+          onClick={onSelect}
+          className="w-full py-4 rounded-full bg-primary-container text-white font-label-md shadow-md hover:brightness-110 active:scale-95 transition-all mt-auto"
+        >
+          {buttonText}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative h-full flex mt-4">
-      {/* "MOST POPULAR" Ribbon for highlighted tier */}
-      {isHighlighted && (
-        <div className="absolute -top-4 right-6 z-10">
-          <Badge variant="dark" className="shadow-lg py-1.5 px-4 rounded-md">
-            Most Popular
-          </Badge>
+    <div className="bg-surface-container-lowest spa-card-shadow rounded-2xl p-[32px] border border-outline-variant/20 transition-transform hover:scale-[1.02] duration-300 h-full flex flex-col">
+      {isActive && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-container/20 px-6 py-1.5 rounded-full border border-primary-container/30 shadow-sm">
+          <span className="text-primary-container text-[10px] font-bold tracking-widest uppercase">ACTIVE PLAN</span>
         </div>
       )}
-      
-      <Card 
-        className={`flex flex-col w-full p-8 transition-shadow duration-300 ${
-          isHighlighted ? 'bg-ink-900 shadow-[0_8px_32px_rgba(33,29,23,0.12)] border-none' : 'bg-surface border border-ink-200/50 shadow-[0_4px_24px_rgba(33,29,23,0.04)] hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)]'
-        }`}
+      <div className="text-center mb-8">
+        {isElite ? (
+          <span className="material-symbols-outlined text-primary-fixed-dim text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
+        ) : (
+          <span className="material-symbols-outlined text-outline text-4xl mb-4">spa</span>
+        )}
+        <h3 className="font-headline-md text-headline-md text-on-surface uppercase tracking-widest mb-2">{title}</h3>
+        <div className="flex items-center justify-center gap-1">
+          <span className="text-on-surface font-bold text-2xl">{price}</span>
+          <span className="text-outline font-label-md">{period}</span>
+        </div>
+      </div>
+      <div className="space-y-4 mb-10 flex-1">
+        {features.map((feature, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary text-xl">check</span>
+            <span className="text-secondary font-label-md">{feature}</span>
+          </div>
+        ))}
+      </div>
+      <button 
+        onClick={onSelect}
+        className="w-full py-4 rounded-full border border-primary-container text-primary-container font-label-md hover:bg-primary-container/5 transition-colors mt-auto"
       >
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            {isHighlighted && <Crown className="w-5 h-5 text-[#D4AF37]" />}
-            <h3 className={`font-serif font-medium text-2xl ${isHighlighted ? 'text-white' : 'text-ink-900'}`}>
-              {title}
-            </h3>
-            {isActive && (
-              <Badge variant={isHighlighted ? 'dark' : 'gold'} className="ml-auto">Active</Badge>
-            )}
-          </div>
-          <div className="flex items-baseline gap-1 mt-4">
-            <span className={`font-sans text-[32px] font-bold ${isHighlighted ? 'text-[#D4AF37]' : 'text-ink-900'}`}>
-              {price}
-            </span>
-            <span className={`font-sans text-sm ${isHighlighted ? 'text-ink-300' : 'text-ink-400'}`}>
-              {period}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-grow mt-4">
-          <ul className="space-y-4">
-            {features.map((feature, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <Check className={`w-5 h-5 shrink-0 stroke-[1.5] ${isHighlighted ? 'text-[#D4AF37]' : 'text-[#D4AF37]'}`} />
-                <span className={`font-sans text-[15px] ${isHighlighted ? 'text-ink-200' : 'text-ink-700'}`}>
-                  {feature}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-10">
-          {isHighlighted ? (
-            <button 
-              onClick={onSelect}
-              className="w-full bg-[#D4AF37] text-white font-sans font-medium rounded-full px-6 py-3 transition-all duration-300 hover:bg-[#C9992E] hover:shadow-[0_4px_12px_rgba(212,175,55,0.3)]"
-            >
-              {buttonText}
-            </button>
-          ) : (
-            <PrimaryButton onClick={onSelect} className="w-full">
-              {buttonText}
-            </PrimaryButton>
-          )}
-        </div>
-      </Card>
+        {buttonText}
+      </button>
     </div>
   );
 };

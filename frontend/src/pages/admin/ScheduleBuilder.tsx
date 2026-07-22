@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useShiftsByBranchQuery, useCreateShiftMutation, usePublishShiftsMutation } from '../../hooks/api/useSchedule';
 import { useStaffQuery } from '../../hooks/api/useStaff';
 import { useBranchesQuery } from '../../hooks/api/useBranches';
@@ -8,6 +8,40 @@ import { Modal } from '../../components/ui/Modal';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const ShiftCard = React.memo(({ shift, index }: { shift: any; index: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: index * 0.05 }}
+  >
+    <div className="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between rounded-2xl hover:shadow-md transition-shadow group">
+      <div className="flex items-center space-x-6 mb-4 sm:mb-0">
+        <div className="h-14 w-14 rounded-full bg-primary-container text-primary flex items-center justify-center font-display-sm text-xl">
+          {shift.staffName?.charAt(0) || 'S'}
+        </div>
+        <div>
+          <h4 className="font-display-sm text-xl text-on-surface mb-1">{shift.staffName}</h4>
+          <div className="flex items-center text-sm text-on-surface-variant font-label-md">
+            <Calendar className="h-4 w-4 mr-1.5 text-primary/70" />
+            {new Date(shift.startTime).toLocaleDateString()}
+            <Clock className="h-4 w-4 ml-4 mr-1.5 text-primary/70" />
+            {new Date(shift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+            {new Date(shift.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col items-end">
+        <span className={`status-pill mb-2 ${
+          shift.status === 'PUBLISHED' ? 'success' : 'warning'
+        }`}>
+          {shift.status}
+        </span>
+        <span className="font-label-sm text-xs text-on-surface-variant uppercase tracking-widest">{shift.type}</span>
+      </div>
+    </div>
+  </motion.div>
+));
 
 export const ScheduleBuilder: React.FC = () => {
   const { role, branchId: userBranchId } = useAuthStore();
@@ -59,7 +93,7 @@ export const ScheduleBuilder: React.FC = () => {
     }
   };
 
-  const draftShifts = shifts.filter((s: any) => s.status === 'DRAFT');
+  const draftShifts = useMemo(() => shifts.filter((s: any) => s.status === 'DRAFT'), [shifts]);
 
   const handlePublish = async () => {
     if (draftShifts.length > 0) {
@@ -110,38 +144,7 @@ export const ScheduleBuilder: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {shifts.map((shift: any, i: number) => (
-                  <motion.div
-                    key={shift.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <div className="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between rounded-2xl hover:shadow-md transition-shadow group">
-                      <div className="flex items-center space-x-6 mb-4 sm:mb-0">
-                        <div className="h-14 w-14 rounded-full bg-primary-container text-primary flex items-center justify-center font-display-sm text-xl">
-                          {shift.staffName?.charAt(0) || 'S'}
-                        </div>
-                        <div>
-                          <h4 className="font-display-sm text-xl text-on-surface mb-1">{shift.staffName}</h4>
-                          <div className="flex items-center text-sm text-on-surface-variant font-label-md">
-                            <Calendar className="h-4 w-4 mr-1.5 text-primary/70" />
-                            {new Date(shift.startTime).toLocaleDateString()}
-                            <Clock className="h-4 w-4 ml-4 mr-1.5 text-primary/70" />
-                            {new Date(shift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                            {new Date(shift.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className={`status-pill mb-2 ${
-                          shift.status === 'PUBLISHED' ? 'success' : 'warning'
-                        }`}>
-                          {shift.status}
-                        </span>
-                        <span className="font-label-sm text-xs text-on-surface-variant uppercase tracking-widest">{shift.type}</span>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <ShiftCard key={shift.id} shift={shift} index={i} />
                 ))}
               </div>
             )}

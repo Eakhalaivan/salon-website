@@ -16,4 +16,7 @@ public class AuthResponse {
     private Long branchId;
     private Long staffId;
     private Long customerId;
+    private String firstName;
+    private String lastName;
+    private String email;
 }

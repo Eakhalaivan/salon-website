@@ -19,32 +19,32 @@ public class SalonServiceService {
 
     private final ServiceRepository serviceRepository;
 
-    @org.springframework.cache.annotation.Cacheable(value = "salon_services", key = "'all_' + #page + '_' + #size")
+    @org.springframework.cache.annotation.Cacheable(value = "services", key = "'all_' + #page + '_' + #size")
     public PageResponse<ServiceDto> getAllServices(int page, int size) {
         Page<Service> servicePage = serviceRepository.findAll(PageRequest.of(page, size));
         return PageResponse.of(servicePage.map(this::mapToDto));
     }
 
-    @org.springframework.cache.annotation.Cacheable(value = "salon_services", key = "'active_' + #page + '_' + #size")
+    @org.springframework.cache.annotation.Cacheable(value = "services", key = "'active_' + #page + '_' + #size")
     public PageResponse<ServiceDto> getActiveServices(int page, int size) {
         Page<Service> servicePage = serviceRepository.findByIsActiveTrue(PageRequest.of(page, size));
         return PageResponse.of(servicePage.map(this::mapToDto));
     }
 
-    @org.springframework.cache.annotation.Cacheable(value = "salon_services", key = "#id")
+    @org.springframework.cache.annotation.Cacheable(value = "services", key = "#id")
     public ServiceDto getServiceById(Long id) {
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
         return mapToDto(service);
     }
 
-    @org.springframework.cache.annotation.CacheEvict(value = "salon_services", allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = "services", allEntries = true)
     public ServiceDto createService(ServiceDto dto) {
         Service service = mapToEntity(dto);
         return mapToDto(serviceRepository.save(service));
     }
 
-    @org.springframework.cache.annotation.CacheEvict(value = "salon_services", allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = "services", allEntries = true)
     public ServiceDto updateService(Long id, ServiceDto dto) {
         Service existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
@@ -66,7 +66,7 @@ public class SalonServiceService {
         return mapToDto(serviceRepository.save(existing));
     }
 
-    @org.springframework.cache.annotation.CacheEvict(value = "salon_services", allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = "services", allEntries = true)
     public void deleteService(Long id) {
         Service existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));

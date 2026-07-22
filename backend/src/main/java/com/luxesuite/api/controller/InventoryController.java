@@ -29,12 +29,7 @@ public class InventoryController {
     ) {
         if (securityUtils.hasRole("MANAGER")) {
             Long branchId = securityUtils.getStaffBranchId();
-            List<InventoryDto> list = inventoryService.getInventoryByBranch(branchId);
-            // Quick workaround to page list. In real prod, create a paged getInventoryByBranch query.
-            int start = Math.min((int)PageRequest.of(page, size).getOffset(), list.size());
-            int end = Math.min((start + size), list.size());
-            org.springframework.data.domain.Page<InventoryDto> paged = new PageImpl<>(list.subList(start, end), PageRequest.of(page, size), list.size());
-            return ResponseEntity.ok(com.luxesuite.api.dto.PageResponse.of(paged));
+            return ResponseEntity.ok(inventoryService.getInventoryByBranch(branchId, page, size));
         }
         return ResponseEntity.ok(inventoryService.getAllInventory(page, size));
     }

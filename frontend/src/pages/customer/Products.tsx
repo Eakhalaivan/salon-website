@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { useRetailProductsQuery } from '../../hooks/api/useProducts';
-import { GoldRibbon } from '../../components/ui/GoldRibbon';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { Card } from '../../components/ui/Card';
-import { AnimatedSection, AnimatedItem } from '../../components/ui/AnimatedSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../store/useCartStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
-import { Search, Heart, ShoppingCart } from 'lucide-react';
 import clsx from 'clsx';
 
 export const Products = () => {
@@ -51,77 +47,84 @@ export const Products = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-gold-500 text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-danger-bg text-danger-text p-6 rounded-2xl border border-danger-bg/50 font-sans text-center max-w-2xl mx-auto mt-12">
+      <div className="bg-error-container text-on-error-container p-6 rounded-2xl font-body-md text-center max-w-2xl mx-auto mt-12">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 animate-fade-in pb-12 relative">
-      <GoldRibbon position="top-right" />
-      
-      <header className="flex flex-col items-center text-center max-w-5xl mx-auto mb-10 relative z-10 pt-4">
-        <h2 className="font-serif text-[40px] leading-[48px] mb-2 text-ink-900">
-          Our Collection
-        </h2>
-        <p className="font-sans text-ink-400 text-[15px] mb-8">
-          Premium retail products for your at-home rituals.
-        </p>
+    <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative overflow-hidden py-12 animate-fade-in">
+      <div className="max-w-container-max-width mx-auto relative z-10">
         
-        {/* Search and Icons Row */}
-        <div className="w-full flex items-center justify-between gap-6 mb-8">
-           <div className="flex-1 max-w-md ml-auto relative">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 w-5 h-5 stroke-[1.5]" />
-             <input 
-               type="text" 
-               placeholder="Search our collection..." 
-               value={search}
-               onChange={(e) => setSearch(e.target.value)}
-               className="w-full pl-11 pr-4 py-3 rounded-full border border-ink-200/50 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none text-sm bg-surface text-ink-900 shadow-[0_2px_8px_rgba(33,29,23,0.04)] placeholder:text-ink-400"
-             />
-           </div>
-           
-           <div className="flex items-center gap-4 mr-auto">
-             <button className="p-2 text-ink-400 hover:text-ink-900 transition-colors">
-               <Heart className="w-6 h-6 stroke-[1.5]" />
-             </button>
-             <button className="p-2 text-ink-400 hover:text-ink-900 transition-colors relative">
-               <ShoppingCart className="w-6 h-6 stroke-[1.5]" />
-               {cartItemCount > 0 && (
-                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#D4AF37] rounded-full border-2 border-page"></span>
-               )}
-             </button>
-           </div>
-        </div>
+        {/* Header Section */}
+        <section className="mb-stack-lg flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <nav className="flex items-center gap-2 text-label-sm text-secondary mb-4">
+              <span>Customer</span>
+              <span className="material-symbols-outlined text-xs">chevron_right</span>
+              <span className="text-primary font-bold">Products</span>
+            </nav>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">Our Collection</h2>
+            <p className="text-secondary max-w-lg font-body-md">
+              Premium retail products for your at-home rituals. Discover the essence of tranquility crafted for your daily self-care.
+            </p>
+          </div>
 
-        {/* Temporary static categories since we don't have them in the endpoint yet */}
-        <div className="flex flex-wrap justify-center gap-3 w-full max-w-3xl">
-            {['All', 'Skincare', 'Haircare', 'Bodycare', 'Wellness', 'Accessories'].map((cat) => (
-              <button 
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={clsx(
-                  "px-6 py-2.5 rounded-full font-sans text-[13px] font-semibold transition-all duration-300 border",
-                  activeCategory === cat 
-                    ? "bg-[#D4AF37] text-white border-[#D4AF37] shadow-[0_4px_12px_rgba(212,175,55,0.3)]" 
-                    : "bg-surface text-ink-900 border-ink-200/50 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-                )}
-              >
-                {cat}
+          {/* Search & Filters Container */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <div className="relative w-full sm:w-80">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+              <input 
+                type="text" 
+                placeholder="Search our collection..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-full focus:ring-1 focus:ring-primary focus:border-primary outline-none text-body-md transition-all"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-lowest border border-outline-variant/30 text-secondary hover:text-primary hover:border-primary transition-all">
+                <span className="material-symbols-outlined text-[20px]">favorite</span>
               </button>
-            ))}
-        </div>
-      </header>
+              <button className="relative w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-lowest border border-outline-variant/30 text-secondary hover:text-primary hover:border-primary transition-all">
+                <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </section>
 
-      <AnimatedSection stagger className="relative z-10 max-w-6xl mx-auto">
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-3 mb-stack-lg">
+          {['All', 'Skincare', 'Haircare', 'Bodycare', 'Wellness', 'Accessories'].map((cat) => (
+            <button 
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={clsx(
+                "px-6 py-2 rounded-full font-label-md transition-all active:scale-95",
+                activeCategory === cat 
+                  ? "bg-primary text-on-primary shadow-lg shadow-primary/20" 
+                  : "bg-surface-container-lowest border border-outline-variant/30 text-secondary hover:border-primary hover:text-primary"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Product Grid */}
         {filteredProducts.length === 0 ? (
           <EmptyState 
             icon="inventory_2" 
@@ -129,86 +132,117 @@ export const Products = () => {
             description="We couldn't find any products matching your search criteria."
           />
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product) => {
                 const inWishlist = wishlist.includes(product.id);
-                
                 return (
-                <AnimatedItem key={product.id}>
-                  <Card className="h-full flex flex-col p-4 group border-none shadow-[0_4px_24px_rgba(33,29,23,0.04)] hover:shadow-[0_8px_32px_rgba(33,29,23,0.08)] bg-surface rounded-3xl" hoverable>
-                    
-                    {/* Image Area */}
-                    <div className="h-64 relative overflow-hidden rounded-2xl bg-white mb-6">
-                      {/* Using a clear product-like background */}
-                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
-                      
-                      {/* Top Action Bar (Wishlist Heart) */}
+                <motion.div 
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                  className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 hover:shadow-[0_12px_40px_rgba(119,90,25,0.12)] transition-all duration-300 flex flex-col"
+                >
+                  {/* Image Area */}
+                  <div className="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
+                    <img 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop" 
+                      alt={product.name} 
+                      loading="lazy"
+                    />
+                    <button 
+                      className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100"
+                      onClick={(e) => toggleWishlist(product.id, e)}
+                    >
+                      <span className={clsx("material-symbols-outlined text-[20px]", inWishlist ? "text-primary" : "text-secondary hover:text-primary")} style={inWishlist ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                        favorite
+                      </span>
+                    </button>
+                  </div>
+                  
+                  {/* Product Details */}
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="mb-4 flex-1">
+                      <h3 className="font-headline-md text-on-surface text-[18px] mb-1 group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+                      <p className="text-secondary text-[13px] font-label-sm uppercase tracking-wider">{activeCategory === 'All' ? 'Wellness' : activeCategory}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="font-headline-md text-primary text-[20px] font-semibold">₹{product.price.toFixed(2)}</span>
                       <button 
-                        className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-20 bg-white shadow-sm border border-ink-200/50 ${
-                          inWishlist 
-                            ? 'text-[#D4AF37]' 
-                            : 'text-ink-400 hover:text-[#D4AF37]'
-                        }`}
-                        onClick={(e) => toggleWishlist(product.id, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addItem(product);
+                        }}
+                        className="flex items-center gap-2 font-label-md text-primary px-4 py-2 border border-primary/20 rounded-lg hover:bg-primary hover:text-on-primary transition-all active:scale-95"
                       >
-                        <Heart className={`w-4 h-4 stroke-[1.5] ${inWishlist ? 'fill-current' : ''}`} />
+                        <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                        Add
                       </button>
                     </div>
-                    
-                    <div className="flex flex-col flex-grow items-center text-center px-2">
-                      <h3 className="font-serif text-lg text-ink-900 leading-tight mb-2">{product.name}</h3>
-                      <span className="font-sans text-[15px] font-bold text-[#D4AF37] mb-6">₹{product.price.toFixed(2)}</span>
-                      
-                      <div className="mt-auto w-full pt-4 border-t border-ink-200/50">
-                        <button 
-                          className="w-full text-center text-[#D4AF37] font-sans text-[13px] font-semibold transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addItem(product);
-                          }}
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
-                    </div>
-                  </Card>
-                </AnimatedItem>
+                  </div>
+                </motion.div>
               )})}
             </AnimatePresence>
           </motion.div>
         )}
-        
-        {!loading && !error && filteredProducts.length > 0 && (
-          <div className="mt-12 p-4 border border-ink-200/50 bg-surface/50 backdrop-blur-md flex justify-between items-center rounded-2xl max-w-6xl mx-auto">
+
+        {/* Pagination Section */}
+        {pageData && pageData.totalPages > 1 && (
+          <div className="mt-stack-lg p-4 border border-outline-variant/30 bg-surface-container-lowest flex justify-between items-center rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
+              className={`px-6 py-2 rounded-full font-label-md transition-all border ${
                 page === 0 
-                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
-                  : 'border-[#D4AF37] text-[#D4AF37] hover:bg-gold-50'
+                  ? 'opacity-50 cursor-not-allowed border-outline text-outline' 
+                  : 'border-primary text-primary hover:bg-primary/5'
               }`}
               disabled={page === 0} 
               onClick={() => setPage(p => Math.max(0, p - 1))}
             >
               PREVIOUS
             </button>
-            <span className="text-ink-400 font-sans text-sm font-semibold tracking-wider uppercase">
-              Page {pageData ? pageData.pageNo + 1 : 1} of {pageData ? pageData.totalPages : 1}
+            <span className="text-secondary font-label-md tracking-wider uppercase">
+              Page {pageData.pageNo + 1} of {pageData.totalPages}
             </span>
             <button 
-              className={`px-6 py-2 rounded-full font-sans text-sm font-medium tracking-wider transition-all border ${
-                pageData?.last 
-                  ? 'opacity-50 cursor-not-allowed border-ink-200 text-ink-400' 
-                  : 'border-[#D4AF37] text-[#D4AF37] hover:bg-gold-50'
+              className={`px-6 py-2 rounded-full font-label-md transition-all border ${
+                pageData.last 
+                  ? 'opacity-50 cursor-not-allowed border-outline text-outline' 
+                  : 'border-primary text-primary hover:bg-primary/5'
               }`}
-              disabled={pageData ? pageData.last : true} 
+              disabled={pageData.last} 
               onClick={() => setPage(p => p + 1)}
             >
               NEXT
             </button>
           </div>
         )}
-      </AnimatedSection>
-    </div>
+
+        {/* Footer Banner Section */}
+        <section className="mt-stack-lg bg-primary-container/5 rounded-2xl p-stack-lg flex flex-col md:flex-row items-center gap-8 overflow-hidden relative border border-primary/5">
+          <div className="flex-1 z-10">
+            <p className="text-primary font-bold tracking-widest text-[12px] uppercase mb-3">Membership Benefit</p>
+            <h3 className="font-headline-lg text-headline-lg text-on-surface mb-4">Elite Members get 20% OFF all retail.</h3>
+            <p className="text-secondary font-body-md mb-6">Upgrade your lifestyle today and enjoy exclusive discounts on our entire boutique collection, priority booking, and complimentary upgrades.</p>
+            <button className="bg-primary text-on-primary px-8 py-3 rounded-full font-label-md hover:shadow-lg shadow-primary/20 transition-all active:scale-95">View Membership Plans</button>
+          </div>
+          <div className="w-full md:w-1/3 aspect-video md:aspect-square relative rounded-xl overflow-hidden shadow-xl z-10">
+            <img 
+              className="w-full h-full object-cover" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA76y9RUMRQr5UcoH7qlEaXgY4VyIvSsmOpGNPz5ajpN1WlgfM1-ts37v6rNjYRGhEy6Q_MQ89YF_FVYDBvE5OduLbxlMzUgOn8-N9TGVi2HOocukiHJnScZ1SdmwMA3qD3r7W-zL7D1NU7GGDR1LK72KegwE-MMmuao7yKmbSsuuMtpBWrLGPZLDO0ykWXtmyuABoUajfamRAK6DSsVX2pFiILKVgWT106A2BfWznGXbZSSG3syf6EGzvuUx-W-gQcgUydLmdy99KZ" 
+              alt="Retail Boutique" 
+            />
+          </div>
+          
+          {/* Abstract Design Elements */}
+          <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-primary/5 blur-3xl"></div>
+          <div className="absolute -left-10 top-0 w-48 h-48 rounded-full bg-primary/10 blur-3xl"></div>
+        </section>
+
+      </div>
+    </main>
   );
 };

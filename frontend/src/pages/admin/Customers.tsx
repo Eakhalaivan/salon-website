@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCustomersQuery, useCreateCustomer } from '../../hooks/api/useCustomers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
 import { Input } from '../../components/ui/Input';
@@ -6,6 +6,37 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Modal } from '../../components/ui/Modal';
+
+const CustomerRow = React.memo(({ customer: c }: { customer: any }) => (
+  <TableRow className="group transition-all duration-300 hover:bg-surface-container/50 border-outline-variant/10">
+    <TableCell className="py-6">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-display-sm text-xl border border-primary/20 shrink-0 group-hover:scale-110 transition-transform">
+          {c.firstName.charAt(0)}
+        </div>
+        <div className="font-display-sm text-lg text-on-surface">{c.firstName} {c.lastName}</div>
+      </div>
+    </TableCell>
+    <TableCell className="py-6">
+      <div className="text-on-surface font-body-md">{c.email || '—'}</div>
+      <div className="text-on-surface-variant font-label-sm mt-1 flex items-center gap-1 opacity-70">
+        <span className="material-symbols-outlined text-[14px]">call</span>
+        {c.phone || '—'}
+      </div>
+    </TableCell>
+    <TableCell className="py-6">
+      <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-label-sm uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+        {c.totalPoints} pts
+      </span>
+    </TableCell>
+    <TableCell className="text-right py-6">
+      <button className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-end w-full group/btn">
+        <span className="font-label-md mr-2 opacity-0 group-hover/btn:opacity-100 transition-opacity">Profile</span>
+        <span className="material-symbols-outlined">chevron_right</span>
+      </button>
+    </TableCell>
+  </TableRow>
+));
 
 export const Customers = () => {
   const [search, setSearch] = useState('');
@@ -112,34 +143,7 @@ export const Customers = () => {
                   </TableRow>
                 ) : (
                   customers.map((c) => (
-                    <TableRow key={c.id} className="group transition-all duration-300 hover:bg-surface-container/50 border-outline-variant/10">
-                      <TableCell className="py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-display-sm text-xl border border-primary/20 shrink-0 group-hover:scale-110 transition-transform">
-                            {c.firstName.charAt(0)}
-                          </div>
-                          <div className="font-display-sm text-lg text-on-surface">{c.firstName} {c.lastName}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-6">
-                        <div className="text-on-surface font-body-md">{c.email || '—'}</div>
-                        <div className="text-on-surface-variant font-label-sm mt-1 flex items-center gap-1 opacity-70">
-                          <span className="material-symbols-outlined text-[14px]">call</span>
-                          {c.phone || '—'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-6">
-                        <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-label-sm uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
-                          {c.totalPoints} pts
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right py-6">
-                        <button className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-end w-full group/btn">
-                          <span className="font-label-md mr-2 opacity-0 group-hover/btn:opacity-100 transition-opacity">Profile</span>
-                          <span className="material-symbols-outlined">chevron_right</span>
-                        </button>
-                      </TableCell>
-                    </TableRow>
+                    <CustomerRow key={c.id} customer={c} />
                   ))
                 )}
               </TableBody>

@@ -79,8 +79,8 @@ export const Register = () => {
       };
       
       const response = await axiosClient.post('/auth/register', payload);
-      const { role, branchId, staffId, customerId } = response.data;
-      setAuth(role, branchId || null, { staffId, customerId });
+      const { role, branchId, staffId, customerId, firstName, lastName, email: userEmail } = response.data;
+      setAuth(role, branchId || null, { staffId, customerId, firstName, lastName, email: userEmail });
       
       navigate('/customer/dashboard');
     } catch (err: any) {

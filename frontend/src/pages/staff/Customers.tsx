@@ -76,7 +76,7 @@ export const StaffCustomers = () => {
                       <p className="text-body-sm text-on-surface-variant">{customer.phone}</p>
                     </td>
                     <td className="p-4">
-                      <span className="font-display-sm text-primary">${customer.loyaltyPoints || 0}</span>
+                      <span className="font-display-sm text-primary">₹{customer.loyaltyPoints || 0}</span>
                     </td>
                     <td className="p-4 text-right">
                       <button className="px-4 py-2 border border-outline text-on-surface rounded-full font-label-sm hover:bg-surface-container transition-colors">

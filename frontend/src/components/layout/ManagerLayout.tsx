@@ -41,10 +41,10 @@ export const ManagerLayout = () => {
       <div className="mb-8 cursor-pointer flex items-center justify-between" onClick={() => navigate('/')}>
         <div>
           <h1 className="font-display-md text-2xl text-primary tracking-wide">LUMINA SPA</h1>
-          <p className="font-label-sm text-xs text-white/50 mt-1 uppercase tracking-widest">Manager Portal</p>
+          <p className="font-label-sm text-xs text-on-surface-variant/80 mt-1 uppercase tracking-widest">Manager Portal</p>
         </div>
         <button 
-          className="lg:hidden text-white/50 p-1 -mr-2 rounded-full hover:bg-white/10 transition-colors"
+          className="lg:hidden text-on-surface-variant p-1 -mr-2 rounded-full hover:bg-on-surface/10 transition-colors"
           onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(false); }}
         >
           <span className="material-symbols-outlined font-light">close</span>
@@ -60,7 +60,7 @@ export const ManagerLayout = () => {
               "flex items-center gap-4 px-4 py-3.5 rounded-xl font-label-md text-sm transition-all duration-300 relative group",
               isActive 
                 ? "bg-primary/10 text-primary" 
-                : "text-white/60 hover:bg-white/5 hover:text-white"
+                : "text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface"
             )}
           >
             {({ isActive }) => (

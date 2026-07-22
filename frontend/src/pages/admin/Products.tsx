@@ -1,5 +1,5 @@
 import { useAdminProductsQuery, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../../hooks/api/useProducts';
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAiInventoryAlerts } from '../../hooks/api/useAi';
 import { useBranchStore } from '../../store/useBranchStore';
 import { Button } from '../../components/ui/Button';
@@ -8,6 +8,51 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Edit2, Trash2 } from 'lucide-react';
 import type { ProductDto } from '../../api/types';
+
+const ProductRow = React.memo(({ 
+  p, 
+  handleOpenModal, 
+  handleDelete 
+}: { 
+  p: any; 
+  handleOpenModal: (p: any) => void; 
+  handleDelete: (p: any) => void; 
+}) => (
+  <tr className="border-b border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+    <td className="p-4 py-5">
+      <div className="font-label-lg text-on-surface">{p.name}</div>
+      {p.sku && <div className="font-body-sm text-on-surface-variant text-xs mt-1">SKU: {p.sku}</div>}
+    </td>
+    <td className="p-4 text-on-surface-variant capitalize">{p.type?.replace('_', ' ').toLowerCase() || 'N/A'}</td>
+    <td className="p-4 text-on-surface font-label-md">₹{p.price?.toFixed(2)}</td>
+    <td className="p-4">
+      <span className={`inline-block px-3 py-1 rounded-full text-xs font-label-sm ${
+        p.stockQuantity > 20 ? 'bg-green-500/20 text-green-400' :
+        p.stockQuantity > 0 ? 'bg-orange-500/20 text-orange-400' :
+        'bg-red-500/20 text-red-400'
+      }`}>
+        {p.stockQuantity ?? 0} in stock
+      </span>
+    </td>
+    <td className="p-4">
+      <span className={`inline-block w-2 h-2 rounded-full ${p.isActive ? 'bg-green-500' : 'bg-red-500'}`}></span>
+    </td>
+    <td className="p-4 text-right">
+      <button 
+        onClick={() => handleOpenModal(p)}
+        className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
+      >
+        <Edit2 size={18} />
+      </button>
+      <button 
+        onClick={() => handleDelete(p)}
+        className="p-2 text-error hover:bg-error/10 rounded-full transition-colors ml-2"
+      >
+        <Trash2 size={18} />
+      </button>
+    </td>
+  </tr>
+));
 
 export const AdminProducts = () => {
   const { selectedBranchId } = useBranchStore();
@@ -166,40 +211,12 @@ export const AdminProducts = () => {
             </thead>
             <tbody>
               {filteredProducts.map((p: any) => (
-                <tr key={p.id} className="border-b border-outline-variant/30 hover:bg-surface-container-low transition-colors">
-                  <td className="p-4 py-5">
-                    <div className="font-label-lg text-on-surface">{p.name}</div>
-                    {p.sku && <div className="font-body-sm text-on-surface-variant text-xs mt-1">SKU: {p.sku}</div>}
-                  </td>
-                  <td className="p-4 text-on-surface-variant capitalize">{p.type?.replace('_', ' ').toLowerCase() || 'N/A'}</td>
-                  <td className="p-4 text-on-surface font-label-md">₹{p.price?.toFixed(2)}</td>
-                  <td className="p-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-label-sm ${
-                      p.stockQuantity > 20 ? 'bg-green-500/20 text-green-400' :
-                      p.stockQuantity > 0 ? 'bg-orange-500/20 text-orange-400' :
-                      'bg-red-500/20 text-red-400'
-                    }`}>
-                      {p.stockQuantity ?? 0} in stock
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-block w-2 h-2 rounded-full ${p.isActive ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button 
-                      onClick={() => handleOpenModal(p)}
-                      className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button 
-                      onClick={() => { setProductToDelete(p); setIsDeleteDialogOpen(true); }}
-                      className="p-2 text-error hover:bg-error/10 rounded-full transition-colors ml-2"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
+                <ProductRow 
+                  key={p.id} 
+                  p={p} 
+                  handleOpenModal={handleOpenModal} 
+                  handleDelete={(prod) => { setProductToDelete(prod); setIsDeleteDialogOpen(true); }}
+                />
               ))}
             </tbody>
           </table>

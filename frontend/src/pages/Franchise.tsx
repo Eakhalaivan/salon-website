@@ -133,10 +133,10 @@ export default function Franchise() {
                       required
                     >
                       <option value="" disabled>Select Available Capital Range</option>
-                      <option value="under50k">Under $50,000</option>
-                      <option value="50k-100k">$50,000 - $100,000</option>
-                      <option value="100k-250k">$100,000 - $250,000</option>
-                      <option value="over250k">Over $250,000</option>
+                      <option value="under50k">Under ₹50,000</option>
+                      <option value="50k-100k">₹50,000 - ₹100,000</option>
+                      <option value="100k-250k">₹100,000 - ₹250,000</option>
+                      <option value="over250k">Over ₹250,000</option>
                     </select>
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
                       <ChevronDownIcon />

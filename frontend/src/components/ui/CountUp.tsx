@@ -13,7 +13,7 @@ export const CountUp = ({ value, duration = 1.5, format = 'number', className = 
   
   const displayValue = useTransform(spring, (current) => {
     if (format === 'currency') {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(current);
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(current);
     }
     if (format === 'percentage') {
       return `${current.toFixed(1)}%`;

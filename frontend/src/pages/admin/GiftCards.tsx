@@ -4,6 +4,7 @@ import { useCustomersQuery } from '../../hooks/api/useCustomers';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { Gift, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -81,8 +82,12 @@ export default function AdminGiftCards() {
                   </tr>
                 ) : historyData?.content?.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
-                      No gift cards found.
+                    <td colSpan={6} className="px-6 py-12">
+                      <EmptyState 
+                        icon="redeem" 
+                        title="No gift cards found" 
+                        description="There are currently no gift cards to display." 
+                      />
                     </td>
                   </tr>
                 ) : (

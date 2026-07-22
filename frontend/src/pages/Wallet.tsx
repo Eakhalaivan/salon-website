@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion, useSpring, useReducedMotion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import axiosClient from '../api/axiosClient';
-import { Input } from '../components/ui/Input';
 import { useToast } from '../components/ui/use-toast';
-import { PlusCircle, AlertCircle, Landmark, X } from 'lucide-react';
 import { StripeWalletTopup } from '../components/payments/StripeWalletTopup';
-import { GoldRibbon } from '../components/ui/GoldRibbon';
 import { PremiumWalletCard } from '../components/ui/PremiumWalletCard';
-import { Card } from '../components/ui/Card';
-import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { Landmark, X, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
 
 interface WalletDto {
@@ -18,40 +14,10 @@ interface WalletDto {
   balance: number;
 }
 
-function AnimatedBalance({ value, onComplete }: { value: number, onComplete?: () => void }) {
-  const shouldReduceMotion = useReducedMotion();
-  const spring = useSpring(value, { bounce: 0, duration: shouldReduceMotion ? 0 : 800 });
-  const [display, setDisplay] = useState('₹ 0.00');
-
-  useEffect(() => {
-    spring.set(value);
-  }, [spring, value]);
-
-  useEffect(() => {
-    return spring.on('change', (latest) => {
-      setDisplay(
-        Intl.NumberFormat('en-IN', {
-          style: 'currency',
-          currency: 'INR',
-          minimumFractionDigits: 2,
-        }).format(latest).replace('₹', '₹ ')
-      );
-      if (latest === value && onComplete) {
-        onComplete();
-      }
-    });
-  }, [spring, value, onComplete]);
-
-  return <span>{display}</span>;
-}
-
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
-
 
 export default function Wallet() {
   const [topupAmount, setTopupAmount] = useState('');
-  
-  // Razorpay Mock state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   const { toast } = useToast();
@@ -67,8 +33,7 @@ export default function Wallet() {
 
   const currentBalance = wallet?.balance || 0;
 
-  const initiatePayment = (e: React.FormEvent) => {
-    e.preventDefault();
+  const initiatePayment = () => {
     if (!topupAmount || Number(topupAmount) <= 0) {
       toast({ title: 'Invalid amount', variant: 'destructive' });
       return;
@@ -88,117 +53,180 @@ export default function Wallet() {
     toast({ title: 'Payment failed', description: backendMessage, variant: 'destructive' });
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.15 } },
-  } satisfies Variants;
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.6 } },
-  } satisfies Variants;
-
   const isAmountValid = topupAmount === '' || Number(topupAmount) > 0;
 
   return (
-    <div className="container mx-auto p-6 space-y-8 relative pb-12">
-      <GoldRibbon position="top-right" />
-      
-      <header className="flex flex-col items-center text-center max-w-2xl mx-auto mb-10 relative z-10 pt-4">
-        <h2 className="font-serif text-[40px] leading-[48px] mb-2 text-ink-900">
-          My Wallet
-        </h2>
-        <p className="font-sans text-ink-400 text-[15px] mb-8">
-          Manage your elite premier balance and reload funds seamlessly.
-        </p>
-      </header>
-      
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start"
-      >
-        {/* Elite Premium 3D Card */}
-        <motion.div variants={itemVariants} className="flex justify-center lg:justify-start lg:mt-8">
-          <PremiumWalletCard
-            balance={<AnimatedBalance value={currentBalance} />}
-            isLoading={isLoading}
-          />
-        </motion.div>
+    <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative overflow-hidden py-12 animate-fade-in">
+      <div className="mb-stack-lg relative z-10 max-w-container-max-width mx-auto">
+        <nav className="flex items-center gap-2 text-label-sm text-secondary mb-4">
+          <span>Customer</span>
+          <span className="material-symbols-outlined text-xs">chevron_right</span>
+          <span className="text-primary font-bold">Wallet</span>
+        </nav>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">My Wallet</h2>
+      </div>
+
+      {/* Bento Grid Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start mb-stack-lg max-w-container-max-width mx-auto relative z-10">
         
-        {/* Add Funds Card */}
-        <motion.div variants={itemVariants} className="h-full">
-          <Card className="h-full p-8 flex flex-col justify-center border-none shadow-sm">
-            <div className="pb-6 border-b border-ink-200/50 mb-8">
-              <h3 className="flex items-center gap-3 text-gold-500 font-serif text-3xl">
-                <PlusCircle className="w-8 h-8" />
-                Add Funds
-              </h3>
-            </div>
-            <div className="space-y-10">
-              
-              <div className="space-y-4">
-                <label className="text-[11px] font-sans font-semibold tracking-widest uppercase text-ink-400">Quick Select Amount</label>
-                <div className="flex flex-wrap gap-3">
-                  {QUICK_AMOUNTS.map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setTopupAmount(amt.toString())}
-                      className={clsx(
-                        "px-6 py-2.5 rounded-full font-sans text-[13px] font-semibold transition-all duration-300 border",
-                        topupAmount === amt.toString() 
-                          ? "bg-[#D4AF37] text-white border-[#D4AF37] shadow-[0_4px_12px_rgba(212,175,55,0.3)]" 
-                          : "bg-surface text-ink-900 border-ink-200/50 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-                      )}
-                    >
-                      ₹{amt.toLocaleString('en-IN')}
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Wallet Card */}
+        <div className="lg:col-span-7 xl:col-span-8 h-full flex flex-col justify-center">
+          <PremiumWalletCard 
+            balance={currentBalance} 
+            isLoading={isLoading} 
+            walletId={wallet?.id.toString() || '0000'} 
+          />
+        </div>
 
-              <form onSubmit={initiatePayment} className="space-y-8">
-                <div className="space-y-4">
-                  <label className="text-[11px] font-sans font-semibold tracking-widest uppercase text-ink-400">Custom Amount (₹)</label>
-                  <Input 
-                    type="number" 
-                    min="1"
-                    value={topupAmount} 
-                    onChange={e => setTopupAmount(e.target.value)}
-                    placeholder="Enter amount to add" 
-                    className="h-14 text-lg bg-surface border-ink-200/50 text-ink-900 focus-visible:border-[#D4AF37] focus-visible:ring-[#D4AF37] rounded-xl"
-                  />
-                  <AnimatePresence>
-                    {!isAmountValid && topupAmount !== '' && (
-                      <motion.div 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="flex items-center gap-1.5 text-danger-text text-sm mt-2"
-                      >
-                        <AlertCircle className="w-4 h-4" />
-                        <span>Please enter a valid amount greater than 0.</span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                
-                <PrimaryButton 
-                  type="submit" 
-                  disabled={!isAmountValid || !topupAmount} 
-                  className="w-full h-14 disabled:opacity-50 disabled:cursor-not-allowed text-[15px] font-semibold"
+        {/* Add Funds Section */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-surface-container-low rounded-3xl p-8 shadow-[0_4px_24px_rgba(33,29,23,0.04)] border border-outline-variant/20 h-full flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-primary-container/10 rounded-lg text-primary">
+              <span className="material-symbols-outlined">add_card</span>
+            </div>
+            <h3 className="font-headline-md text-headline-md">Add Funds</h3>
+          </div>
+          
+          <div className="mb-6 flex-1">
+            <p className="font-label-md text-secondary mb-4">Quick Select</p>
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {QUICK_AMOUNTS.map((amt) => (
+                <button
+                  key={amt}
+                  onClick={() => setTopupAmount(amt.toString())}
+                  className={clsx(
+                    "py-2.5 px-4 rounded-xl font-label-md transition-all duration-200 border",
+                    topupAmount === amt.toString()
+                      ? "border-primary bg-primary-container/10 text-primary font-bold"
+                      : "border-outline-variant/30 text-on-surface hover:border-primary hover:text-primary"
+                  )}
                 >
-                  Proceed to Pay
-                </PrimaryButton>
-              </form>
+                  ₹{amt.toLocaleString('en-IN')}
+                </button>
+              ))}
             </div>
-          </Card>
-        </motion.div>
-      </motion.div>
 
-      {/* Mock Razorpay Payment Modal Overlay */}
+            <div className="mb-8 relative">
+              <label className="font-label-md text-secondary block mb-2" htmlFor="custom_amount">Custom Amount (₹)</label>
+              <input 
+                id="custom_amount"
+                type="number"
+                min="1"
+                value={topupAmount}
+                onChange={(e) => setTopupAmount(e.target.value)}
+                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-on-surface transition-all font-body-md"
+                placeholder="Enter amount to add"
+              />
+              {!isAmountValid && topupAmount !== '' && (
+                <div className="flex items-center gap-1.5 text-error text-xs mt-2 absolute -bottom-6">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Enter a valid amount.</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button 
+            onClick={initiatePayment}
+            disabled={!isAmountValid || !topupAmount}
+            className="w-full bg-primary-container py-4 rounded-xl text-on-primary-container font-bold font-label-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
+          >
+            Proceed To Pay
+          </button>
+        </div>
+      </div>
+
+      {/* Recent Transactions Table */}
+      <section className="bg-surface-container-low rounded-3xl p-8 shadow-[0_4px_24px_rgba(33,29,23,0.04)] border border-outline-variant/20 max-w-container-max-width mx-auto relative z-10">
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="font-headline-md text-headline-md flex items-center gap-3">
+            Recent Transactions
+          </h3>
+          <button className="text-primary font-label-md flex items-center gap-1 hover:underline">
+            View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-outline-variant/30">
+                <th className="py-4 font-label-md text-secondary uppercase tracking-widest text-xs">Description</th>
+                <th className="py-4 font-label-md text-secondary uppercase tracking-widest text-xs">Reference ID</th>
+                <th className="py-4 font-label-md text-secondary uppercase tracking-widest text-xs">Date</th>
+                <th className="py-4 font-label-md text-secondary uppercase tracking-widest text-xs text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/20">
+              <tr className="hover:bg-surface-container-lowest transition-colors group">
+                <td className="py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                      <span className="material-symbols-outlined">arrow_downward</span>
+                    </div>
+                    <div>
+                      <p className="font-body-md font-semibold text-on-surface">Added Funds</p>
+                      <p className="text-xs text-secondary">Wallet Recharge</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-5 text-sm text-secondary font-mono">TXN-49210-992</td>
+                <td className="py-5 text-sm text-on-surface-variant">Today, 11:45 AM</td>
+                <td className="py-5 text-right font-bold text-green-600">+ ₹1,000.00</td>
+              </tr>
+              <tr className="hover:bg-surface-container-lowest transition-colors group">
+                <td className="py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                      <span className="material-symbols-outlined">spa</span>
+                    </div>
+                    <div>
+                      <p className="font-body-md font-semibold text-on-surface">Payment for Facial</p>
+                      <p className="text-xs text-secondary">Lumina Glow Ritual</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-5 text-sm text-secondary font-mono">TXN-48901-884</td>
+                <td className="py-5 text-sm text-on-surface-variant">2 May 2024</td>
+                <td className="py-5 text-right font-bold text-on-surface">- ₹145.00</td>
+              </tr>
+              <tr className="hover:bg-surface-container-lowest transition-colors group">
+                <td className="py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                      <span className="material-symbols-outlined">arrow_downward</span>
+                    </div>
+                    <div>
+                      <p className="font-body-md font-semibold text-on-surface">Added Funds</p>
+                      <p className="text-xs text-secondary">Promotional Bonus</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-5 text-sm text-secondary font-mono">TXN-48822-105</td>
+                <td className="py-5 text-sm text-on-surface-variant">28 Apr 2024</td>
+                <td className="py-5 text-right font-bold text-green-600">+ ₹500.00</td>
+              </tr>
+              <tr className="hover:bg-surface-container-lowest transition-colors group">
+                <td className="py-5">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                      <span className="material-symbols-outlined">shopping_bag</span>
+                    </div>
+                    <div>
+                      <p className="font-body-md font-semibold text-on-surface">Product Purchase</p>
+                      <p className="text-xs text-secondary">Botanical Body Oil</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-5 text-sm text-secondary font-mono">TXN-48765-219</td>
+                <td className="py-5 text-sm text-on-surface-variant">24 Apr 2024</td>
+                <td className="py-5 text-right font-bold text-on-surface">- ₹55.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Stripe Payment Modal Overlay */}
       <AnimatePresence>
         {showPaymentModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -214,22 +242,22 @@ export default function Wallet() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-surface rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="flex items-center justify-between p-4 border-b border-ink-200/50">
+              <div className="flex items-center justify-between p-6 border-b border-ink-200/50 bg-surface-container-low">
                 <div className="flex items-center gap-2">
-                  <Landmark className="w-6 h-6 text-gold-500" />
-                  <span className="font-serif text-xl text-ink-900">Top Up Wallet</span>
+                  <Landmark className="w-6 h-6 text-primary" />
+                  <span className="font-headline-md text-xl text-on-surface">Top Up Wallet</span>
                 </div>
                 <button 
                   onClick={() => setShowPaymentModal(false)}
-                  className="p-2 text-ink-400 hover:text-ink-900 rounded-full hover:bg-page transition-colors"
+                  className="p-2 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-high transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto flex-1 bg-page">
+              <div className="p-6 overflow-y-auto flex-1 bg-surface-container-lowest">
                 <StripeWalletTopup 
                   amount={Number(topupAmount)} 
                   onSuccess={handlePaymentSuccess} 
@@ -240,6 +268,6 @@ export default function Wallet() {
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   );
 }

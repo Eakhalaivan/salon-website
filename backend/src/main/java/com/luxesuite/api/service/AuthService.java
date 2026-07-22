@@ -3,6 +3,8 @@ package com.luxesuite.api.service;
 import com.luxesuite.api.dto.AuthResponse;
 import com.luxesuite.api.dto.LoginRequest;
 import com.luxesuite.api.dto.RegisterRequest;
+import com.luxesuite.api.dto.ForgotPasswordRequest;
+import com.luxesuite.api.dto.ResetPasswordRequest;
 import com.luxesuite.api.model.Customer;
 import com.luxesuite.api.model.Role;
 import com.luxesuite.api.model.User;
@@ -37,6 +39,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final RedisService redisService;
     private final ReferralService referralService;
+    private final EmailService emailService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -93,6 +96,9 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .role(customerRole.getName())
                 .customerId(customer.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
                 .build();
     }
 
@@ -129,7 +135,10 @@ public class AuthService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .role(user.getRole().getName())
-                .branchId(user.getBranch() != null ? user.getBranch().getId() : null);
+                .branchId(user.getBranch() != null ? user.getBranch().getId() : null)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail());
         
         populateUserIds(responseBuilder, user);
         
@@ -161,7 +170,10 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .role(user.getRole().getName())
-                .branchId(user.getBranch() != null ? user.getBranch().getId() : null);
+                .branchId(user.getBranch() != null ? user.getBranch().getId() : null)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail());
                 
         populateUserIds(responseBuilder, user);
         
@@ -176,5 +188,37 @@ public class AuthService {
         if (refreshToken != null) {
             redisService.blacklistToken(refreshToken, jwtService.getRefreshExpiration());
         }
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
+            String token = java.util.UUID.randomUUID().toString();
+            user.setResetPasswordToken(token);
+            user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusHours(1));
+            userRepository.save(user);
+            
+            // In a real app this would be a link to the frontend
+            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            String emailBody = "You requested a password reset. Click the link below to set a new password:\n\n" + resetLink + "\n\nThis link will expire in 1 hour.";
+            emailService.sendEmail(user.getEmail(), "LuxeSuite Password Reset", emailBody);
+        });
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findAll().stream()
+            .filter(u -> request.getToken().equals(u.getResetPasswordToken()))
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException("Invalid reset token"));
+            
+        if (user.getResetPasswordTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new BadRequestException("Reset token has expired");
+        }
+        
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        userRepository.save(user);
     }
 }

@@ -5,6 +5,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { MapPin, Phone, Building2 } from 'lucide-react';
 
 export const Branches = () => {
@@ -126,8 +127,12 @@ export const Branches = () => {
             </div>
           ))}
           {branches.length === 0 && (
-            <div className="col-span-full text-center py-12 text-on-surface-variant glass-panel rounded-3xl">
-              No branches configured.
+            <div className="col-span-full">
+              <EmptyState 
+                icon="domain_disabled" 
+                title="No branches configured" 
+                description="Add a new branch to start managing locations." 
+              />
             </div>
           )}
         </div>

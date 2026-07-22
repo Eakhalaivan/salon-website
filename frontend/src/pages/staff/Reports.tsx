@@ -52,11 +52,11 @@ export const Reports = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="glass-panel p-6 rounded-[24px]">
             <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Total Earnings</h3>
-            <p className="font-display-md text-[36px] text-primary">${totalEarnings.toFixed(2)}</p>
+            <p className="font-display-md text-[36px] text-primary">₹{totalEarnings.toFixed(2)}</p>
           </div>
           <div className="glass-panel p-6 rounded-[24px]">
             <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Commissions</h3>
-            <p className="font-display-md text-[36px] text-on-surface">${totalCommissions.toFixed(2)}</p>
+            <p className="font-display-md text-[36px] text-on-surface">₹{totalCommissions.toFixed(2)}</p>
           </div>
           <div className="glass-panel p-6 rounded-[24px]">
             <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Appointments</h3>

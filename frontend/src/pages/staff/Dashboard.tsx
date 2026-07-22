@@ -3,9 +3,10 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useStaffAppointmentsQuery } from '../../hooks/api/useAppointments';
 import { useLiveAttendanceQuery } from '../../hooks/api/useAttendance';
 import { useStaffNoteQuery, useUpdateStaffNoteMutation } from '../../hooks/api/useStaffNote';
-import { customerService } from '../../api/services/customerService';
-import { useQuery } from '@tanstack/react-query';
+
+
 import { Link } from 'react-router-dom';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 export const Dashboard = () => {
   const { user } = useAuthStore();
@@ -16,11 +17,6 @@ export const Dashboard = () => {
   const { data: attendances } = useLiveAttendanceQuery();
   const { data: staffNote } = useStaffNoteQuery();
   const updateNoteMutation = useUpdateStaffNoteMutation();
-  
-  const { data: customersResponse } = useQuery({
-    queryKey: ['staffCustomers'],
-    queryFn: () => customerService.getAll('', 0, 1),
-  });
 
   const myAttendance = attendances?.find(a => a.staffId === staffId && a.date === today);
   const clockedIn = myAttendance && myAttendance.checkInTime && !myAttendance.checkOutTime;
@@ -37,7 +33,6 @@ export const Dashboard = () => {
   // Computed Stats
   const todaysAppointmentsCount = appointments?.length || 0;
   const completedToday = appointments?.filter((a: any) => a.status === 'COMPLETED').length || 0;
-  const totalCustomers = customersResponse?.totalElements || 0;
   
   // Shift progress calculation
   let shiftProgress = 0;
@@ -80,14 +75,10 @@ export const Dashboard = () => {
       </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="glass-panel p-6 rounded-2xl">
           <p className="text-on-surface-variant font-label-md mb-2">Today's Appointments</p>
           <p className="font-display-lg text-4xl text-on-surface">{todaysAppointmentsCount}</p>
-        </div>
-        <div className="glass-panel p-6 rounded-2xl">
-          <p className="text-on-surface-variant font-label-md mb-2">Total Customers</p>
-          <p className="font-display-lg text-4xl text-on-surface">{totalCustomers}</p>
         </div>
         <div className="glass-panel p-6 rounded-2xl">
           <p className="text-on-surface-variant font-label-md mb-2">Completed Today</p>
@@ -131,10 +122,12 @@ export const Dashboard = () => {
                 ))}
               </div>
             ) : !appointments || appointments.length === 0 ? (
-              <div className="glass-panel p-12 rounded-[24px] text-center">
-                <span className="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-4">event_available</span>
-                <h4 className="font-headline-sm text-on-surface">No appointments today</h4>
-                <p className="text-on-surface-variant mt-2">Enjoy your free time or help out around the branch.</p>
+              <div className="p-6">
+                <EmptyState 
+                  icon="event_available" 
+                  title="No appointments today" 
+                  description="Enjoy your free time or help out around the branch." 
+                />
               </div>
             ) : (
               appointments.map((appointment: any) => (
@@ -149,7 +142,7 @@ export const Dashboard = () => {
                         <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-label-sm font-label-sm">
                           {appointment.services?.length || 0} Service(s)
                         </span>
-                        <span className="text-on-surface-variant/60 font-label-sm text-label-sm">• ${appointment.totalPrice}</span>
+                        <span className="text-on-surface-variant/60 font-label-sm text-label-sm">• ₹{appointment.totalPrice}</span>
                       </div>
                     </div>
                   </div>

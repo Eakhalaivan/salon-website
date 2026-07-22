@@ -15,6 +15,8 @@ import { ManagerLayout } from './components/layout/ManagerLayout';
 const Home = React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Login = React.lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 const Register = React.lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
+const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const NotFound = React.lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 const About = React.lazy(() => import('./pages/About'));
 const FAQ = React.lazy(() => import('./pages/FAQ'));
@@ -63,10 +65,12 @@ const BranchComparison = React.lazy(() => import('./pages/admin/BranchComparison
 const CmsEditor = React.lazy(() => import('./pages/admin/CmsEditor').then(m => ({ default: m.CmsEditor })));
 const ScheduleBuilder = React.lazy(() => import('./pages/admin/ScheduleBuilder').then(m => ({ default: m.ScheduleBuilder })));
 const LiveAttendance = React.lazy(() => import('./pages/admin/LiveAttendance').then(m => ({ default: m.LiveAttendance })));
+const AdminSettings = React.lazy(() => import('./pages/admin/Settings').then(m => ({ default: m.Settings })));
 const AdminGiftCards = React.lazy(() => import('./pages/admin/GiftCards'));
 const StaffSchedule = React.lazy(() => import('./pages/staff/StaffSchedule').then(m => ({ default: m.StaffSchedule })));
 const StaffAttendance = React.lazy(() => import('./pages/staff/StaffAttendance').then(m => ({ default: m.StaffAttendance })));
 const Payroll = React.lazy(() => import('./pages/staff/Payroll').then(m => ({ default: m.Payroll })));
+const ManagerReports = React.lazy(() => import('./pages/manager/Reports').then(m => ({ default: m.Reports })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,17 +85,6 @@ const queryClient = new QueryClient({
 
 import { ProtectedRoute } from './components/routing/ProtectedRoute';
 
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="flex h-full items-center justify-center p-8 text-center bg-surface rounded-2xl shadow-sm border border-outline-variant/30">
-    <div>
-      <span className="material-symbols-outlined text-6xl text-primary/30 mb-4">construction</span>
-      <h2 className="text-headline-md text-primary mb-2">{title}</h2>
-      <p className="text-body-md text-on-surface-variant max-w-md mx-auto">
-        This module is currently under construction. Check back soon for updates.
-      </p>
-    </div>
-  </div>
-);
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -103,6 +96,8 @@ const AnimatedRoutes = () => {
         <Route path="/admin/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/staff/login" element={<PageTransition><Login /></PageTransition>} />
         <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/book" element={<PageTransition><CustomerBooking /></PageTransition>} />
         <Route path="/book/category/:categoryName" element={<PageTransition><CategoryServices /></PageTransition>} />
         
@@ -184,7 +179,7 @@ const AnimatedRoutes = () => {
           <Route path="branches" element={<PageTransition><Branches /></PageTransition>} />
           <Route path="branch-comparison" element={<PageTransition><BranchComparison /></PageTransition>} />
           <Route path="cms" element={<PageTransition><CmsEditor /></PageTransition>} />
-          <Route path="settings" element={<PageTransition><Placeholder title="Settings" /></PageTransition>} />
+          <Route path="settings" element={<PageTransition><AdminSettings /></PageTransition>} />
         </Route>
 
         {/* Manager Routes */}
@@ -203,7 +198,7 @@ const AnimatedRoutes = () => {
           <Route path="appointments" element={<PageTransition><ScheduleBuilder /></PageTransition>} />
           <Route path="revenue" element={<PageTransition><Billing /></PageTransition>} />
           <Route path="inventory" element={<PageTransition><AdminProducts /></PageTransition>} />
-          <Route path="reports" element={<PageTransition><Placeholder title="Manager Reports" /></PageTransition>} />
+          <Route path="reports" element={<PageTransition><ManagerReports /></PageTransition>} />
         </Route>
         
         {/* Fallbacks */}
@@ -243,17 +238,28 @@ const SplashScreen = () => {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background pointer-events-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background pointer-events-none overflow-hidden"
       aria-hidden="true"
     >
+      <div className="absolute inset-0 z-0">
+        <div
+          className="w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCG7wV3dL6UOVMLkuAFaUcs6zEMQxwsUAMsQmSlJH0GdvlbkVD7B795DzeFx5xp2E7H7VsnqHywkJV9K4Umkrm9zqOQzZC4PEZ3-lcsGMYRLCCivOBlIyrYvuaZZSXivkRxqN92euuAe3hpHR-ZmvrLIXW_hRvCysF_eOzrSHorpmGcjA2gT0HtPvc1Cynl1CCUo1OnQq65d7XzBcP59M6pekm-8bQLofi8bkQFbE2yWkO-Dw2pyxtsrCaORBng6W8An5S2nXXQ9Nqs')",
+          }}
+        />
+        <div className="absolute inset-0 luxury-overlay z-10 backdrop-blur-[2px]" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
         animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
         exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="flex flex-col items-center"
+        className="relative z-20 flex flex-col items-center"
       >
-        <h1 className="font-display-lg text-4xl md:text-6xl text-primary tracking-widest uppercase">
+        <h1 className="font-display-lg text-4xl md:text-6xl text-primary tracking-widest uppercase shadow-sm">
           Lumina
         </h1>
         <motion.div 
