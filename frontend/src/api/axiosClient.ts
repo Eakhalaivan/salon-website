@@ -20,6 +20,18 @@ const axiosClient = axios.create({
   withCredentials: true,
 });
 
+// Avoid duplicate /api/v1/api/v1 in requests when components hardcode the prefix
+axiosClient.interceptors.request.use((config) => {
+  if (config.url) {
+    if (config.url.startsWith('/api/v1/')) {
+      config.url = config.url.substring(7); // Removes '/api/v1' and leaves the leading '/'
+    } else if (config.url === '/api/v1') {
+      config.url = '/';
+    }
+  }
+  return config;
+});
+
 // We rely on withCredentials: true to send the HttpOnly cookies for JWT automatically.
 axiosClient.interceptors.response.use(
   (response) => response,
