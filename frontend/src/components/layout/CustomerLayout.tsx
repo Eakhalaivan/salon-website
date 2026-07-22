@@ -37,9 +37,6 @@ export const CustomerLayout = () => {
     logout();
     navigate('/login');
   };
-
-  const currentNavItem = navItems.find(item => location.pathname.startsWith(item.path)) || navItems[0];
-
   const SidebarContent = () => (
     <>
       <div className="mb-10 cursor-pointer flex flex-col items-center justify-center text-center mt-2 relative" onClick={() => navigate('/')}>

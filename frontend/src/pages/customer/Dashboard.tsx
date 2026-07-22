@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { AnimatedSection, AnimatedItem } from '../../components/ui/AnimatedSection';
 import { StatTile } from '../../components/ui/StatTile';
-import { Card } from '../../components/ui/Card';
+
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { useAuthStore, selectUser } from '../../store/useAuthStore';
-import { format } from 'date-fns';
+
 import { Calendar, Crown, ShoppingBag, Sparkles } from 'lucide-react';
 
 interface ActivityDto {
@@ -26,7 +26,7 @@ export const Dashboard = () => {
     }
   });
 
-  const { data: loyaltyData } = useQuery({
+  useQuery({
     queryKey: ['loyaltyPoints'],
     queryFn: async () => {
       const res = await axiosClient.get('/loyalty/me');
@@ -50,7 +50,7 @@ export const Dashboard = () => {
     }
   });
 
-  const { data: activityList } = useQuery<ActivityDto[]>({
+  useQuery<ActivityDto[]>({
     queryKey: ['recentActivity'],
     queryFn: async () => {
       const res = await axiosClient.get('/customers/me/activity');
@@ -58,7 +58,6 @@ export const Dashboard = () => {
     }
   });
 
-  const points = loyaltyData?.pointsBalance || 0;
   const balance = walletData?.balance || 0;
   const membershipTier = membershipData?.plan?.name || 'Premium'; // Default for the mockup
 

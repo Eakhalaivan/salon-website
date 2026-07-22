@@ -18,7 +18,7 @@ const navItems = [
 ];
 
 export const ManagerLayout = () => {
-  const { role, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
