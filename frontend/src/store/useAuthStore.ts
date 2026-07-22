@@ -30,6 +30,12 @@ interface AuthState {
   branchId: number | null;
   user: UserInfo | null;
 
+  // --- Hydration flag ---
+  // Set to true once the persist middleware has finished reading from localStorage.
+  // ProtectedRoute must wait for this before making redirect decisions.
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
+
   // --- Actions ---
   setAuth: (role: string, branchId: number | null, user?: UserInfo) => void;
   logout: () => void;
@@ -47,8 +53,12 @@ export const useAuthStore = create<AuthState>()(
         role: null,
         branchId: null,
         user: null,
+        _hasHydrated: false,
 
         // Actions
+        setHasHydrated: (state) =>
+          set({ _hasHydrated: state }, false, 'auth/setHasHydrated'),
+
         setAuth: (role, branchId, user) =>
           set({ isLoggedIn: true, role, branchId, user: user ?? null }, false, 'auth/setAuth'),
 
@@ -68,6 +78,11 @@ export const useAuthStore = create<AuthState>()(
           branchId: state.branchId,
           user: state.user,
         }),
+        // Called once localStorage has been read and state rehydrated.
+        // Setting _hasHydrated to true is what unblocks ProtectedRoute.
+        onRehydrateStorage: () => (state) => {
+          state?.setHasHydrated(true);
+        },
       }
     ),
     { name: 'AuthStore' }
@@ -81,3 +96,4 @@ export const selectIsLoggedIn = (s: AuthState) => s.isLoggedIn;
 export const selectRole = (s: AuthState) => s.role;
 export const selectBranchId = (s: AuthState) => s.branchId;
 export const selectUser = (s: AuthState) => s.user;
+export const selectHasHydrated = (s: AuthState) => s._hasHydrated;
