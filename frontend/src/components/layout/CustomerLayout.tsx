@@ -3,7 +3,8 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import axiosClient from '../../api/axiosClient';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
 const navItems = [
@@ -31,6 +32,26 @@ export const CustomerLayout = () => {
   }, [location.pathname]);
 
   const queryClient = useQueryClient();
+
+  const { data: profile } = useQuery({
+    queryKey: ['customerProfile'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/customers/my');
+      return res.data;
+    },
+    enabled: !!user, // only fetch if logged in
+  });
+
+  const { data: membershipData } = useQuery({
+    queryKey: ['membershipStatus'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/subscriptions/my');
+      return res.data;
+    },
+    enabled: !!user, // only fetch if logged in
+  });
+
+  const activeSubscription = membershipData?.content?.[0];
 
   const handleLogout = () => {
     queryClient.clear();
@@ -160,11 +181,15 @@ export const CustomerLayout = () => {
             </button>
             <div className="flex items-center gap-4 bg-surface-container-low py-1.5 px-4 rounded-full border border-outline-variant/30">
               <div className="text-right">
-                <p className="font-label-md text-label-md text-on-surface leading-none">{user?.firstName || 'Guest'} {user?.lastName || ''}</p>
-                <p className="text-[10px] text-outline mt-1 font-bold">PREMIUM MEMBER</p>
+                <p className="font-label-md text-label-md text-on-surface leading-none">
+                  {profile ? `${profile.firstName} ${profile.lastName || ''}`.replace(/\bUser\b/gi, '').trim() : (user?.firstName || 'Guest').replace(/\bUser\b/gi, '').trim()}
+                </p>
+                <p className="text-[10px] text-outline mt-1 font-bold">
+                  {activeSubscription ? activeSubscription.plan?.name?.toUpperCase() : 'NO ACTIVE MEMBERSHIP'}
+                </p>
               </div>
               <div className="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center text-on-primary font-bold">
-                 {user?.firstName?.[0] || "G"}
+                 {profile?.firstName?.[0] || user?.firstName?.[0] || "G"}
               </div>
             </div>
           </div>

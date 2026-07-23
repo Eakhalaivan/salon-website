@@ -272,7 +272,7 @@ export const CustomerBooking = () => {
                     >
                       <div className="h-48 overflow-hidden relative">
                         <div className="absolute inset-0 bg-[var(--color-on-background)]/20 z-10 group-hover:opacity-0 transition-opacity duration-500"></div>
-                        <img src={aesthetics.image} alt={categoryName} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        <img loading="lazy" src={aesthetics.image} alt={categoryName} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                       </div>
                       <div className="p-6 text-center relative z-20 bg-[var(--color-surface)]">
                         <div className="w-12 h-12 bg-[var(--color-primary)]/5 text-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[var(--color-primary)] group-hover:text-[#F5F0E6] transition-colors duration-300">
@@ -304,7 +304,7 @@ export const CustomerBooking = () => {
                     className="bg-[var(--color-surface)] rounded-3xl p-8 border border-[var(--color-border)] shadow-sm hover:shadow-xl transition-all text-center relative overflow-hidden group"
                   >
                     <div className="w-32 h-32 rounded-full mx-auto mb-6 overflow-hidden border-4 border-surface shadow-md relative z-10">
-                      <img
+                      <img loading="lazy"
                         src={`https://i.pravatar.cc/300?img=${id + 20}`}
                         alt="Staff"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

@@ -118,7 +118,7 @@ export const Profile = () => {
               <div className="relative inline-block mb-6">
                 <div className="w-32 h-32 rounded-full border-2 border-primary-container p-1 relative z-10 mx-auto transition-transform duration-500 group-hover:scale-105">
                   <div className="w-full h-full rounded-full overflow-hidden bg-surface-dim">
-                    <img 
+                    <img
                       className="w-full h-full object-cover" 
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZk4EJsHtpgx8tysD3NCRd9PLuFRwnPiJ444yDLW5IYmqUdeyM40wRcw4eyD1a19DjGjFJrAaUp7iv5xUSYT0A-ktUk-1GQ8faAbYeh1eVqmYz_zU-TI0oslmiAqxQp6kwZMP6XrtUdmh4BtHPm5T2qhZT-I-CT6PZ8M-jl9d1IEB8d-SzGqpDPrqG162Sesjbx-tQ1FW8TBw6vTLKbPrM4UfwYyCkINHQQ_O9x805-yfUSQk_ONIR103qYVbDhm7e44uJpjDO6rXz"
                       alt="Profile"

@@ -5,6 +5,53 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { Users, Clock, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const AttendanceRow = React.memo(({ log, index }: { log: any, index: number }) => (
+  <motion.div
+    key={log.id}
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: index * 0.05 }}
+    className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:bg-surface-container-low transition-colors"
+  >
+    <div className="flex items-center space-x-4">
+      <div className="h-12 w-12 rounded-full bg-primary-container flex items-center justify-center font-display-sm text-xl text-primary border border-primary/20">
+        {log.staffName?.charAt(0) || 'S'}
+      </div>
+      <div>
+        <h4 className="font-display-sm text-xl text-on-surface">{log.staffName}</h4>
+        <div className="flex flex-wrap items-center gap-4 text-sm text-on-surface-variant mt-2 font-label-md">
+          {log.checkInTime && (
+            <span className="flex items-center">
+              <Clock className="h-4 w-4 mr-1.5 text-success" /> 
+              In: {new Date(log.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          {log.checkOutTime && (
+            <span className="flex items-center">
+              <Clock className="h-4 w-4 mr-1.5 text-error" /> 
+              Out: {new Date(log.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          {(log.locationLat && log.locationLng) && (
+            <span className="flex items-center text-secondary">
+              <MapPin className="h-4 w-4 mr-1.5" /> GPS Logged
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+    <div className="mt-2 md:mt-0">
+      <span className={`status-pill ${
+        log.status === 'ON_TIME' ? 'success' : 
+        log.status === 'LATE' ? 'warning' :
+        'error'
+      }`}>
+        {log.status.replace('_', ' ')}
+      </span>
+    </div>
+  </motion.div>
+));
+
 export const LiveAttendance: React.FC = () => {
   const { data: attendances = [] } = useLiveAttendanceQuery();
 
@@ -71,50 +118,7 @@ export const LiveAttendance: React.FC = () => {
               </div>
             ) : (
               attendances.map((log: any, i: number) => (
-                <motion.div
-                  key={log.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:bg-surface-container-low transition-colors"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 rounded-full bg-primary-container flex items-center justify-center font-display-sm text-xl text-primary border border-primary/20">
-                      {log.staffName?.charAt(0) || 'S'}
-                    </div>
-                    <div>
-                      <h4 className="font-display-sm text-xl text-on-surface">{log.staffName}</h4>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-on-surface-variant mt-2 font-label-md">
-                        {log.checkInTime && (
-                          <span className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1.5 text-success" /> 
-                            In: {new Date(log.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                        {log.checkOutTime && (
-                          <span className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1.5 text-error" /> 
-                            Out: {new Date(log.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                        {(log.locationLat && log.locationLng) && (
-                          <span className="flex items-center text-secondary">
-                            <MapPin className="h-4 w-4 mr-1.5" /> GPS Logged
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 md:mt-0">
-                    <span className={`status-pill ${
-                      log.status === 'ON_TIME' ? 'success' : 
-                      log.status === 'LATE' ? 'warning' :
-                      'error'
-                    }`}>
-                      {log.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                </motion.div>
+                <AttendanceRow key={log.id} log={log} index={i} />
               ))
             )}
           </div>

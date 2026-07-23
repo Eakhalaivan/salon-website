@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useServicesQuery } from '../../hooks/api/useAppointments';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { ServiceSkeleton } from '../../components/ui/Skeleton';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,11 +24,20 @@ export const Services = () => {
     navigate(`/book?serviceId=${serviceId}`);
   };
 
-  if (loading) {
+  if (loading && services.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
-      </div>
+      <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative py-12">
+        <div className="mb-10">
+          <div className="h-10 w-48 bg-surface-container-high/50 rounded-md animate-pulse mb-4"></div>
+          <div className="h-4 w-96 bg-surface-container-high/50 rounded-md animate-pulse mb-10"></div>
+        </div>
+        <div className="flex flex-wrap gap-4 mb-10">
+          {[1, 2, 3].map(i => <div key={i} className="h-12 w-32 bg-surface-container-high/50 rounded-full animate-pulse"></div>)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
+          {[1, 2, 3, 4, 5, 6].map(i => <ServiceSkeleton key={i} />)}
+        </div>
+      </main>
     );
   }
 
@@ -39,9 +49,11 @@ export const Services = () => {
     );
   }
 
-  const filteredServices = services.filter(
-    (service) => service.category === activeCategory || activeCategory === "All Rituals"
-  );
+  const filteredServices = useMemo(() => {
+    return services.filter(
+      (service) => service.category === activeCategory || activeCategory === "All Rituals"
+    );
+  }, [services, activeCategory]);
 
   return (
     <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative overflow-hidden py-12 animate-fade-in">

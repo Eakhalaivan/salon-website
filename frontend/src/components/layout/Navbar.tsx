@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
 const links = [
-  { name: 'Services', path: '/#services' },
+  { name: 'Services', path: '/services' },
   { name: 'About', path: '/about' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'Blog', path: '/blog' },
@@ -57,14 +57,14 @@ export const Navbar = () => {
         </div>
         
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden lg:flex items-center gap-1 xl:gap-2">
           {links.map((link) => {
             const isActive = location.pathname === link.path || location.pathname + location.hash === link.path;
             
             return (
               <motion.div 
                 key={link.name} 
-                className="relative px-4 py-2 cursor-pointer"
+                className="relative px-2 xl:px-4 py-2 cursor-pointer"
                 initial="initial"
                 whileHover="hover"
               >
@@ -91,7 +91,11 @@ export const Navbar = () => {
                       }
                     }
                   }}
-                  className={`font-label-md relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-white/90 hover:text-white'}`}
+                  className={`font-label-md text-sm xl:text-base relative z-10 transition-all duration-300 ${
+                    isActive 
+                      ? 'text-primary ' + (!isScrolled ? 'drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]' : '')
+                      : (isScrolled ? 'text-on-surface/70 hover:text-on-surface' : 'text-white/80 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]')
+                  }`}
                 >
                   {link.name}
                 </a>
@@ -113,8 +117,8 @@ export const Navbar = () => {
                       initial: { scaleX: 0 },
                       hover: { scaleX: 1 }
                     }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute bottom-0 left-4 right-4 h-[2px] bg-white/50 rounded-t-md origin-left"
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className={`absolute bottom-0 left-2 xl:left-4 right-2 xl:right-4 h-[2px] rounded-t-md origin-left ${isScrolled ? 'bg-on-surface/40' : 'bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.4)]'}`}
                   />
                 )}
               </motion.div>
@@ -122,7 +126,7 @@ export const Navbar = () => {
           })}
         </div>
         
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           <ThemeToggle />
           <Button onClick={() => navigate('/login')} variant="primary" size="md" magnetic>
             Book Now
@@ -130,7 +134,7 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile Toggle */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex lg:hidden items-center gap-2">
           <ThemeToggle />
           <button 
             className="text-primary z-50 p-2 relative"
@@ -149,7 +153,7 @@ export const Navbar = () => {
             initial={{ opacity: 0, pointerEvents: 'none' }}
             animate={{ opacity: 1, pointerEvents: 'auto' }}
             exit={{ opacity: 0, pointerEvents: 'none' }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md lg:hidden"
           >
             <motion.div
               initial={{ x: '100%' }}

@@ -24,7 +24,20 @@ const axiosClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  timeout: 15000,
 });
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string | null) => void)[] = [];
+
+const subscribeTokenRefresh = (cb: (token: string | null) => void) => {
+  refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token: string | null) => {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+};
 
 // Avoid duplicate /api/v1/api/v1 in requests when components hardcode the prefix
 axiosClient.interceptors.request.use((config) => {
@@ -52,13 +65,34 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    
+    // Cold start retry logic
+    if ((error.code === 'ECONNABORTED' || !error.response) && !originalRequest._coldStartRetry) {
+      originalRequest._coldStartRetry = true;
+      originalRequest.timeout = 45000;
+      return axiosClient(originalRequest);
+    }
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Do not attempt to refresh if the failure was on the login endpoint itself
       if (originalRequest.url?.includes('/auth/login')) {
         return Promise.reject(error);
       }
 
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((token) => {
+            if (token) {
+              resolve(axiosClient(originalRequest));
+            } else {
+              reject(error);
+            }
+          });
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const response = await axios.post(
@@ -70,11 +104,15 @@ axiosClient.interceptors.response.use(
         if (response.status === 200) {
           const { role, branchId, staffId, customerId } = response.data;
           useAuthStore.getState().setAuth(role, branchId || null, { staffId, customerId });
+          onRefreshed('success');
           return axiosClient(originalRequest);
         }
       } catch (refreshError) {
+        onRefreshed(null);
         useAuthStore.getState().logout();
         window.location.href = '/login';
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);

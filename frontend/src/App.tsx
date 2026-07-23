@@ -18,6 +18,7 @@ const Register = React.lazy(() => import('./pages/Register').then(m => ({ defaul
 const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
 const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const NotFound = React.lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
+const Services = React.lazy(() => import('./pages/Services'));
 const About = React.lazy(() => import('./pages/About'));
 const FAQ = React.lazy(() => import('./pages/FAQ'));
 const Gallery = React.lazy(() => import('./pages/Gallery'));
@@ -75,10 +76,11 @@ const ManagerReports = React.lazy(() => import('./pages/manager/Reports').then(m
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: 2,
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
     },
   },
 });
@@ -144,6 +146,7 @@ const AnimatedRoutes = () => {
         </Route>
 
         {/* Public marketing pages */}
+        <Route path="/services" element={<PageTransition><Services /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/faq" element={<PageTransition><FAQ /></PageTransition>} />
         <Route path="/gallery" element={<PageTransition><Gallery /></PageTransition>} />

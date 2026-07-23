@@ -6,6 +6,15 @@ import { useAuthStore, selectUser } from '../../store/useAuthStore';
 export const Dashboard = () => {
   const user = useAuthStore(selectUser);
 
+  const { data: profile } = useQuery({
+    queryKey: ['customerProfile'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/customers/my');
+      return res.data;
+    },
+    enabled: !!user,
+  });
+
   const { data: walletData } = useQuery({
     queryKey: ['walletBalance'],
     queryFn: async () => {
@@ -14,16 +23,16 @@ export const Dashboard = () => {
     }
   });
 
-  const { data: membershipData } = useQuery({
+  const { data: membershipData, isLoading: isLoadingMembership } = useQuery({
     queryKey: ['membershipStatus'],
     queryFn: async () => {
-      const res = await axiosClient.get('/subscriptions/me');
+      const res = await axiosClient.get('/subscriptions/my');
       return res.data;
     }
   });
 
   const balance = walletData?.balance || 0;
-  const membershipTier = membershipData?.plan?.name || 'Premium'; 
+  const activeSubscription = membershipData?.content?.[0];
 
   const formattedBalance = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(balance);
 
@@ -32,7 +41,7 @@ export const Dashboard = () => {
       {/* Header Section */}
       <div className="mb-10">
         <h2 className="font-headline-lg text-headline-lg text-on-surface flex items-center gap-3">
-          Welcome back, {user?.firstName || 'Elite Guest'} <span className="text-2xl">✨</span>
+          Welcome, {profile ? `${profile.firstName} ${profile.lastName || ''}`.replace(/\bUser\b/gi, '').trim() : (user?.firstName || 'Guest').replace(/\bUser\b/gi, '').trim()} <span className="text-2xl">✨</span>
         </h2>
         <p className="font-body-md text-body-md text-secondary mt-2">Here's your wellness overview for today.</p>
       </div>
@@ -69,13 +78,49 @@ export const Dashboard = () => {
         </div>
 
         {/* Membership Status */}
-        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border border-outline-variant/30 relative overflow-hidden">
-          <div className="absolute -top-2 -right-2 w-16 h-16 bg-primary-fixed/30 rounded-full blur-2xl"></div>
-          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Membership</p>
-          <p className="font-display-lg text-display-lg text-primary-container">{membershipTier}</p>
-          <div className="mt-4">
-            <span className="material-symbols-outlined text-primary-container text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-          </div>
+        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col border border-outline-variant/30 relative overflow-hidden">
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-3xl"></div>
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-4">
+            {activeSubscription ? activeSubscription.plan?.name : 'Membership'}
+          </p>
+          
+          {isLoadingMembership ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+              <p className="font-label-sm text-label-sm text-secondary">Loading membership...</p>
+            </div>
+          ) : activeSubscription ? (
+            <div className="flex flex-col gap-2 relative z-10">
+              <div className="flex items-center justify-between">
+                <p className="font-headline-sm text-headline-sm text-primary-container font-bold">Status</p>
+                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${activeSubscription.status === 'ACTIVE' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
+                  {activeSubscription.status}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 mt-2">
+                <p className="font-label-sm text-label-sm flex justify-between">
+                  <span className="text-secondary">Valid From:</span>
+                  <span className="text-on-surface">{new Date(activeSubscription.startDate).toLocaleDateString()}</span>
+                </p>
+                <p className="font-label-sm text-label-sm flex justify-between">
+                  <span className="text-secondary">Expires:</span>
+                  <span className="text-on-surface">{new Date(activeSubscription.endDate).toLocaleDateString()}</span>
+                </p>
+                <p className="font-label-sm text-label-sm flex justify-between">
+                  <span className="text-secondary">Remaining Value:</span>
+                  <span className="text-on-surface font-bold">₹{activeSubscription.remainingBalance}</span>
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10">
+              <span className="material-symbols-outlined text-outline/50 text-4xl mb-2" style={{ fontVariationSettings: "'FILL' 0" }}>card_membership</span>
+              <p className="font-body-sm text-body-sm text-secondary mb-3">You don't have an active membership yet.</p>
+              <Link to="/customer/membership" className="px-4 py-1.5 rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-primary/5 transition-colors">
+                Explore Plans
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 

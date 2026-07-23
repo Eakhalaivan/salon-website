@@ -13,6 +13,7 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showColdStartMessage, setShowColdStartMessage] = useState(false);
   
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ export const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setShowColdStartMessage(false);
+    
+    const timer = setTimeout(() => setShowColdStartMessage(true), 4000);
 
     try {
       const response = await axiosClient.post('/auth/login', { email, password });
@@ -72,7 +76,9 @@ export const Login = () => {
         setError('Login failed. Please check your credentials.');
       }
     } finally {
+      clearTimeout(timer);
       setLoading(false);
+      setShowColdStartMessage(false);
     }
   };
 
@@ -175,6 +181,11 @@ export const Login = () => {
               >
                 {loading ? 'Entering Sanctuary...' : 'Sign In'}
               </Button>
+              {showColdStartMessage && (
+                <p className="text-sm text-on-surface-variant mt-2 text-center">
+                  First login after a while can take up to a minute while the server wakes up — hang tight.
+                </p>
+              )}
             </motion.div>
           </form>
 

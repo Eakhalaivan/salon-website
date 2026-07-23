@@ -77,6 +77,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/api/v1/public/**", "/api/v1/cms/**", "/api/v1/content/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/services").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/services/**").permitAll()

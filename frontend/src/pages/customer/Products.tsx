@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRetailProductsQuery } from '../../hooks/api/useProducts';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { ProductSkeleton } from '../../components/ui/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../store/useCartStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,7 +22,7 @@ export const Products = () => {
   const { data: wishlistData } = useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
-      const res = await axiosClient.get('/customers/me/wishlist');
+      const res = await axiosClient.get('/customers/my/wishlist');
       return res.data;
     }
   });
@@ -31,24 +32,40 @@ export const Products = () => {
 
   const toggleWishlistMutation = useMutation({
     mutationFn: async (productId: number) => {
-      await axiosClient.post(`/customers/me/wishlist/${productId}`);
+      await axiosClient.post(`/customers/my/wishlist/${productId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     }
   });
 
-  const filteredProducts = products.filter((p: any) => p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()));
+  const filteredProducts = useMemo(() => {
+    return products.filter((p: any) => 
+      p.name.toLowerCase().includes(search.toLowerCase()) || 
+      p.sku.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
   const toggleWishlist = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     toggleWishlistMutation.mutate(id);
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
-      </div>
+      <main className="lg:px-[40px] px-[16px] min-h-[calc(100vh-80px)] relative py-12">
+        <div className="max-w-container-max-width mx-auto">
+          {/* Header Skeleton */}
+          <div className="mb-12">
+            <div className="h-4 w-32 bg-surface-container-high/50 rounded-md animate-pulse mb-4"></div>
+            <div className="h-10 w-64 bg-surface-container-high/50 rounded-md animate-pulse mb-4"></div>
+            <div className="h-6 w-96 bg-surface-container-high/50 rounded-md animate-pulse"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <ProductSkeleton key={i} />)}
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -148,7 +165,7 @@ export const Products = () => {
                 >
                   {/* Image Area */}
                   <div className="relative aspect-[4/5] bg-surface-container-low overflow-hidden">
-                    <img 
+                    <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop" 
                       alt={product.name} 
@@ -230,7 +247,7 @@ export const Products = () => {
             <button className="bg-primary text-on-primary px-8 py-3 rounded-full font-label-md hover:shadow-lg shadow-primary/20 transition-all active:scale-95">View Membership Plans</button>
           </div>
           <div className="w-full md:w-1/3 aspect-video md:aspect-square relative rounded-xl overflow-hidden shadow-xl z-10">
-            <img 
+            <img
               className="w-full h-full object-cover" 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuA76y9RUMRQr5UcoH7qlEaXgY4VyIvSsmOpGNPz5ajpN1WlgfM1-ts37v6rNjYRGhEy6Q_MQ89YF_FVYDBvE5OduLbxlMzUgOn8-N9TGVi2HOocukiHJnScZ1SdmwMA3qD3r7W-zL7D1NU7GGDR1LK72KegwE-MMmuao7yKmbSsuuMtpBWrLGPZLDO0ykWXtmyuABoUajfamRAK6DSsVX2pFiILKVgWT106A2BfWznGXbZSSG3syf6EGzvuUx-W-gQcgUydLmdy99KZ" 
               alt="Retail Boutique" 

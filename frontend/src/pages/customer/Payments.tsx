@@ -20,7 +20,7 @@ export const Payments = () => {
   const { data: customerInfo } = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      const res = await axiosClient.get('/customers/me');
+      const res = await axiosClient.get('/customers/my');
       return res.data;
     }
   });
