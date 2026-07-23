@@ -1,0 +1,11 @@
+name: Keep Render Alive
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: curl -f https://salon-website-o8qe.onrender.com/actuator/health || exit 0
