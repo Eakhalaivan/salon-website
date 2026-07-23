@@ -68,7 +68,8 @@ public class SecurityConfig {
                 .ignoringRequestMatchers(
                     "/api/v1/auth/**",
                     "/api/v1/payments/stripe/webhook",
-                    "/api/v1/payments/razorpay/webhook"
+                    "/api/v1/payments/razorpay/webhook",
+                    "/api/v1/payments/stripe/create-subscription-intent/**"
                 )
             )
             .headers(headers -> headers
