@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Loader2, Quote } from 'lucide-react';
 import { Card } from '../components/ui/Card';
@@ -65,7 +65,7 @@ export default function Testimonials() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const { data: reviews, isLoading, isError } = useQuery({
+  const { data: reviews, isLoading } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
       try {

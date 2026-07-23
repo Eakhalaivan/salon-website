@@ -1,5 +1,4 @@
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 import { Card } from '../components/ui/Card';

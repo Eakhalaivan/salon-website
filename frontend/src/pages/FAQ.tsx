@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, MessageCircle, ArrowLeft } from 'lucide-react';
 import { AnimatedSection } from '../components/ui/AnimatedSection';

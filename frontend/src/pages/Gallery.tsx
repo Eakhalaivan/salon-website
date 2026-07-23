@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
