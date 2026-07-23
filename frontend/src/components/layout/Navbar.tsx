@@ -46,9 +46,9 @@ export const Navbar = () => {
         <div className="flex items-center gap-4 relative z-50">
           {location.pathname !== '/' && (
             <button 
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/')}
               className="p-2 bg-surface/20 hover:bg-surface/40 rounded-full transition-colors text-primary"
-              aria-label="Go back"
+              aria-label="Go to home page"
             >
               <ArrowLeft size={24} />
             </button>

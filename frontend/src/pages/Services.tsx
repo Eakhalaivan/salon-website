@@ -5,7 +5,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { motion } from 'framer-motion';
 import { transitionSpring } from '../utils/motion';
-import { ArrowLeft } from 'lucide-react';
+
 
 const categories = [
   { name: 'Massage', icon: 'spa', image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1600&q=80', description: 'Rejuvenate your body with our signature massage therapies.' },
@@ -37,13 +37,6 @@ export default function Services() {
 
       <main className="flex-grow pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-4 mb-8">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 bg-surface/50 hover:bg-surface rounded-full transition-colors border border-outline-variant/30 text-on-surface"
-            aria-label="Go back"
-          >
-            <ArrowLeft size={24} />
-          </button>
           <h1 className="font-display-lg text-4xl md:text-5xl text-primary">Our Rituals</h1>
         </div>
 
