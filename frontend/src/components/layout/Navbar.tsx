@@ -44,15 +44,6 @@ export const Navbar = () => {
       
       <div className="flex justify-between items-center px-6 md:px-12 max-w-7xl mx-auto relative z-10">
         <div className="flex items-center gap-4 relative z-50">
-          {location.pathname !== '/' && (
-            <button 
-              onClick={() => navigate('/')}
-              className="p-2 bg-surface/20 hover:bg-surface/40 rounded-full transition-colors text-primary"
-              aria-label="Go to home page"
-            >
-              <ArrowLeft size={24} />
-            </button>
-          )}
           <Link to="/" className="font-display-lg text-3xl text-primary tracking-tighter">LUMINA SPA</Link>
         </div>
         
