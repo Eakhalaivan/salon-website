@@ -58,48 +58,41 @@ export const PremiumWalletCard = ({ balance = 0, isLoading = false, walletId = '
               </div>
             </div>
 
-            {/* Center: Large Logo & Name (matching the provided image) */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="material-symbols-outlined text-5xl sm:text-7xl mb-2 bg-gradient-to-b from-[#f7d6b3] to-[#b3885d] text-transparent bg-clip-text drop-shadow-[0_2px_4px_rgba(0,0,0,1)]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>spa</span>
-              <p className="font-display-lg text-xl sm:text-2xl tracking-[0.3em] uppercase bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                Lumina <span className="opacity-50 font-light px-2">|</span> Elite
-              </p>
+            {/* Center: Card Number & Watermark */}
+            <div className="flex-grow flex items-center justify-center relative z-10 w-full mt-2">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                <span className="material-symbols-outlined text-[80px] sm:text-[120px] bg-gradient-to-b from-[#f7d6b3] to-[#b3885d] text-transparent bg-clip-text" style={{ fontVariationSettings: "'FILL' 0, 'wght' 100" }}>spa</span>
+              </div>
+              <div className="font-mono text-xl sm:text-3xl tracking-[0.15em] sm:tracking-[0.25em] bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_2px_rgba(0,0,0,1)] z-10 w-full text-center">
+                <span className="opacity-70 mr-3 sm:mr-4">**** **** ****</span> {walletId.toString().padStart(4, '0')}
+              </div>
             </div>
 
             {/* Bottom Row */}
-            <div className="flex flex-col gap-4 relative z-10 mt-auto">
-              
-              {/* Card Number */}
-              <div className="font-mono text-lg sm:text-2xl tracking-[0.2em] sm:tracking-[0.3em] bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_2px_rgba(0,0,0,1)] text-right w-full flex justify-end">
-                <span className="opacity-70 mr-4">**** **** ****</span> {walletId.toString().padStart(4, '0')}
+            <div className="flex justify-between items-end w-full relative z-10">
+              {/* Member Info */}
+              <div className="flex flex-col">
+                <p className="font-serif text-[8px] sm:text-[10px] tracking-widest uppercase opacity-80">Elite Premier Member</p>
+                <p className="font-serif text-[8px] sm:text-[10px] tracking-widest uppercase opacity-80">Since 2024</p>
+                <p className="font-serif text-sm sm:text-lg tracking-[0.1em] sm:tracking-[0.2em] uppercase mt-1 sm:mt-2 bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_1px_rgba(0,0,0,1)]">
+                  ALEXANDER VON SCHMIDT
+                </p>
               </div>
-              
-              <div className="flex justify-between items-end w-full">
-                {/* Member Info */}
-                <div className="flex flex-col">
-                  <p className="font-serif text-[8px] sm:text-[10px] tracking-widest uppercase opacity-80">Elite Premier Member</p>
-                  <p className="font-serif text-[8px] sm:text-[10px] tracking-widest uppercase opacity-80">Since 2024</p>
-                  <p className="font-serif text-sm sm:text-lg tracking-[0.1em] sm:tracking-[0.2em] uppercase mt-1 sm:mt-2 bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_1px_rgba(0,0,0,1)]">
-                    ALEXANDER VON SCHMIDT
+
+              {/* Expiry / Balance info */}
+              <div className="flex flex-col items-end text-right">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-[6px] sm:text-[8px] uppercase tracking-widest opacity-80 leading-tight">Valid<br/>Thru</p>
+                  <p className="font-mono text-sm sm:text-base tracking-widest bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_1px_rgba(0,0,0,1)]">11/28</p>
+                </div>
+                {/* Balance Display */}
+                <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-md border border-[#9c7853]/30">
+                  <p className="text-[8px] uppercase tracking-widest opacity-70 mb-0.5">Balance</p>
+                  <p className="font-mono font-bold text-sm sm:text-lg text-white">
+                    ₹ {isLoading ? '---' : balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-
-                {/* Expiry / Balance info */}
-                <div className="flex flex-col items-end text-right">
-                  <div className="flex items-center gap-2 mb-2">
-                    <p className="text-[6px] sm:text-[8px] uppercase tracking-widest opacity-80 leading-tight">Valid<br/>Thru</p>
-                    <p className="font-mono text-sm sm:text-base tracking-widest bg-gradient-to-r from-[#dca77a] via-[#f7d6b3] to-[#c18d5f] text-transparent bg-clip-text drop-shadow-[0_1px_1px_rgba(0,0,0,1)]">11/28</p>
-                  </div>
-                  {/* Balance Display */}
-                  <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-md border border-[#9c7853]/30">
-                    <p className="text-[8px] uppercase tracking-widest opacity-70 mb-0.5">Balance</p>
-                    <p className="font-mono font-bold text-sm sm:text-lg text-white">
-                      ₹ {isLoading ? '---' : balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
               </div>
-
             </div>
 
           </div>
