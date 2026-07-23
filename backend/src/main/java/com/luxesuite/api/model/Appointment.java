@@ -57,6 +57,10 @@ public class Appointment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    @Column(name = "business_type", nullable = false)
+    private String businessType = "BOTH";
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

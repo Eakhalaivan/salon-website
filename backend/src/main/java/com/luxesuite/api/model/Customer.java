@@ -38,6 +38,9 @@ public class Customer {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "profile_photo", columnDefinition = "TEXT")
+    private String profilePhoto;
+
     @Column(name = "referral_code", unique = true)
     private String referralCode;
 

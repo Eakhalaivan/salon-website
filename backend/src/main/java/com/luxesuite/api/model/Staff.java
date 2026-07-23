@@ -51,8 +51,12 @@ public class Staff {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-        @Column(name = "deleted_at")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Builder.Default
+    @Column(name = "business_type", nullable = false)
+    private String businessType = "BOTH";
 
     @PrePersist
     protected void onCreate() {

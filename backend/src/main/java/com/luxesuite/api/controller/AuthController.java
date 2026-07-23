@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
+// Security Note: @PreAuthorize is not required here as these are intentionally public endpoints for authentication, registration, and password recovery.
 public class AuthController {
 
     private final AuthService authService;

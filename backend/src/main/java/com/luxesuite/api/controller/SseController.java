@@ -11,6 +11,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
+// Security Note: @PreAuthorize is not required here because this endpoint generates a random UUID for anonymous stream subscriptions and does not expose sensitive data directly.
 public class SseController {
 
     private final SseService sseService;

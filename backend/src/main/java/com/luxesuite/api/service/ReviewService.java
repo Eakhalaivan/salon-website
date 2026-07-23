@@ -27,6 +27,7 @@ public class ReviewService {
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "reviews", key = "'approved_' + #page + '_' + #size")
     public PageResponse<ReviewDto> getApprovedReviews(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Review> reviewPage = reviewRepository.findByIsApprovedTrue(pageable);
@@ -41,6 +42,7 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "reviews", key = "'all_' + #page + '_' + #size")
     public PageResponse<ReviewDto> getAllReviews(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Review> reviewPage = reviewRepository.findAll(pageable);
@@ -55,6 +57,7 @@ public class ReviewService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "reviews", allEntries = true)
     public ReviewDto createReview(ReviewDto dto) {
         // Customer creates review for themselves
         Customer customer = customerRepository.findById(dto.getCustomerId())
@@ -79,6 +82,7 @@ public class ReviewService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "reviews", allEntries = true)
     public ReviewDto approveReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
@@ -87,6 +91,7 @@ public class ReviewService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "reviews", allEntries = true)
     public void deleteReview(Long id) {
         if (!reviewRepository.existsById(id)) {
             throw new ResourceNotFoundException("Review not found");

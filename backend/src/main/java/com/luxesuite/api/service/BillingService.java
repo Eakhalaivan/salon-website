@@ -42,6 +42,9 @@ public class BillingService {
     private final PayrollService payrollService;
     private final GiftCardService giftCardService;
     private final WalletService walletService;
+    private final SubscriptionService subscriptionService;
+    private final CustomerRepository customerRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Value("${stripe.key.secret}")
     private String stripeApiKey;
@@ -201,6 +204,43 @@ public class BillingService {
         }
     }
 
+    public String createStripeSubscriptionIntent(Long planId) {
+        try {
+            Long userId = securityUtils.getCurrentUserId();
+            Customer customer = customerRepository.findByUserId(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+            if (customerSubscriptionRepository.existsByCustomerIdAndStatus(customer.getId(), "ACTIVE")) {
+                throw new IllegalStateException("You already have an active membership plan. Please wait for it to expire or cancel it before purchasing a new one.");
+            }
+
+            SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+            if (!plan.getIsActive()) {
+                throw new BadRequestException("Cannot purchase inactive plan");
+            }
+
+            PaymentIntentCreateParams params =
+                PaymentIntentCreateParams.builder()
+                    .setAmount(plan.getPrice().multiply(new BigDecimal(100)).longValue())
+                    .setCurrency("inr")
+                    .putMetadata("subscriptionPlanId", plan.getId().toString())
+                    .putMetadata("subscriptionCustomerId", customer.getId().toString())
+                    .build();
+
+            PaymentIntent intent = PaymentIntent.create(params);
+            
+            return intent.getClientSecret();
+        } catch (ApiException e) {
+            throw e;
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PaymentGatewayException("Failed to create Stripe PaymentIntent for subscription: " + e.getMessage(), e);
+        }
+    }
+
     @Transactional
     public void handleStripeWebhook(String payload, String sigHeader) {
         try {
@@ -214,8 +254,14 @@ public class BillingService {
                     String invoiceIdStr = paymentIntent.getMetadata().get("invoiceId");
                     String walletTopupCustomerIdStr = paymentIntent.getMetadata().get("walletTopupCustomerId");
                     String giftCardAmountStr = paymentIntent.getMetadata().get("giftCardAmount");
+                    String subscriptionPlanIdStr = paymentIntent.getMetadata().get("subscriptionPlanId");
+                    String subscriptionCustomerIdStr = paymentIntent.getMetadata().get("subscriptionCustomerId");
 
-                    if (invoiceIdStr != null) {
+                    if (subscriptionPlanIdStr != null && subscriptionCustomerIdStr != null) {
+                        Long planId = Long.parseLong(subscriptionPlanIdStr);
+                        Long customerId = Long.parseLong(subscriptionCustomerIdStr);
+                        subscriptionService.activateSubscription(planId, customerId);
+                    } else if (invoiceIdStr != null) {
                         Long invoiceId = Long.parseLong(invoiceIdStr);
                         BigDecimal amount = new BigDecimal(paymentIntent.getAmountReceived()).divide(new BigDecimal(100));
                         

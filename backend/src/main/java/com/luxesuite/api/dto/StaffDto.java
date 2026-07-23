@@ -33,4 +33,6 @@ public class StaffDto {
     
     // IDs of services this staff can perform
     private Set<Long> serviceIds;
+
+    private String businessType;
 }

@@ -41,6 +41,10 @@ public class Service {
     @Column(nullable = false)
     private String category;
 
+    @Builder.Default
+    @Column(name = "business_type", nullable = false)
+    private String businessType = "BOTH";
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -55,6 +59,7 @@ public class Service {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (isActive == null) isActive = true;
+        if (businessType == null) businessType = "BOTH";
     }
 
     @PreUpdate

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
+// Security Note: @PreAuthorize is not required here as this is a public/authenticated assistant endpoint that delegates to ChatbotService which manages its own access/context.
 public class ChatController {
 
     private final ChatbotService chatbotService;

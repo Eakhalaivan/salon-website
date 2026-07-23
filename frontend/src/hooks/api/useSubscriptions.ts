@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '../../api/services/subscriptionService';
+import { useProviderStore } from '../../store/useProviderStore';
 
 export const useMySubscriptionsQuery = (page = 0, size = 10) => {
   return useQuery({
@@ -10,9 +11,10 @@ export const useMySubscriptionsQuery = (page = 0, size = 10) => {
 };
 
 export const useSubscriptionPlansQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['subscriptions', 'plans', page, size],
-    queryFn: () => subscriptionService.getPlans(page, size),
+    queryKey: ['subscriptions', 'plans', page, size, businessType],
+    queryFn: () => subscriptionService.getPlans(page, size, businessType),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 };

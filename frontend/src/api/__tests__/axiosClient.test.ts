@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import axios from 'axios';
 import axiosClient from '../axiosClient';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -9,6 +9,7 @@ vi.mock('axios', async (importOriginal) => {
     ...actual,
     post: vi.fn(),
     create: vi.fn(() => ({
+      request: vi.fn(),
       interceptors: {
         request: { use: vi.fn() },
         response: { use: vi.fn() }
@@ -35,17 +36,14 @@ describe('axiosClient interceptors', () => {
   let responseInterceptorSuccess: any;
   let responseInterceptorError: any;
 
+  beforeAll(() => {
+    requestInterceptor = (axiosClient.interceptors.request.use as any).mock.calls[0][0];
+    responseInterceptorSuccess = (axiosClient.interceptors.response.use as any).mock.calls[0][0];
+    responseInterceptorError = (axiosClient.interceptors.response.use as any).mock.calls[0][1];
+  });
+
   beforeEach(() => {
-    vi.clearAllMocks();
-    
-    // Extract the registered interceptors from axiosClient
-    // (Since we can't easily extract them from the mocked axios.create in this test setup without deeper reflection,
-    // we'll directly test the logic by accessing axiosClient's actual interceptor handlers if possible, or we recreate the test.)
-    
-    requestInterceptor = (axiosClient.interceptors.request as any).handlers[0].fulfilled;
-    const responseHandlers = (axiosClient.interceptors.response as any).handlers[0];
-    responseInterceptorSuccess = responseHandlers.fulfilled;
-    responseInterceptorError = responseHandlers.rejected;
+    vi.clearAllMocks();    
   });
 
   afterEach(() => {

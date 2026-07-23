@@ -25,6 +25,10 @@ public class AppointmentDto {
     private String notes;
     private LocalDateTime createdAt;
     
+    private String cancellationReason;
+    private Boolean isWalkIn;
+    private String businessType;
+    
     @NotEmpty(message = "At least one service must be booked")
     @Valid
     private List<AppointmentItemDto> services;

@@ -2,12 +2,16 @@ import axiosClient from '../axiosClient';
 import type { StaffDto, PageResponse } from '../types';
 
 export const staffService = {
-  getAll: async (page = 0, size = 10): Promise<PageResponse<StaffDto>> => {
-    const res = await axiosClient.get(`/staff?page=${page}&size=${size}`);
+  getAll: async (page = 0, size = 10, businessType?: string): Promise<PageResponse<StaffDto>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (businessType && businessType !== 'BOTH') params.set('businessType', businessType);
+    const res = await axiosClient.get(`/staff?${params}`);
     return res.data;
   },
-  getByBranch: async (branchId: number, page = 0, size = 10): Promise<PageResponse<StaffDto>> => {
-    const res = await axiosClient.get(`/staff/branch/${branchId}?page=${page}&size=${size}`);
+  getByBranch: async (branchId: number, page = 0, size = 10, businessType?: string): Promise<PageResponse<StaffDto>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (businessType && businessType !== 'BOTH') params.set('businessType', businessType);
+    const res = await axiosClient.get(`/staff/branch/${branchId}?${params}`);
     return res.data;
   },
   create: async (data: Partial<StaffDto>): Promise<StaffDto> => {

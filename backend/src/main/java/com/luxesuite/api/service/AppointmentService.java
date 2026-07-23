@@ -55,10 +55,15 @@ public class AppointmentService {
         }
         
         LocalDateTime currentStartTime = dto.getServices().get(0).getStartTime();
+        boolean hasSpa = false;
+        boolean hasSalon = false;
 
         for (AppointmentItemDto itemDto : dto.getServices()) {
             com.luxesuite.api.model.Service service = serviceRepository.findById(itemDto.getServiceId())
                     .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+            
+            if ("SPA".equals(service.getBusinessType())) hasSpa = true;
+            if ("SALON".equals(service.getBusinessType())) hasSalon = true;
             
             Staff staff = staffRepository.findByIdForUpdate(itemDto.getStaffId())
                     .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
@@ -94,6 +99,16 @@ public class AppointmentService {
 
         appointment.setTotalPrice(totalPrice);
         
+        if (hasSpa && hasSalon) {
+            appointment.setBusinessType("BOTH");
+        } else if (hasSpa) {
+            appointment.setBusinessType("SPA");
+        } else if (hasSalon) {
+            appointment.setBusinessType("SALON");
+        } else {
+            appointment.setBusinessType("BOTH");
+        }
+        
         Appointment savedAppointment = appointmentRepository.save(appointment);
         
         // Emit SSE event
@@ -103,9 +118,11 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public com.luxesuite.api.dto.PageResponse<AppointmentDto> getAppointmentsByBranchAndDateRange(Long branchId, LocalDateTime start, LocalDateTime end, int page, int size) {
+    public com.luxesuite.api.dto.PageResponse<AppointmentDto> getAppointmentsByBranchAndDateRange(Long branchId, LocalDateTime start, LocalDateTime end, int page, int size, String businessType) {
         securityUtils.validateBranchAccess(branchId);
-        org.springframework.data.domain.Page<Appointment> appointments = appointmentRepository.findByBranchIdAndCreatedAtBetween(branchId, start, end, org.springframework.data.domain.PageRequest.of(page, size));
+        String bType = businessType != null ? businessType : "BOTH";
+        List<String> validTypes = "BOTH".equals(bType) ? java.util.Arrays.asList("SPA", "SALON", "BOTH") : java.util.Arrays.asList("BOTH", bType);
+        org.springframework.data.domain.Page<Appointment> appointments = appointmentRepository.findByBranchIdAndCreatedAtBetweenAndBusinessTypeIn(branchId, start, end, validTypes, org.springframework.data.domain.PageRequest.of(page, size));
         
         if (appointments.hasContent()) {
             List<Long> appointmentIds = appointments.stream().map(Appointment::getId).collect(Collectors.toList());
@@ -166,6 +183,7 @@ public class AppointmentService {
         dto.setTotalPrice(appointment.getTotalPrice());
         dto.setNotes(appointment.getNotes());
         dto.setCreatedAt(appointment.getCreatedAt());
+        dto.setBusinessType(appointment.getBusinessType());
         
         List<AppointmentItemDto> itemDtos = appointment.getServices().stream().map(item -> {
             AppointmentItemDto itemDto = new AppointmentItemDto();

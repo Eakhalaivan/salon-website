@@ -38,6 +38,10 @@ public class Product {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Builder.Default
+    @Column(name = "business_type")
+    private String businessType = "BOTH"; // SALON, SPA, BOTH
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -52,6 +56,7 @@ public class Product {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (isActive == null) isActive = true;
+        if (businessType == null) businessType = "BOTH";
     }
 
     @PreUpdate

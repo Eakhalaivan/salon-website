@@ -17,6 +17,7 @@ export interface CustomerDto {
   totalPoints: number;
   familyGroupId?: number;
   isPrimaryMember: boolean;
+  profilePhoto?: string;
 }
 
 export interface AppointmentDto {
@@ -51,6 +52,7 @@ export interface ServiceDto {
   durationMins: number;
   genderCategory?: 'MEN' | 'WOMEN' | 'UNISEX';
   category: string;
+  businessType?: 'SPA' | 'SALON' | 'BOTH';
   isActive?: boolean;
   imageUrl?: string;
 }

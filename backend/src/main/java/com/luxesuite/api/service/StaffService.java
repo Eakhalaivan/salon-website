@@ -42,15 +42,19 @@ public class StaffService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public PageResponse<StaffDto> getAllStaff(int page, int size) {
-        Page<Staff> staffPage = staffRepository.findByUserIsActiveTrue(PageRequest.of(page, size));
+    public PageResponse<StaffDto> getAllStaff(int page, int size, String businessType) {
+        String bType = businessType != null ? businessType : "BOTH";
+        List<String> validTypes = "BOTH".equals(bType) ? java.util.Arrays.asList("SPA", "SALON", "BOTH") : java.util.Arrays.asList("BOTH", bType);
+        Page<Staff> staffPage = staffRepository.findByUserIsActiveTrueAndBusinessTypeIn(validTypes, PageRequest.of(page, size));
         return PageResponse.of(staffPage.map(this::mapToDto));
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<StaffDto> getStaffByBranch(Long branchId, int page, int size) {
+    public PageResponse<StaffDto> getStaffByBranch(Long branchId, int page, int size, String businessType) {
         securityUtils.validateBranchAccess(branchId);
-        Page<Staff> staffPage = staffRepository.findByBranchIdAndUserIsActiveTrue(branchId, PageRequest.of(page, size));
+        String bType = businessType != null ? businessType : "BOTH";
+        List<String> validTypes = "BOTH".equals(bType) ? java.util.Arrays.asList("SPA", "SALON", "BOTH") : java.util.Arrays.asList("BOTH", bType);
+        Page<Staff> staffPage = staffRepository.findByBranchIdAndUserIsActiveTrueAndBusinessTypeIn(branchId, validTypes, PageRequest.of(page, size));
         return PageResponse.of(staffPage.map(this::mapToDto));
     }
 
@@ -94,6 +98,8 @@ public class StaffService {
         staff.setBaseSalary(dto.getBaseSalary());
         staff.setCommissionRate(dto.getCommissionRate());
         
+        staff.setBusinessType(dto.getBusinessType() != null ? dto.getBusinessType() : "BOTH");
+        
         if (dto.getServiceIds() != null && !dto.getServiceIds().isEmpty()) {
             Set<Service> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
             staff.setServices(services);
@@ -115,6 +121,10 @@ public class StaffService {
         existing.setBranch(branch);
         existing.setBaseSalary(dto.getBaseSalary());
         existing.setCommissionRate(dto.getCommissionRate());
+        
+        if (dto.getBusinessType() != null) {
+            existing.setBusinessType(dto.getBusinessType());
+        }
         
         if (dto.getServiceIds() != null) {
             Set<Service> services = new HashSet<>(serviceRepository.findAllById(dto.getServiceIds()));
@@ -154,6 +164,8 @@ public class StaffService {
         if (staff.getServices() != null) {
             dto.setServiceIds(staff.getServices().stream().map(Service::getId).collect(Collectors.toSet()));
         }
+        
+        dto.setBusinessType(staff.getBusinessType());
         return dto;
     }
 }

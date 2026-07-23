@@ -17,9 +17,9 @@ public class AiMarketingService {
     private final AiClientService aiClientService;
 
     public List<AiMarketingSuggestionDto> generateSuggestions() {
-        // In a full implementation, we would pull real metrics from AnalyticsService.
-        // For this example, we mock the analytics summary to pass to the AI.
-        String businessContext = "Revenue is up 5% this month, but Hair treatments are down 10%. We have 50 lapsed customers who haven't visited in 60 days.";
+        var stats = analyticsService.getDashboardStats(null);
+        String businessContext = String.format("Revenue this month is %s. We had %s new customers this month and %s appointments today.", 
+                stats.getRevenueThisMonth(), stats.getNewCustomersThisMonth(), stats.getTotalAppointmentsToday());
         
         String systemPrompt = "You are a marketing strategist for a luxury salon. Provide exactly 2 short marketing campaign ideas based on the data provided. Format strictly as 'IDEA | RATIONALE | TARGET | COUPON_CODE', separated by newlines.";
         String userPrompt = "Recent data: " + businessContext;

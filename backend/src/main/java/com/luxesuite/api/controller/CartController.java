@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/customers/me/cart")
 @RequiredArgsConstructor
+// Security Note: @PreAuthorize is not required here because endpoints operate strictly on the currently authenticated user's ID obtained from SecurityContextHolder, preventing IDOR.
 public class CartController {
 
     private final CartService cartService;

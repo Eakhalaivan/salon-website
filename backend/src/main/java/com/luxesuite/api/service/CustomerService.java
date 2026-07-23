@@ -63,6 +63,7 @@ public class CustomerService {
         existing.setLastName(dto.getLastName());
         if (dto.getPhone() != null) existing.setPhone(dto.getPhone());
         if (dto.getNotes() != null) existing.setNotes(dto.getNotes());
+        if (dto.getProfilePhoto() != null) existing.setProfilePhoto(dto.getProfilePhoto());
         
         return mapToDto(customerRepository.save(existing));
     }
@@ -85,6 +86,7 @@ public class CustomerService {
         existing.setEmail(dto.getEmail());
         existing.setPhone(dto.getPhone());
         existing.setNotes(dto.getNotes());
+        if (dto.getProfilePhoto() != null) existing.setProfilePhoto(dto.getProfilePhoto());
         
         return mapToDto(customerRepository.save(existing));
     }
@@ -105,6 +107,7 @@ public class CustomerService {
         dto.setPhone(customer.getPhone());
         dto.setNotes(customer.getNotes());
         dto.setTotalPoints(customer.getTotalPoints());
+        dto.setProfilePhoto(customer.getProfilePhoto());
         return dto;
     }
 
@@ -116,6 +119,7 @@ public class CustomerService {
         customer.setPhone(dto.getPhone());
         customer.setNotes(dto.getNotes());
         customer.setTotalPoints(dto.getTotalPoints() != null ? dto.getTotalPoints() : 0);
+        customer.setProfilePhoto(dto.getProfilePhoto());
         return customer;
     }
 }

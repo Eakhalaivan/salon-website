@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appointmentService } from '../../api/services/appointmentService';
+import { useProviderStore } from '../../store/useProviderStore';
 
 export const useServicesQuery = (page = 0, size = 100) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['services', page, size],
-    queryFn: () => appointmentService.getServices(page, size),
+    queryKey: ['services', page, size, businessType],
+    queryFn: () => appointmentService.getServices(page, size, businessType),
     staleTime: 60 * 60 * 1000, // 1 hour
   });
 };
@@ -41,9 +43,10 @@ export const useUpdateAppointmentStatusMutation = () => {
 };
 
 export const useAppointmentsByBranchQuery = (branchId: number | null, start: string, end: string, page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['appointments', branchId, start, end, page, size],
-    queryFn: () => appointmentService.getAppointmentsByBranch(branchId!, start, end, page, size),
+    queryKey: ['appointments', branchId, start, end, page, size, businessType],
+    queryFn: () => appointmentService.getAppointmentsByBranch(branchId!, start, end, page, size, businessType),
     enabled: !!branchId && !!start && !!end,
   });
 };

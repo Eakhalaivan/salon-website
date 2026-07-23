@@ -6,11 +6,13 @@ import { Card } from '../../components/ui/Card';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
+import { BusinessTypeBadge } from '../../components/ui/BusinessTypeBadge';
 import type { ServiceDto } from '../../api/types';
 
 export const AdminServices = () => {
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [businessTypeFilter, setBusinessTypeFilter] = useState('ALL');
   const { data: pageData, isLoading } = useServicesQuery(page, searchQuery ? 1000 : 10);
   const services = pageData?.content || [];
   const createService = useCreateService();
@@ -29,6 +31,7 @@ export const AdminServices = () => {
     price: '',
     genderCategory: 'UNISEX',
     category: 'Wellness',
+    businessType: 'BOTH',
     isActive: true,
   });
 
@@ -37,9 +40,13 @@ export const AdminServices = () => {
       const name = s.name.toLowerCase();
       const cat = s.category?.toLowerCase() || '';
       const q = searchQuery.toLowerCase();
-      return name.includes(q) || cat.includes(q);
+      const matchesSearch = name.includes(q) || cat.includes(q);
+      
+      const typeMatches = businessTypeFilter === 'ALL' || (s.businessType || 'BOTH') === businessTypeFilter || (s.businessType === 'BOTH');
+      
+      return matchesSearch && typeMatches;
     });
-  }, [services, searchQuery]);
+  }, [services, searchQuery, businessTypeFilter]);
 
   const handleOpenModal = (service?: ServiceDto) => {
     if (service) {
@@ -51,12 +58,13 @@ export const AdminServices = () => {
         price: service.price?.toString() || '',
         genderCategory: service.genderCategory || 'UNISEX',
         category: service.category || 'Wellness',
+        businessType: service.businessType || 'BOTH',
         isActive: service.isActive ?? true,
       });
     } else {
       setEditingService(null);
       setFormData({
-        name: '', description: '', durationMins: '30', price: '', genderCategory: 'UNISEX', category: 'Wellness', isActive: true
+        name: '', description: '', durationMins: '30', price: '', genderCategory: 'UNISEX', category: 'Wellness', businessType: 'BOTH', isActive: true
       });
     }
     setIsModalOpen(true);
@@ -68,7 +76,8 @@ export const AdminServices = () => {
       ...formData,
       price: Number(formData.price),
       durationMins: Number(formData.durationMins),
-      genderCategory: formData.genderCategory as "MEN" | "WOMEN" | "UNISEX" | undefined
+      genderCategory: formData.genderCategory as "MEN" | "WOMEN" | "UNISEX" | undefined,
+      businessType: formData.businessType as "SPA" | "SALON" | "BOTH" | undefined
     };
 
     if (editingService) {
@@ -109,6 +118,18 @@ export const AdminServices = () => {
               Local search: retrieving extended results for filtering.
             </div>
           </div>
+          
+          <select 
+            value={businessTypeFilter}
+            onChange={(e) => setBusinessTypeFilter(e.target.value)}
+            className="h-[52px] px-4 rounded-xl border border-outline-variant bg-surface text-on-surface"
+          >
+            <option value="ALL">All Types</option>
+            <option value="SPA">Spa Only</option>
+            <option value="SALON">Salon Only</option>
+            <option value="BOTH">Both</option>
+          </select>
+
           <Button onClick={() => handleOpenModal()} className="shadow-[0px_8px_20px_rgba(212,175,55,0.2)] shrink-0">
             <span className="material-symbols-outlined font-light mr-2">add_circle</span>
             Add Service
@@ -140,7 +161,10 @@ export const AdminServices = () => {
                 
                 <div className="relative z-10 flex flex-col h-full">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="font-label-sm text-xs bg-primary/10 text-primary px-2 py-1 rounded-md uppercase tracking-widest">{service.category}</div>
+                    <div className="flex gap-2 items-center">
+                      <div className="font-label-sm text-xs bg-primary/10 text-primary px-2 py-1 rounded-md uppercase tracking-widest">{service.category}</div>
+                      <BusinessTypeBadge businessType={service.businessType ?? 'BOTH'} />
+                    </div>
                     <div className="font-label-sm text-xs text-on-surface-variant uppercase tracking-widest">{service.genderCategory}</div>
                   </div>
                   <h3 className="font-display-sm text-xl text-on-surface mb-2 leading-tight">{service.name}</h3>
@@ -211,6 +235,19 @@ export const AdminServices = () => {
           <div className="grid grid-cols-2 gap-4">
             <Input label="Category (e.g. Hair, Skin)" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required />
             <Input label="Gender Target (MEN, WOMEN, UNISEX)" value={formData.genderCategory} onChange={e => setFormData({...formData, genderCategory: e.target.value})} required />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="font-label-md text-on-surface">Business Type</label>
+            <select
+              className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300 font-body-md"
+              value={formData.businessType}
+              onChange={e => setFormData({...formData, businessType: e.target.value})}
+              required
+            >
+              <option value="BOTH">Both (Spa & Salon)</option>
+              <option value="SPA">Spa Only</option>
+              <option value="SALON">Salon Only</option>
+            </select>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <input type="checkbox" id="isActive" checked={formData.isActive} onChange={e => setFormData({...formData, isActive: e.target.checked})} className="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary" />

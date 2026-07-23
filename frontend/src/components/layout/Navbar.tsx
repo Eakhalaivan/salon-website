@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, animate, useScroll, useTransform } from 'framer-motion';
-import { Menu, X, ArrowLeft } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
@@ -120,7 +120,7 @@ export const Navbar = () => {
         <div className="hidden lg:flex items-center gap-4">
           <ThemeToggle />
           <Button onClick={() => navigate('/login')} variant="primary" size="md" magnetic>
-            Book Now
+            Login /sign in
           </Button>
         </div>
 

@@ -2,8 +2,10 @@ import axiosClient from '../axiosClient';
 import type { AppointmentDto, ServiceDto, PageResponse } from '../types';
 
 export const appointmentService = {
-  getServices: async (page = 0, size = 100): Promise<PageResponse<ServiceDto>> => {
-    const res = await axiosClient.get(`/services?page=${page}&size=${size}`);
+  getServices: async (page = 0, size = 100, businessType?: string): Promise<PageResponse<ServiceDto>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (businessType && businessType !== 'BOTH') params.set('businessType', businessType);
+    const res = await axiosClient.get(`/services?${params}`);
     return res.data;
   },
   
@@ -22,8 +24,10 @@ export const appointmentService = {
     return res.data;
   },
 
-  getAppointmentsByBranch: async (branchId: number, start: string, end: string, page = 0, size = 10): Promise<PageResponse<AppointmentDto>> => {
-    const res = await axiosClient.get(`/appointments/branch/${branchId}?start=${start}&end=${end}&page=${page}&size=${size}`);
+  getAppointmentsByBranch: async (branchId: number, start: string, end: string, page = 0, size = 10, businessType?: string): Promise<PageResponse<AppointmentDto>> => {
+    const params = new URLSearchParams({ start, end, page: String(page), size: String(size) });
+    if (businessType && businessType !== 'BOTH') params.set('businessType', businessType);
+    const res = await axiosClient.get(`/appointments/branch/${branchId}?${params}`);
     return res.data;
   }
 };

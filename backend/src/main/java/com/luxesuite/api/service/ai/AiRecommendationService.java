@@ -35,8 +35,8 @@ public class AiRecommendationService {
 
         List<Appointment> pastAppointments = appointmentRepository.findByCustomerId(customerId);
         
-        // 1. Deterministic heuristic fallback: find popular or randomly rotated services
-        List<Service> allServices = serviceRepository.findByIsActiveTrue();
+        // 1. Deterministic heuristic fallback: find popular services
+        List<Service> allServices = serviceRepository.findTopServicesByBookingCountNative(10);
         
         // Exclude services they've already had recently (simple heuristic)
         List<Long> recentServiceIds = pastAppointments.stream()
@@ -50,7 +50,7 @@ public class AiRecommendationService {
                 .limit(3)
                 .collect(Collectors.toList());
                 
-        // If they've had all services, just suggest the most popular (mocked by limit)
+        // If they've had all top services, just suggest the most popular anyway
         if (candidates.isEmpty()) {
             candidates = allServices.stream().limit(3).collect(Collectors.toList());
         }

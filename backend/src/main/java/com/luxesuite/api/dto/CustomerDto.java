@@ -21,4 +21,5 @@ public class CustomerDto {
     private String phone;
     private String notes;
     private Integer totalPoints;
+    private String profilePhoto;
 }

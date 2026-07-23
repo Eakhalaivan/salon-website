@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMyProfileQuery, useUpdateMyProfileMutation } from '../../hooks/api/useCustomers';
 import type { CustomerDto } from '../../api/types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,8 @@ export const Profile = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profileData) {
@@ -32,6 +34,28 @@ export const Profile = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setProfile(prev => {
+          const newProfile = { ...prev, profilePhoto: base64String };
+          // Auto-save the photo change
+          updateProfile.mutate(newProfile, {
+            onSuccess: () => {
+              setSuccess(true);
+              setTimeout(() => setSuccess(false), 3000);
+            }
+          });
+          return newProfile;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,13 +144,23 @@ export const Profile = () => {
                   <div className="w-full h-full rounded-full overflow-hidden bg-surface-dim">
                     <img
                       className="w-full h-full object-cover" 
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZk4EJsHtpgx8tysD3NCRd9PLuFRwnPiJ444yDLW5IYmqUdeyM40wRcw4eyD1a19DjGjFJrAaUp7iv5xUSYT0A-ktUk-1GQ8faAbYeh1eVqmYz_zU-TI0oslmiAqxQp6kwZMP6XrtUdmh4BtHPm5T2qhZT-I-CT6PZ8M-jl9d1IEB8d-SzGqpDPrqG162Sesjbx-tQ1FW8TBw6vTLKbPrM4UfwYyCkINHQQ_O9x805-yfUSQk_ONIR103qYVbDhm7e44uJpjDO6rXz"
+                      src={profile.profilePhoto || "https://lh3.googleusercontent.com/aida-public/AB6AXuCZk4EJsHtpgx8tysD3NCRd9PLuFRwnPiJ444yDLW5IYmqUdeyM40wRcw4eyD1a19DjGjFJrAaUp7iv5xUSYT0A-ktUk-1GQ8faAbYeh1eVqmYz_zU-TI0oslmiAqxQp6kwZMP6XrtUdmh4BtHPm5T2qhZT-I-CT6PZ8M-jl9d1IEB8d-SzGqpDPrqG162Sesjbx-tQ1FW8TBw6vTLKbPrM4UfwYyCkINHQQ_O9x805-yfUSQk_ONIR103qYVbDhm7e44uJpjDO6rXz"}
                       alt="Profile"
                       loading="lazy"
                     />
                   </div>
                 </div>
-                <button className="absolute bottom-1 right-1 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-container transition-colors z-20">
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handlePhotoChange} 
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-1 right-1 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-container transition-colors z-20"
+                >
                   <span className="material-symbols-outlined text-lg">photo_camera</span>
                 </button>
               </div>

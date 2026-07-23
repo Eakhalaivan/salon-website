@@ -100,17 +100,20 @@ public class AppointmentConcurrentTest {
     }
 
     @Autowired
-    private InvoiceRepository invoiceRepository;
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void tearDown() {
-        invoiceRepository.deleteAll();
-        appointmentRepository.deleteAll();
-        staffRepository.deleteAll();
-        serviceRepository.deleteAll();
-        customerRepository.deleteAll();
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM invoices");
+        jdbcTemplate.execute("DELETE FROM appointment_services");
+        jdbcTemplate.execute("DELETE FROM appointments");
+        jdbcTemplate.execute("DELETE FROM staff_services");
+        jdbcTemplate.execute("DELETE FROM staff");
+        jdbcTemplate.execute("DELETE FROM services");
+        jdbcTemplate.execute("DELETE FROM branches");
+        jdbcTemplate.execute("DELETE FROM customers");
+        jdbcTemplate.execute("DELETE FROM users");
+        jdbcTemplate.execute("DELETE FROM roles");
     }
 
     @Test

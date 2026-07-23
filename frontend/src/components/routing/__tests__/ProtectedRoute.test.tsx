@@ -7,9 +7,13 @@ import React from 'react';
 import '@testing-library/jest-dom';
 
 // Mock the auth store
-vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: vi.fn(),
-}));
+vi.mock('../../../store/useAuthStore', () => {
+  const useAuthStore = vi.fn();
+  return {
+    useAuthStore,
+    selectHasHydrated: (state: any) => true,
+  };
+});
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
@@ -60,6 +64,22 @@ describe('ProtectedRoute', () => {
     
     expect(screen.getByTestId('unauthorized-page')).toBeInTheDocument();
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
+  });
+
+  it('should redirect to /unauthorized when STAFF tries to access ADMIN route (e.g. branch settings)', () => {
+    (useAuthStore as any).mockImplementation((selector: any) => {
+      const state = { isLoggedIn: true, role: 'STAFF' };
+      return selector(state);
+    });
+
+    renderWithRouter(
+      <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+        <div data-testid="branch-settings-view">Branch Settings View</div>
+      </ProtectedRoute>
+    );
+    
+    expect(screen.getByTestId('unauthorized-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('branch-settings-view')).not.toBeInTheDocument();
   });
 
   it('should render children if authenticated and role is allowed', () => {

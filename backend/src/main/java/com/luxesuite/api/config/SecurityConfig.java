@@ -41,6 +41,9 @@ public class SecurityConfig {
     @Value("${jwt.secret:dGhpcy1pcy1hLXZlcnktc2VjdXJlLWp3dC1zZWNyZXQta2V5LXRoYXQtaXMtMjU2LWJpdHM=}")
     private String jwtSecret;
 
+    @Value("${razorpay.key.secret:eZyRCiqqgfbu1lNVbB60CAFH}")
+    private String razorpaySecret;
+
     @Bean
     public RateLimitFilter rateLimitFilter() {
         return new RateLimitFilter();
@@ -51,6 +54,9 @@ public class SecurityConfig {
         if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
             if ("dGhpcy1pcy1hLXZlcnktc2VjdXJlLWp3dC1zZWNyZXQta2V5LXRoYXQtaXMtMjU2LWJpdHM=".equals(jwtSecret)) {
                 throw new IllegalStateException("FATAL: Burned JWT secret used in production!");
+            }
+            if ("eZyRCiqqgfbu1lNVbB60CAFH".equals(razorpaySecret)) {
+                throw new IllegalStateException("FATAL: Burned Razorpay secret used in production!");
             }
         }
     }
@@ -67,9 +73,8 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 .ignoringRequestMatchers(
                     "/api/v1/auth/**",
-                    "/api/v1/payments/stripe/webhook",
-                    "/api/v1/payments/razorpay/webhook",
-                    "/api/v1/payments/stripe/create-subscription-intent/**"
+                    "/api/v1/payments/**",
+                    "/api/v1/wallet/**"
                 )
             )
             .headers(headers -> headers

@@ -83,6 +83,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
+            System.err.println("JWT FILTER ERROR:");
+            e.printStackTrace();
             // Ignore invalid/expired tokens, let the request proceed unauthenticated
             // (If the endpoint is secured, Spring Security will return 401; if it's permitAll, it will succeed)
         }

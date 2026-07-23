@@ -41,9 +41,10 @@ public class AppointmentController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByBranchAndDateRange(branchId, start, end, page, size));
+        return ResponseEntity.ok(appointmentService.getAppointmentsByBranchAndDateRange(branchId, start, end, page, size, businessType));
     }
 
     @GetMapping("/staff/{staffId}")

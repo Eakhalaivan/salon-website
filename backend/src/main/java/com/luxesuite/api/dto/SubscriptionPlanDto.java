@@ -19,4 +19,5 @@ public class SubscriptionPlanDto {
     private BigDecimal discountRate;
     private String planType;
     private Integer totalSessions;
+    private String businessType;
 }

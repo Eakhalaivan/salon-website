@@ -1,19 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { salonService } from '../../api/services/salonService';
 import type { ServiceDto } from '../../api/types';
+import { useProviderStore } from '../../store/useProviderStore';
 
 export const useServicesQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['services', page, size],
-    queryFn: () => salonService.getAll(page, size),
+    queryKey: ['services', page, size, businessType],
+    queryFn: () => salonService.getAll(page, size, businessType),
     staleTime: 5 * 60 * 1000,
   });
 };
 
 export const useActiveServicesQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['services', 'active', page, size],
-    queryFn: () => salonService.getActive(page, size),
+    queryKey: ['services', 'active', page, size, businessType],
+    queryFn: () => salonService.getActive(page, size, businessType),
     staleTime: 5 * 60 * 1000,
   });
 };

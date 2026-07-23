@@ -1,7 +1,6 @@
 -- 1. Add fields to branches
-ALTER TABLE branches 
-ADD COLUMN phone VARCHAR(20),
-ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE branches ADD COLUMN phone VARCHAR(20);
+ALTER TABLE branches ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
 
 -- Backfill Main Branch if none exist
 INSERT INTO branches (name, address, is_active)

@@ -22,7 +22,7 @@ public class ChatbotService {
     @Transactional(readOnly = true)
     public ChatMessageDto chat(ChatRequestDto request) {
         // Fetch real catalog data to ground the AI
-        List<Service> catalog = serviceRepository.findByIsActiveTrue();
+        List<Service> catalog = serviceRepository.findByIsActiveTrue(org.springframework.data.domain.Pageable.unpaged()).getContent();
         
         String catalogString = catalog.stream()
                 .map(s -> String.format("- %s (Price: ₹%s, Duration: %s mins): %s", 

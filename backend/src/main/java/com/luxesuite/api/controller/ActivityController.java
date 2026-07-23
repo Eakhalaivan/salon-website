@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/customers/me/activity")
 @RequiredArgsConstructor
+// Security Note: @PreAuthorize is not required here because endpoints operate strictly on the currently authenticated user's ID obtained from SecurityContextHolder, preventing IDOR.
 public class ActivityController {
 
     private final AppointmentRepository appointmentRepository;

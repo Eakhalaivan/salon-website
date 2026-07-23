@@ -39,6 +39,10 @@ public class Branch {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Builder.Default
+    @Column(name = "business_type")
+    private String businessType = "BOTH"; // SALON, SPA, BOTH
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,6 +58,7 @@ public class Branch {
         updatedAt = LocalDateTime.now();
         if (timezone == null) timezone = "UTC";
         if (isActive == null) isActive = true;
+        if (businessType == null) businessType = "BOTH";
     }
 
     @PreUpdate

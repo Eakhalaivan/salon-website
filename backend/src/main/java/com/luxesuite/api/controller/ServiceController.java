@@ -21,17 +21,21 @@ public class ServiceController {
     @GetMapping
     public ResponseEntity<com.luxesuite.api.dto.PageResponse<ServiceDto>> getAllServices(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(salonService.getAllServices(page, size));
+        return ResponseEntity.ok(salonService.getAllServices(page, size, branchId, businessType));
     }
 
     @GetMapping("/active")
     public ResponseEntity<com.luxesuite.api.dto.PageResponse<ServiceDto>> getActiveServices(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(salonService.getActiveServices(page, size));
+        return ResponseEntity.ok(salonService.getActiveServices(page, size, branchId, businessType));
     }
 
     @GetMapping("/{id}")

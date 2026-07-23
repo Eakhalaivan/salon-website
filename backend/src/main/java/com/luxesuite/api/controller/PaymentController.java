@@ -44,6 +44,15 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/stripe/create-subscription-intent/{planId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> createStripeSubscriptionIntent(@PathVariable Long planId) {
+        String clientSecret = billingService.createStripeSubscriptionIntent(planId);
+        Map<String, String> response = new HashMap<>();
+        response.put("clientSecret", clientSecret);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/stripe/webhook")
     public ResponseEntity<String> handleStripeWebhook(
             @RequestBody String payload,

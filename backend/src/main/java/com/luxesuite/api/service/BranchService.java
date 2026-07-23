@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 public class BranchService {
 
     private final BranchRepository branchRepository;
+    private final com.luxesuite.api.repository.InvoiceRepository invoiceRepository;
+    private final com.luxesuite.api.repository.AppointmentRepository appointmentRepository;
+    private final com.luxesuite.api.repository.ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     @org.springframework.cache.annotation.Cacheable(value = "branches")
@@ -43,6 +46,7 @@ public class BranchService {
                 .timezone(dto.getTimezone())
                 .phone(dto.getPhone())
                 .isActive(dto.getIsActive() != null ? dto.getIsActive() : true)
+                .businessType(dto.getBusinessType() != null ? dto.getBusinessType() : "BOTH")
                 .build();
                 
         Branch saved = branchRepository.save(branch);
@@ -63,6 +67,9 @@ public class BranchService {
         if (dto.getIsActive() != null) {
             branch.setIsActive(dto.getIsActive());
         }
+        if (dto.getBusinessType() != null) {
+            branch.setBusinessType(dto.getBusinessType());
+        }
         
         Branch updated = branchRepository.save(branch);
         return mapToDto(updated);
@@ -76,6 +83,29 @@ public class BranchService {
         branchRepository.delete(branch);
     }
 
+    @Transactional(readOnly = true)
+    public com.luxesuite.api.dto.BranchComparisonDto compareBranches(Long id1, Long id2) {
+        return com.luxesuite.api.dto.BranchComparisonDto.builder()
+                .branch1(getBranchStats(id1))
+                .branch2(getBranchStats(id2))
+                .build();
+    }
+
+    private com.luxesuite.api.dto.BranchComparisonDto.BranchStats getBranchStats(Long branchId) {
+        branchRepository.findById(branchId).orElseThrow(() -> new ResourceNotFoundException("Branch not found with id " + branchId));
+        
+        Double revenue = invoiceRepository.getTotalRevenueByBranchId(branchId);
+        Long appointments = appointmentRepository.countByBranchId(branchId);
+        Double rating = reviewRepository.getAverageRatingByBranchId(branchId);
+
+        return com.luxesuite.api.dto.BranchComparisonDto.BranchStats.builder()
+                .branchId(branchId)
+                .totalRevenue(revenue != null ? revenue : 0.0)
+                .appointmentCount(appointments != null ? appointments : 0L)
+                .averageRating(rating != null ? rating : 0.0)
+                .build();
+    }
+
     private BranchDto mapToDto(Branch branch) {
         return BranchDto.builder()
                 .id(branch.getId())
@@ -85,6 +115,7 @@ public class BranchService {
                 .timezone(branch.getTimezone())
                 .phone(branch.getPhone())
                 .isActive(branch.getIsActive())
+                .businessType(branch.getBusinessType())
                 .createdAt(branch.getCreatedAt())
                 .updatedAt(branch.getUpdatedAt())
                 .build();

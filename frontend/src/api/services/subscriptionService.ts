@@ -7,8 +7,10 @@ export const subscriptionService = {
     return res.data;
   },
   
-  getPlans: async (page = 0, size = 10): Promise<PageResponse<SubscriptionPlanDto>> => {
-    const res = await axiosClient.get(`/subscriptions/plans?page=${page}&size=${size}`);
+  getPlans: async (page = 0, size = 10, businessType?: string): Promise<PageResponse<SubscriptionPlanDto>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (businessType && businessType !== 'BOTH') params.set('businessType', businessType);
+    const res = await axiosClient.get(`/subscriptions/plans?${params}`);
     return res.data;
   },
 

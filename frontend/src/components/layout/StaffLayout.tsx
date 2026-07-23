@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useQueryClient } from '@tanstack/react-query';
+import { ProviderTypeSelector } from '../common/ProviderTypeSelector';
 
 const navItems = [
   { name: 'Dashboard', icon: 'dashboard', path: '/staff/dashboard' },
@@ -86,7 +87,10 @@ export const StaffLayout = () => {
         ))}
       </nav>
 
-      <div className="pt-6 border-t border-outline-variant/30 space-y-2 mt-auto">
+      <div className="pt-6 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div className="px-4">
+          <ProviderTypeSelector />
+        </div>
         <button 
           onClick={handleLogout}
           className="flex w-full items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md rounded-xl"

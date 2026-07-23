@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { ProviderTypeSelector } from '../common/ProviderTypeSelector';
 
 const navItems = [
   { name: 'Dashboard', icon: 'dashboard', path: '/manager/dashboard' },
@@ -88,6 +89,9 @@ export const ManagerLayout = () => {
       </nav>
 
       <div className="pt-6 border-t border-outline-variant/30 space-y-4 mt-auto">
+        <div className="px-4">
+          <ProviderTypeSelector />
+        </div>
         <div className="px-4 mb-2">
           <button className="w-full py-3 bg-primary text-on-primary rounded-full font-label-md text-label-md shadow-lg hover:shadow-xl transition-shadow active:scale-95">
             Quick Book

@@ -24,6 +24,8 @@ public class BranchDto {
     private String phone;
     private Boolean isActive;
     
+    private String businessType;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

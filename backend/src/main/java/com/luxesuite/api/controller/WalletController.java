@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -31,9 +32,15 @@ public class WalletController {
         return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
     }
 
+    @Autowired
+    private org.springframework.core.env.Environment env;
+
     @PostMapping("/topup/mock")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Map<String, String>> mockTopup(@RequestBody WalletTopupRequest request) {
+        if (java.util.Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+            return ResponseEntity.notFound().build();
+        }
         walletService.mockTopup(request.getAmount());
         return ResponseEntity.ok(Map.of("status", "success"));
     }

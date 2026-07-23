@@ -30,4 +30,6 @@ public class ServiceDto implements Serializable {
     private String genderCategory;
     
     private String category;
+    
+    private String businessType;
 }

@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { AnimatedSection } from '../../components/ui/AnimatedSection';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
+import { BusinessTypeBadge } from '../../components/ui/BusinessTypeBadge';
 import { Edit2, Trash2 } from 'lucide-react';
 import type { ProductDto } from '../../api/types';
 
@@ -20,7 +21,10 @@ const ProductRow = React.memo(({
 }) => (
   <tr className="border-b border-outline-variant/30 hover:bg-surface-container-low transition-colors">
     <td className="p-4 py-5">
-      <div className="font-label-lg text-on-surface">{p.name}</div>
+      <div className="font-label-lg text-on-surface flex items-center gap-2">
+        {p.name}
+        <BusinessTypeBadge businessType={p.businessType} />
+      </div>
       {p.sku && <div className="font-body-sm text-on-surface-variant text-xs mt-1">SKU: {p.sku}</div>}
     </td>
     <td className="p-4 text-on-surface-variant capitalize">{p.type?.replace('_', ' ').toLowerCase() || 'N/A'}</td>
@@ -58,6 +62,8 @@ export const AdminProducts = () => {
   const { selectedBranchId } = useBranchStore();
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [businessTypeFilter, setBusinessTypeFilter] = useState('ALL');
+  
   const { data: pageData } = useAdminProductsQuery(page, searchQuery ? 1000 : 10);
   const products = pageData?.content || [];
   const { data: inventoryAlerts, isLoading: isAlertsLoading } = useAiInventoryAlerts(selectedBranchId);
@@ -83,11 +89,15 @@ export const AdminProducts = () => {
   const filteredProducts = useMemo(() => {
     return products.filter((product: any) => {
       const name = product.name.toLowerCase();
-      const sku = product.sku.toLowerCase();
+      const sku = product.sku?.toLowerCase() || '';
       const q = searchQuery.toLowerCase();
-      return name.includes(q) || sku.includes(q);
+      const matchesSearch = name.includes(q) || sku.includes(q);
+      
+      const typeMatches = businessTypeFilter === 'ALL' || (product.businessType || 'BOTH') === businessTypeFilter || (product.businessType === 'BOTH');
+      
+      return matchesSearch && typeMatches;
     });
-  }, [products, searchQuery]);
+  }, [products, searchQuery, businessTypeFilter]);
 
   const handleOpenModal = (product?: ProductDto) => {
     if (product) {
@@ -158,6 +168,18 @@ export const AdminProducts = () => {
               Local search: retrieving extended results for filtering.
             </div>
           </div>
+          
+          <select 
+            value={businessTypeFilter}
+            onChange={(e) => setBusinessTypeFilter(e.target.value)}
+            className="h-[52px] px-4 rounded-xl border border-outline-variant bg-surface text-on-surface"
+          >
+            <option value="ALL">All Types</option>
+            <option value="SPA">Spa Only</option>
+            <option value="SALON">Salon Only</option>
+            <option value="BOTH">Both</option>
+          </select>
+
           <Button onClick={() => handleOpenModal()} className="shadow-[0px_8px_20px_rgba(212,175,55,0.2)] shrink-0">
             <span className="material-symbols-outlined font-light mr-2">add_box</span>
             Add Product

@@ -1,11 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { staffService } from '../../api/services/staffService';
 import type { StaffDto } from '../../api/types';
+import { useProviderStore } from '../../store/useProviderStore';
 
 export const useStaffQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['staff', page, size],
-    queryFn: () => staffService.getAll(page, size),
+    queryKey: ['staff', page, size, businessType],
+    queryFn: () => staffService.getAll(page, size, businessType),
     staleTime: 5 * 60 * 1000,
   });
 };

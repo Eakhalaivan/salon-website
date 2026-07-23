@@ -23,11 +23,13 @@ public class ContentService {
     private final BlogPostRepository blogPostRepository;
     private final JobOpeningRepository jobOpeningRepository;
 
+    @org.springframework.cache.annotation.Cacheable(value = "content", key = "'blogs_' + #page + '_' + #size")
     public PageResponse<BlogPostDto> getPublishedBlogs(int page, int size) {
         Page<BlogPost> posts = blogPostRepository.findByStatus("PUBLISHED", PageRequest.of(page, size));
         return PageResponse.of(posts.map(this::mapToDto));
     }
 
+    @org.springframework.cache.annotation.Cacheable(value = "content", key = "'blog_' + #slug")
     public BlogPostDto getBlogBySlug(String slug) {
         BlogPost post = blogPostRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog post not found"));
@@ -35,6 +37,7 @@ public class ContentService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "content", allEntries = true)
     public BlogPostDto createBlogPost(BlogPostDto dto) {
         BlogPost post = BlogPost.builder()
                 .title(dto.getTitle())
@@ -50,6 +53,7 @@ public class ContentService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "content", allEntries = true)
     public BlogPostDto updateBlogPost(Long id, BlogPostDto dto) {
         BlogPost post = blogPostRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog post not found"));
@@ -68,12 +72,14 @@ public class ContentService {
         return mapToDto(blogPostRepository.save(post));
     }
 
+    @org.springframework.cache.annotation.Cacheable(value = "content", key = "'jobs_' + #page + '_' + #size")
     public PageResponse<JobOpeningDto> getActiveJobOpenings(int page, int size) {
         Page<JobOpening> jobs = jobOpeningRepository.findByActive(true, PageRequest.of(page, size));
         return PageResponse.of(jobs.map(this::mapToJobDto));
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "content", allEntries = true)
     public JobOpeningDto createJobOpening(JobOpeningDto dto) {
         JobOpening job = JobOpening.builder()
                 .title(dto.getTitle())
@@ -87,6 +93,7 @@ public class ContentService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "content", allEntries = true)
     public JobOpeningDto updateJobOpening(Long id, JobOpeningDto dto) {
         JobOpening job = jobOpeningRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job opening not found"));

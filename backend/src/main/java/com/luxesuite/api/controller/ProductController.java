@@ -22,18 +22,22 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'CUSTOMER')")
     public ResponseEntity<com.luxesuite.api.dto.PageResponse<ProductDto>> getRetailProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(productService.getRetailProducts(page, size));
+        return ResponseEntity.ok(productService.getRetailProducts(page, size, branchId, businessType));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')")
     public ResponseEntity<com.luxesuite.api.dto.PageResponse<ProductDto>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(productService.getAllProducts(page, size));
+        return ResponseEntity.ok(productService.getAllProducts(page, size, branchId, businessType));
     }
 
     @GetMapping("/{id}")

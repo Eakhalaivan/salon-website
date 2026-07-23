@@ -24,24 +24,26 @@ public class StaffController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public com.luxesuite.api.dto.PageResponse<StaffDto> getAllStaff(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String businessType
     ) {
         if (securityUtils.hasRole("MANAGER")) {
             Long branchId = securityUtils.getStaffBranchId();
-            return staffService.getStaffByBranch(branchId, page, size);
+            return staffService.getStaffByBranch(branchId, page, size, businessType);
         }
-        return staffService.getAllStaff(page, size);
+        return staffService.getAllStaff(page, size, businessType);
     }
 
     @GetMapping("/branch/{branchId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')")
-    @org.springframework.cache.annotation.Cacheable(value = "staff", key = "'branch_' + #branchId + '_' + #page + '_' + #size")
+    @org.springframework.cache.annotation.Cacheable(value = "staff", key = "'branch_' + #branchId + '_' + #page + '_' + #size + '_' + #businessType")
     public com.luxesuite.api.dto.PageResponse<StaffDto> getStaffByBranch(
             @PathVariable Long branchId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String businessType
     ) {
-        return staffService.getStaffByBranch(branchId, page, size);
+        return staffService.getStaffByBranch(branchId, page, size, businessType);
     }
 
     @GetMapping("/{id}")

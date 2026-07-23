@@ -32,4 +32,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"customer", "customer.user", "branch", "appointment"})
     @Query("SELECT i FROM Invoice i WHERE i.customer.user.id = :userId")
     Page<Invoice> findByCustomerUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT SUM(i.totalAmount) FROM Invoice i WHERE i.branch.id = :branchId AND i.status = 'PAID'")
+    Double getTotalRevenueByBranchId(@Param("branchId") Long branchId);
 }

@@ -123,10 +123,10 @@ public class WalletService {
     }
 
     @Transactional
-    public void processTopup(Long customerId, BigDecimal amount, String transactionRef) {
-        Customer customer = customerRepository.findById(customerId)
+    public void processTopup(Long userId, BigDecimal amount, String transactionRef) {
+        Customer customer = customerRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-        Wallet wallet = walletRepository.findByCustomerId(customerId)
+        Wallet wallet = walletRepository.findByCustomerId(customer.getId())
                 .orElseGet(() -> createEmptyWallet(customer));
                 
         wallet.setBalance(wallet.getBalance().add(amount));

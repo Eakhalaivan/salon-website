@@ -1,19 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '../../api/services/productService';
 import type { ProductDto } from '../../api/types';
+import { useProviderStore } from '../../store/useProviderStore';
 
 export const useAdminProductsQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['products', 'admin', page, size],
-    queryFn: () => productService.getAll(page, size),
+    queryKey: ['products', 'admin', page, size, businessType],
+    queryFn: () => productService.getAll(page, size, businessType),
     staleTime: 5 * 60 * 1000,
   });
 };
 
 export const useRetailProductsQuery = (page = 0, size = 10) => {
+  const businessType = useProviderStore((s) => s.businessType);
   return useQuery({
-    queryKey: ['products', 'retail', page, size],
-    queryFn: () => productService.getRetail(page, size),
+    queryKey: ['products', 'retail', page, size, businessType],
+    queryFn: () => productService.getRetail(page, size, businessType),
     staleTime: 5 * 60 * 1000,
   });
 };

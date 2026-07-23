@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useBranchStore } from '../../store/useBranchStore';
 import axiosClient from '../../api/axiosClient';
+import { ProviderTypeSelector } from '../common/ProviderTypeSelector';
 
 interface Branch {
   id: number;
@@ -133,6 +134,10 @@ export const AdminLayout = () => {
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
+        </div>
+
+        <div className="px-4">
+          <ProviderTypeSelector />
         </div>
         
         <div className="px-4 mb-2">

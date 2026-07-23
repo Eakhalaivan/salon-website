@@ -24,6 +24,14 @@ public class BranchController {
         return ResponseEntity.ok(branchService.getAllBranches());
     }
 
+    @GetMapping("/compare")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<com.luxesuite.api.dto.BranchComparisonDto> compareBranches(
+            @RequestParam Long branchId1, 
+            @RequestParam Long branchId2) {
+        return ResponseEntity.ok(branchService.compareBranches(branchId1, branchId2));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<BranchDto> getBranchById(@PathVariable Long id) {

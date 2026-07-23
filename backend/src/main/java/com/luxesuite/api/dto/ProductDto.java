@@ -29,5 +29,6 @@ public class ProductDto {
 
     private BigDecimal cost;
     private Boolean isActive;
+    private String businessType;
     private Integer stockQuantity;
 }

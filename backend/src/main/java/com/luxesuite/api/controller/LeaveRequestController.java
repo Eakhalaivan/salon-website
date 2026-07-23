@@ -9,11 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/leave-requests")
-@CrossOrigin(origins = "*", maxAge = 3600)
+@PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'ADMIN')")
 public class LeaveRequestController {
     
     @Autowired
@@ -42,9 +44,26 @@ public class LeaveRequestController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<LeaveRequest> updateStatus(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<LeaveRequest> updateStatus(
+            @PathVariable Long id, 
+            @RequestBody java.util.Map<String, String> payload,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
         LeaveRequest req = leaveRequestRepository.findById(id).orElseThrow();
-        req.setStatus(payload.get("status"));
+        String newStatus = payload.get("status");
+        if (newStatus == null || (!newStatus.equals("APPROVED") && !newStatus.equals("REJECTED"))) {
+            throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
+        }
+        
+        Staff callerStaff = staffRepository.findByUserEmail(userDetails.getUsername()).orElseThrow();
+        boolean isAdmin = callerStaff.getUser().getRole().getName().equals("ADMIN");
+        
+        if (!isAdmin && !callerStaff.getBranch().getId().equals(req.getStaff().getBranch().getId())) {
+            throw new AccessDeniedException("You can only approve leave requests for your own branch");
+        }
+        
+        req.setStatus(newStatus);
         return ResponseEntity.ok(leaveRequestRepository.save(req));
     }
 }

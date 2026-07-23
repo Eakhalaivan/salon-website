@@ -25,9 +25,10 @@ public class SubscriptionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'CUSTOMER')")
     public ResponseEntity<PageResponse<SubscriptionPlanDto>> getActivePlans(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String businessType
     ) {
-        return ResponseEntity.ok(subscriptionService.getActivePlans(page, size));
+        return ResponseEntity.ok(subscriptionService.getActivePlans(page, size, businessType));
     }
 
     @GetMapping("/my")
@@ -39,9 +40,4 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.getMySubscriptions(page, size));
     }
 
-    @PostMapping("/{planId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CustomerSubscriptionDto> purchaseSubscription(@PathVariable Long planId) {
-        return ResponseEntity.ok(subscriptionService.purchaseSubscription(planId));
-    }
 }
