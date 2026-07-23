@@ -14,6 +14,11 @@ import com.luxesuite.api.exception.PaymentGatewayException;
 import com.luxesuite.api.security.SecurityUtils;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.razorpay.RazorpayClient;
+import com.razorpay.Order;
+import com.razorpay.Utils;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +34,10 @@ public class WalletService {
     private final CustomerRepository customerRepository;
     private final InvoiceRepository invoiceRepository;
     private final SecurityUtils securityUtils;
+    private final RazorpayClient razorpayClient;
+    
+    @Value("${razorpay.key.secret:dummy_secret}")
+    private String razorpaySecret;
 
     @Transactional(readOnly = true)
     public WalletDto getMyWallet() {
@@ -71,6 +80,46 @@ public class WalletService {
     public void mockTopup(BigDecimal amount) {
         Long customerId = securityUtils.getCurrentUserId();
         processTopup(customerId, amount, "MOCK-" + System.currentTimeMillis());
+    }
+
+    public String createRazorpayTopupOrder(BigDecimal amount) {
+        Long customerId = securityUtils.getCurrentUserId();
+        try {
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", amount.multiply(new BigDecimal(100)).longValue());
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "wallet_" + customerId + "_" + System.currentTimeMillis());
+            
+            JSONObject notes = new JSONObject();
+            notes.put("walletTopupCustomerId", customerId.toString());
+            notes.put("type", "WALLET_TOPUP");
+            orderRequest.put("notes", notes);
+
+            Order order = razorpayClient.orders.create(orderRequest);
+            return order.get("id");
+        } catch (Exception e) {
+            throw new PaymentGatewayException("Failed to create Razorpay Order for Wallet Topup: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public void verifyRazorpayTopup(String paymentId, String orderId, String signature, BigDecimal amount) {
+        try {
+            JSONObject options = new JSONObject();
+            options.put("razorpay_order_id", orderId);
+            options.put("razorpay_payment_id", paymentId);
+            options.put("razorpay_signature", signature);
+            
+            boolean isValid = Utils.verifyPaymentSignature(options, razorpaySecret);
+            if (!isValid) {
+                throw new BadRequestException("Invalid payment signature");
+            }
+            Long customerId = securityUtils.getCurrentUserId();
+            processTopup(customerId, amount, paymentId);
+        } catch (Exception e) {
+            if (e instanceof BadRequestException) throw (BadRequestException) e;
+            throw new BadRequestException("Signature verification failed: " + e.getMessage());
+        }
     }
 
     @Transactional

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
@@ -34,6 +35,25 @@ public class WalletController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Map<String, String>> mockTopup(@RequestBody WalletTopupRequest request) {
         walletService.mockTopup(request.getAmount());
+        return ResponseEntity.ok(Map.of("status", "success"));
+    }
+
+    @PostMapping("/razorpay/create-order")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> createRazorpayOrder(@RequestBody WalletTopupRequest request) {
+        String orderId = walletService.createRazorpayTopupOrder(request.getAmount());
+        return ResponseEntity.ok(Map.of("orderId", orderId));
+    }
+
+    @PostMapping("/razorpay/verify")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> verifyRazorpayTopup(@RequestBody Map<String, String> payload) {
+        String paymentId = payload.get("razorpay_payment_id");
+        String orderId = payload.get("razorpay_order_id");
+        String signature = payload.get("razorpay_signature");
+        BigDecimal amount = new BigDecimal(payload.get("amount"));
+        
+        walletService.verifyRazorpayTopup(paymentId, orderId, signature, amount);
         return ResponseEntity.ok(Map.of("status", "success"));
     }
 

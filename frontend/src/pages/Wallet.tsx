@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosClient from '../api/axiosClient';
 import { useToast } from '../components/ui/use-toast';
-import { StripeWalletTopup } from '../components/payments/StripeWalletTopup';
+import { RazorpayWalletTopup } from '../components/payments/RazorpayWalletTopup';
 import { PremiumWalletCard } from '../components/ui/PremiumWalletCard';
 import { Landmark, X, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
@@ -258,7 +258,7 @@ export default function Wallet() {
               </div>
 
               <div className="p-6 overflow-y-auto flex-1 bg-surface-container-lowest">
-                <StripeWalletTopup 
+                <RazorpayWalletTopup 
                   amount={Number(topupAmount)} 
                   onSuccess={handlePaymentSuccess} 
                   onError={handlePaymentError} 
