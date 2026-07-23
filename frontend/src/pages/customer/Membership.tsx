@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { useMySubscriptionsQuery, useSubscriptionPlansQuery, usePurchaseSubscription } from '../../hooks/api/useSubscriptions';
+import { useMySubscriptionsQuery, useSubscriptionPlansQuery } from '../../hooks/api/useSubscriptions';
 import { PricingCard } from '../../components/ui/PricingCard';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Modal } from '../../components/ui/Modal';
+import { StripeSubscriptionCheckout } from '../../components/payments/StripeSubscriptionCheckout';
 import { AnimatePresence } from 'framer-motion';
 
 export const Membership = () => {
   const [planPage, setPlanPage] = useState(0);
-  
-  const purchaseMutation = usePurchaseSubscription();
+  const [checkoutPlan, setCheckoutPlan] = useState<{ id: number; name: string; price: number } | null>(null);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   const { data: subPageData, isLoading: isLoadingSub } = useMySubscriptionsQuery(0, 10);
   const activeSubscriptions = subPageData?.content || [];
@@ -83,11 +85,10 @@ export const Membership = () => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => purchaseMutation.mutate(sub.plan.id)}
-                  disabled={purchaseMutation.isPending}
+                  onClick={() => setCheckoutPlan({ id: sub.plan.id, name: sub.plan.name, price: sub.plan.price })}
                   className="w-full py-3 rounded-full border border-primary text-primary font-label-md hover:bg-primary/5 transition-colors"
                 >
-                  {purchaseMutation.isPending ? 'Processing...' : 'Renew Plan'}
+                  Renew Plan
                 </button>
               </div>
             ))}
@@ -105,7 +106,7 @@ export const Membership = () => {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-end mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch mb-16">
           <AnimatePresence mode="popLayout">
           {availablePlans.map((plan, index) => {
             const isPremium = index === 1; // Middle one highlighted
@@ -127,8 +128,8 @@ export const Membership = () => {
                   features={features}
                   isHighlighted={isPremium}
                   isActive={isActive}
-                  onSelect={() => purchaseMutation.mutate(plan.id)}
-                  buttonText={purchaseMutation.isPending ? 'Processing...' : (isActive ? 'Renew Plan' : 'Choose Plan')}
+                  onSelect={() => setCheckoutPlan({ id: plan.id, name: plan.name, price: plan.price })}
+                  buttonText={isActive ? 'Renew Plan' : 'Choose Plan'}
                 />
               </div>
             );
@@ -198,6 +199,42 @@ export const Membership = () => {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={!!checkoutPlan}
+        onClose={() => {
+            setCheckoutPlan(null);
+            setPurchaseError(null);
+        }}
+        title="Complete Your Membership"
+      >
+        {checkoutPlan && (
+            <div>
+                {purchaseError && (
+                    <div className="bg-error-container text-on-error-container p-4 rounded-xl mb-6 text-sm">
+                        {purchaseError}
+                    </div>
+                )}
+                <StripeSubscriptionCheckout 
+                    planId={checkoutPlan.id}
+                    planName={checkoutPlan.name}
+                    amount={checkoutPlan.price}
+                    onSuccess={() => {
+                        setCheckoutPlan(null);
+                        setPurchaseError(null);
+                    }}
+                    onError={(error) => {
+                        // The backend throws a 400 Bad Request with "message" field for duplicate subscriptions
+                        if (error.response?.data?.message) {
+                            setPurchaseError(error.response.data.message);
+                        } else {
+                            setPurchaseError('Failed to initialize checkout. Please try again.');
+                        }
+                    }}
+                />
+            </div>
+        )}
+      </Modal>
     </main>
   );
 };
