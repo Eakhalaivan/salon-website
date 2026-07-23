@@ -72,8 +72,8 @@ stripe:
 
 razorpay:
   key:
-    id: ${RAZORPAY_KEY_ID:dummy_key_id}
-    secret: ${RAZORPAY_KEY_SECRET:dummy_key_secret}
+    id: ${RAZORPAY_KEY_ID:rzp_test_SpEf15KaCAj2po}
+    secret: ${RAZORPAY_KEY_SECRET:eZyRCiqqgfbu1lNVbB60CAFH}
   webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:dummy_webhook_secret}
 
 management:
