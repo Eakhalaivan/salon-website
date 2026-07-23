@@ -30,4 +30,11 @@ public class WalletController {
         return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
     }
 
+    @PostMapping("/topup/mock")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Map<String, String>> mockTopup(@RequestBody WalletTopupRequest request) {
+        walletService.mockTopup(request.getAmount());
+        return ResponseEntity.ok(Map.of("status", "success"));
+    }
+
 }

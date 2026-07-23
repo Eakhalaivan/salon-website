@@ -68,6 +68,11 @@ public class WalletService {
         }
     }
 
+    public void mockTopup(BigDecimal amount) {
+        Long customerId = securityUtils.getCurrentUserId();
+        processTopup(customerId, amount, "MOCK-" + System.currentTimeMillis());
+    }
+
     @Transactional
     public void processTopup(Long customerId, BigDecimal amount, String transactionRef) {
         Customer customer = customerRepository.findById(customerId)
