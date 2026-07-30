@@ -55,7 +55,7 @@ export const Settings = () => {
               name="businessName"
               value={settings.businessName || ''}
               onChange={handleChange}
-              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl border border-outline-variant/50 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -65,7 +65,7 @@ export const Settings = () => {
               type="email"
               value={settings.email || ''}
               onChange={handleChange}
-              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl border border-outline-variant/50 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -74,7 +74,7 @@ export const Settings = () => {
               name="phone"
               value={settings.phone || ''}
               onChange={handleChange}
-              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl border border-outline-variant/50 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -83,7 +83,7 @@ export const Settings = () => {
               name="currency"
               value={settings.currency || 'USD'}
               onChange={handleChange}
-              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl border border-outline-variant/50 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -92,7 +92,7 @@ export const Settings = () => {
               name="timeZone"
               value={settings.timeZone || 'UTC'}
               onChange={handleChange}
-              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-full bg-surface-variant text-on-surface p-2 rounded-xl border border-outline-variant/50 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div className="flex items-center mt-6">

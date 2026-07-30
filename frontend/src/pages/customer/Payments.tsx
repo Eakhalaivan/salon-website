@@ -242,8 +242,9 @@ export const Payments = () => {
           <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-headline-md text-headline-md text-on-surface">Saved Methods</h4>
-              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline">
-                <span className="material-symbols-outlined text-base">add</span> Add New
+              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors -mr-3">
+                <span className="material-symbols-outlined text-base">add</span>
+                <span>Add New</span>
               </button>
             </div>
             <div className="space-y-4">

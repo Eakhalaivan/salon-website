@@ -194,50 +194,67 @@ export const CustomerBooking = () => {
       </header>
 
       <main className="pt-36 pb-24 max-w-5xl mx-auto px-6 w-full flex-grow relative">
-        {/* Progress Indicator */}
-        <div className="max-w-2xl mx-auto mb-20 px-4">
-          <div className="flex justify-between items-center relative mb-6">
-            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/20 -z-10"></div>
+        {/* Premium Progress Indicator */}
+        <div className="max-w-3xl mx-auto mb-20 px-2 sm:px-8">
+          <div className="flex justify-between items-center relative">
+            {/* Connecting Track */}
+            <div className="absolute top-6 left-12 right-12 h-[2px] bg-outline-variant/30 z-0"></div>
             <motion.div
-              className="absolute top-1/2 left-0 h-[1px] bg-[var(--color-primary)] -z-10"
+              className="absolute top-6 left-12 h-[2px] bg-gradient-to-r from-primary/50 to-primary shadow-[0_0_8px_rgba(212,175,55,0.5)] z-0"
               initial={{ width: '0%' }}
-              animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              animate={{ width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 3rem)` }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             />
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={clsx(
-                  'flex flex-col items-center gap-4 group transition-all duration-300',
-                  step.id <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                )}
-                onClick={() => step.id < currentStep && setStep(step.id as BookingStep)}
-              >
-                <motion.div
-                  layout
+            {/* Steps */}
+            {steps.map((step, index) => {
+              const isActive = step.id === currentStep;
+              const isPast = step.id < currentStep;
+
+              return (
+                <div
+                  key={step.id}
                   className={clsx(
-                    'w-3 h-3 rounded-full transition-all duration-500',
-                    step.id === currentStep
-                      ? 'bg-[var(--color-primary)] ring-4 ring-primary/20 scale-125'
-                      : step.id < currentStep
-                      ? 'bg-[var(--color-primary)]'
-                      : 'bg-[var(--color-surface)] border border-[var(--color-border)]'
+                    'flex flex-col items-center gap-4 group transition-all duration-300 w-24 relative z-10',
+                    step.id <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
                   )}
-                />
-                <span
-                  className={clsx(
-                    'font-label-sm text-xs tracking-widest uppercase transition-colors duration-300',
-                    step.id === currentStep
-                      ? 'text-[var(--color-primary)] font-semibold'
-                      : step.id < currentStep
-                      ? 'text-[var(--color-on-surface-variant)]'
-                      : 'text-[var(--color-outline)]'
-                  )}
+                  onClick={() => step.id < currentStep && setStep(step.id as BookingStep)}
                 >
-                  {step.name}
-                </span>
-              </div>
-            ))}
+                  <motion.div
+                    layout
+                    className={clsx(
+                      'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 font-headline-sm text-lg relative',
+                      isActive
+                        ? 'bg-gradient-to-br from-primary to-primary-fixed-dim text-[#1A1A1A] shadow-[0_4px_20px_rgba(212,175,55,0.4)] scale-110'
+                        : isPast
+                        ? 'bg-[var(--color-background)] border border-primary/50 text-primary'
+                        : 'bg-[var(--color-background)] border border-outline-variant/30 text-outline'
+                    )}
+                  >
+                    {isPast ? (
+                      <span className="material-symbols-outlined text-[20px]">check</span>
+                    ) : (
+                      <span>{index + 1}</span>
+                    )}
+                    
+                    {isActive && (
+                      <div className="absolute -inset-2 border border-primary/20 rounded-full animate-[spin_4s_linear_infinite] pointer-events-none border-t-transparent"></div>
+                    )}
+                  </motion.div>
+                  <span
+                    className={clsx(
+                      'font-label-sm text-[11px] tracking-[0.2em] uppercase transition-colors duration-300 whitespace-nowrap',
+                      isActive
+                        ? 'text-primary font-bold'
+                        : isPast
+                        ? 'text-on-surface-variant'
+                        : 'text-outline'
+                    )}
+                  >
+                    {step.name}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

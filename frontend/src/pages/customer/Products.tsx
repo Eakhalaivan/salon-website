@@ -198,7 +198,6 @@ export const Products = () => {
                     whileHover={{ y: -11, scale: 1.02 }}
                     className="group relative flex flex-col bg-surface-container-lowest/80 backdrop-blur-md border border-transparent hover:border-[#CCA44A]/40 transition-colors duration-400 hover:shadow-[0_24px_60px_rgba(204,164,74,0.18)] rounded-[24px] overflow-hidden"
                   >
-                    <ShimmerSweep angle={-12} />
                     
                     <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-high rounded-t-[24px]">
                       <motion.div 
@@ -316,7 +315,6 @@ const CategoryButton = ({ cat, isActive, onClick }: { cat: string, isActive: boo
         />
       )}
       <RippleLayer ripples={ripples} />
-      <ShimmerSweep />
       <span className="relative z-10">{cat}</span>
     </motion.button>
   );

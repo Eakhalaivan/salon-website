@@ -20,7 +20,7 @@ export const Services = () => {
   // Extract unique categories dynamically
   const categories = useMemo(() => {
     const cats = Array.from(new Set(services.map(s => s.category).filter(Boolean)));
-    return cats.length > 0 ? cats : ['Women\'s Services', 'Men\'s Services'];
+    return ['All Rituals', ...cats];
   }, [services]);
 
   const [activeCategory, setActiveCategory] = useState<string>(categories[0] || 'Women\'s Services');
@@ -140,7 +140,7 @@ export const Services = () => {
                 description={`We couldn't find any services in this category.`}
               />
             ) : (
-              <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[24px]">
+              <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[24px]">
                 <AnimatePresence mode="popLayout">
                   {filteredServices.map((service, index) => (
                     <ServiceCard 
@@ -207,11 +207,10 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
       transition={{ duration: 0.4, delay: index * 0.07, ease: [0.4, 0, 0.2, 1] }}
       className="bg-surface-container-lowest/85 backdrop-blur-md rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] group hover:shadow-[0_24px_60px_rgba(204,164,74,0.18)] border border-transparent hover:border-[#CCA44A]/40 transition-colors duration-400 flex flex-col cursor-pointer relative"
       onClick={() => onBook(service.id)}
-    >
-      <ShimmerSweep angle={-12} className="opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      >
       
       {/* Image Area */}
-      <div className="h-64 relative overflow-hidden bg-surface-container rounded-t-[24px]">
+      <div className="h-36 relative overflow-hidden bg-surface-container rounded-t-[24px]">
         <motion.div 
           animate={{ y: [0, -3, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -247,22 +246,22 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
       </div>
 
       {/* Content Area */}
-      <div className="p-6 flex flex-col flex-1 relative z-10">
+      <div className="p-4 flex flex-col flex-1 relative z-10">
         <AnimatedSection variant="fade" delay={0.1}>
-          <div className="flex justify-between items-start mb-2 gap-4">
-            <h3 className="font-headline-md text-headline-md text-on-surface leading-tight">{service.name}</h3>
+          <div className="flex justify-between items-start mb-2 gap-3">
+            <h3 className="font-title-md text-base font-semibold text-on-surface leading-snug">{service.name}</h3>
             <div className="flex items-center font-bold shrink-0 bg-gradient-to-r from-[#CCA44A] to-[#C3943A] bg-clip-text text-transparent">
-              <span className="text-sm mr-0.5">₹</span>
-              <span className="text-xl">{service.price.toFixed(0)}</span>
+              <span className="text-[10px] mr-0.5">₹</span>
+              <span className="text-lg">{service.price.toFixed(0)}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-secondary font-label-sm mb-4">
-            <span className="material-symbols-outlined text-[16px]">schedule</span>
-            <span className="tracking-widest">{service.durationMins} MINS</span>
+          <div className="flex items-center gap-2 text-secondary/80 font-label-sm mb-3">
+            <span className="material-symbols-outlined text-[14px]">schedule</span>
+            <span className="text-[10px] tracking-wider font-semibold uppercase">{service.durationMins} MINS</span>
           </div>
 
-          <p className="font-body-md text-secondary mb-8 flex-1">
+          <p className="text-[12px] leading-relaxed text-secondary/80 mb-4 flex-1 line-clamp-3">
             {service.description || "A bespoke treatment designed for your absolute serenity."}
           </p>
         </AnimatedSection>
@@ -270,7 +269,7 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
         <motion.button 
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.96 }}
-          className="group/btn relative overflow-hidden w-full py-3.5 rounded-full bg-primary-container text-on-primary-container font-label-md transition-all mt-auto hover:bg-gradient-to-r hover:from-[#CCA44A] hover:via-[#FDE29F] hover:to-[#C3943A] hover:text-[#2A2000] hover:shadow-[0_8px_20px_rgba(204,164,74,0.35)] flex justify-center items-center gap-2"
+          className="group/btn relative overflow-hidden w-full py-2 rounded-full bg-primary-container text-on-primary-container font-label-sm transition-all mt-auto hover:bg-gradient-to-r hover:from-[#CCA44A] hover:via-[#FDE29F] hover:to-[#C3943A] hover:text-[#2A2000] hover:shadow-[0_8px_20px_rgba(204,164,74,0.35)] flex justify-center items-center gap-1.5"
           onClick={(e) => {
             e.stopPropagation();
             addReserveRipple(e as any);
@@ -278,8 +277,8 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
           }}
         >
           <RippleLayer ripples={reserveRipples} />
-          <span className="relative z-10 uppercase tracking-widest text-[12px]">Reserve</span>
-          <span className="material-symbols-outlined text-[18px] relative z-10 group-hover/btn:translate-x-1 transition-transform">
+          <span className="relative z-10 uppercase tracking-widest text-[10px] font-bold">Reserve</span>
+          <span className="material-symbols-outlined text-[14px] relative z-10 group-hover/btn:translate-x-1 transition-transform">
             arrow_forward
           </span>
         </motion.button>

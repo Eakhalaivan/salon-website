@@ -200,10 +200,6 @@ export const CustomerLayout = () => {
         </div>
       </main>
       
-      {/* Contextual FAB (Hidden on some pages, but part of layout) */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
-        <span className="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform">chat_bubble</span>
-      </button>
     </div>
   );
 };
