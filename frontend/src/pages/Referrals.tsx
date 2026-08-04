@@ -88,13 +88,33 @@ export default function Referrals() {
               <div className="mt-8 flex justify-between items-center">
                 <p className="text-[11px] text-secondary-fixed-dim uppercase tracking-wider">Share via</p>
                 <div className="flex gap-4">
-                  <button className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors border border-outline-variant/10">
+                  <a 
+                    href={`mailto:?subject=Join me at Lumina Spa&body=Use my referral code ${codeData?.code || ''} for ₹500 off your first visit!`} 
+                    className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors border border-outline-variant/10 hover:shadow-md hover:border-primary/30"
+                  >
                     <span className="material-symbols-outlined text-lg">mail</span>
-                  </button>
-                  <button className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors border border-outline-variant/10">
+                  </a>
+                  <a 
+                    href={`https://wa.me/?text=Use%20my%20referral%20code%20${codeData?.code || ''}%20for%20%E2%82%B9500%20off%20your%20first%20visit%20at%20Lumina%20Spa!`} 
+                    target="_blank" rel="noopener noreferrer" 
+                    className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-green-500 transition-colors border border-outline-variant/10 hover:shadow-md hover:border-green-500/30"
+                  >
                     <span className="material-symbols-outlined text-lg">chat_bubble</span>
-                  </button>
-                  <button className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors border border-outline-variant/10">
+                  </a>
+                  <button 
+                    onClick={() => {
+                      if (navigator.share && codeData?.code) {
+                        navigator.share({
+                          title: 'Lumina Spa',
+                          text: `Use my referral code ${codeData.code} for ₹500 off your first visit!`,
+                          url: window.location.origin
+                        }).catch(console.error);
+                      } else {
+                        handleCopy();
+                      }
+                    }} 
+                    className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors border border-outline-variant/10 hover:shadow-md hover:border-primary/30"
+                  >
                     <span className="material-symbols-outlined text-lg">share</span>
                   </button>
                 </div>
@@ -141,7 +161,7 @@ export default function Referrals() {
                 <div className="relative flex justify-between">
                   {/* 1 Referral */}
                   <div className="flex flex-col items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${rewardedCount >= 1 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 ${rewardedCount >= 1 ? 'bg-primary text-white shadow-[0_0_15px_var(--color-primary)] scale-110' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
                       <span className="material-symbols-outlined text-sm" style={rewardedCount >= 1 ? {fontVariationSettings: "'FILL' 1"} : {}}>check</span>
                     </div>
                     <div className="mt-4 text-center">
@@ -151,8 +171,8 @@ export default function Referrals() {
                   </div>
                   
                   {/* 3 Referrals */}
-                  <div className={`flex flex-col items-center ${rewardedCount < 3 ? 'opacity-40' : ''}`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${rewardedCount >= 3 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
+                  <div className={`flex flex-col items-center transition-opacity duration-500 ${rewardedCount < 3 ? 'opacity-40' : ''}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 ${rewardedCount >= 3 ? 'bg-primary text-white shadow-[0_0_15px_var(--color-primary)] scale-110' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
                       <span className="material-symbols-outlined text-sm" style={rewardedCount >= 3 ? {fontVariationSettings: "'FILL' 1"} : {}}>card_giftcard</span>
                     </div>
                     <div className="mt-4 text-center">
@@ -162,8 +182,8 @@ export default function Referrals() {
                   </div>
                   
                   {/* 5 Referrals */}
-                  <div className={`flex flex-col items-center ${rewardedCount < 5 ? 'opacity-40' : ''}`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${rewardedCount >= 5 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
+                  <div className={`flex flex-col items-center transition-opacity duration-500 ${rewardedCount < 5 ? 'opacity-40' : ''}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 ${rewardedCount >= 5 ? 'bg-primary text-white shadow-[0_0_15px_var(--color-primary)] scale-110' : 'bg-surface-container-high border-2 border-outline-variant text-secondary'}`}>
                       <span className="material-symbols-outlined text-sm" style={rewardedCount >= 5 ? {fontVariationSettings: "'FILL' 1"} : {}}>redeem</span>
                     </div>
                     <div className="mt-4 text-center">

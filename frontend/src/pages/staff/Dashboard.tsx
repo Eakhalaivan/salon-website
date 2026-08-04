@@ -43,6 +43,12 @@ export const Dashboard = () => {
     shiftProgress = Math.min(100, Math.round((workedHours / 8) * 100)); // Assuming 8 hour shift
   }
 
+  // Generate Daily Brief
+  const sortedAppointments = appointments ? [...appointments].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
+  const dailyBrief = sortedAppointments.length > 0 
+    ? `You have ${sortedAppointments.length} appointment${sortedAppointments.length > 1 ? 's' : ''} scheduled today. Your first client arrives at ${new Date(sortedAppointments[0].services?.[0]?.startTime || sortedAppointments[0].createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}. ${completedToday === sortedAppointments.length ? "All appointments completed, great job!" : "Have a wonderful shift!"}`
+    : "You have no appointments scheduled for today. Enjoy your free time or assist with operations.";
+
   const handleSaveNote = () => {
     updateNoteMutation.mutate(noteContent);
     setIsEditingNote(false);
@@ -134,10 +140,10 @@ export const Dashboard = () => {
                 <div key={appointment.id} className="glass-panel p-6 rounded-[24px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:shadow-lg transition-all duration-300">
                   <div className="flex items-center gap-6">
                     <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-outline-variant flex items-center justify-center">
-                      <span className="font-headline-sm text-surface">C</span>
+                      <span className="font-headline-sm text-surface">{appointment.customerFirstName?.[0] || 'C'}</span>
                     </div>
                     <div>
-                      <h4 className="font-headline-sm text-[20px] text-on-surface mb-1">Customer #{appointment.customerId}</h4>
+                      <h4 className="font-headline-sm text-[20px] text-on-surface mb-1">{appointment.customerFirstName} {appointment.customerLastName}</h4>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-label-sm font-label-sm">
                           {appointment.services?.length || 0} Service(s)
@@ -162,10 +168,19 @@ export const Dashboard = () => {
 
         {/* Sidebar Widgets */}
         <aside className="col-span-12 lg:col-span-4 space-y-8">
-          {/* Customer Notes Section */}
+          {/* Daily Brief Section */}
           <div className="glass-panel p-8 rounded-[32px]">
             <div className="flex items-center justify-between mb-6">
-              <h4 className="font-headline-sm text-[22px] text-on-surface">Client Insights</h4>
+              <h4 className="font-headline-sm text-[22px] text-on-surface">Daily Brief</h4>
+              <span className="material-symbols-outlined text-primary text-[24px]">auto_awesome</span>
+            </div>
+            
+            <div className="p-5 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20 mb-8 shadow-sm">
+              <p className="font-body-lg text-on-surface leading-relaxed">{dailyBrief}</p>
+            </div>
+
+            <div className="flex items-center justify-between mb-4 border-t border-outline-variant/30 pt-6">
+              <h4 className="font-headline-sm text-[18px] text-on-surface">My Reminders</h4>
               <button 
                 className="material-symbols-outlined text-primary hover:opacity-80"
                 onClick={() => setIsEditingNote(!isEditingNote)}

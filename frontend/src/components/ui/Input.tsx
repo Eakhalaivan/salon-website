@@ -60,6 +60,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="text-error text-label-sm mt-1 ml-1"
+            aria-live="polite"
           >
             {error}
           </motion.p>

@@ -3,9 +3,13 @@ package com.luxesuite.api.config;
 import org.springframework.context.annotation.Configuration;
 import io.sentry.Sentry;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Configuration
 public class SentryConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(SentryConfig.class);
 
     @PostConstruct
     public void init() {
@@ -19,6 +23,9 @@ public class SentryConfig {
                 // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
                 options.setTracesSampleRate(1.0);
             });
+            logger.info("Sentry initialized with DSN from environment.");
+        } else {
+            logger.warn("SENTRY_DSN is not configured. Sentry will not capture events in this environment.");
         }
     }
 }

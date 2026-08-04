@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useThemeStore } from './store/useThemeStore';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import { Toaster } from './components/ui/Toaster';
 
 // Layouts
@@ -72,6 +72,7 @@ const StaffSchedule = React.lazy(() => import('./pages/staff/StaffSchedule').the
 const StaffAttendance = React.lazy(() => import('./pages/staff/StaffAttendance').then(m => ({ default: m.StaffAttendance })));
 const Payroll = React.lazy(() => import('./pages/staff/Payroll').then(m => ({ default: m.Payroll })));
 const ManagerReports = React.lazy(() => import('./pages/manager/Reports').then(m => ({ default: m.Reports })));
+const ManagerDashboard = React.lazy(() => import('./pages/manager/ManagerDashboard').then(m => ({ default: m.ManagerDashboard })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -195,7 +196,7 @@ const AnimatedRoutes = () => {
           } 
         >
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="dashboard" element={<PageTransition><ManagerDashboard /></PageTransition>} />
           <Route path="customers" element={<PageTransition><Customers /></PageTransition>} />
           <Route path="staff" element={<PageTransition><Staff /></PageTransition>} />
           <Route path="appointments" element={<PageTransition><ScheduleBuilder /></PageTransition>} />
@@ -301,10 +302,16 @@ function App() {
 
     eventSource.addEventListener('appointment_booked', () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['myNotifications'] });
     });
 
     eventSource.addEventListener('appointment_updated', () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['myNotifications'] });
+    });
+
+    eventSource.addEventListener('new_notification', () => {
+      queryClient.invalidateQueries({ queryKey: ['myNotifications'] });
     });
 
     return () => {
@@ -316,8 +323,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <React.Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <MotionConfig reducedMotion="user">
+        <ErrorBoundary>
+          <React.Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
           <BrowserRouter>
             <div className="min-h-screen bg-background text-on-background font-sans transition-colors duration-300">
               <AnimatePresence>
@@ -330,6 +338,7 @@ function App() {
           </BrowserRouter>
         </React.Suspense>
       </ErrorBoundary>
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

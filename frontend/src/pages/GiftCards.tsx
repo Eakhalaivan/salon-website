@@ -111,6 +111,10 @@ export default function GiftCards() {
   const [recipientName, setRecipientName] = useState('');
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [activeTab, setActiveTab] = useState<'purchased' | 'received'>('purchased');
+  
+  const [redeemCode, setRedeemCode] = useState('');
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const customerId = useAuthStore((s) => s.user?.customerId);
@@ -165,6 +169,28 @@ export default function GiftCards() {
       toast({ title: 'Purchase failed', description: error.message, variant: 'destructive' });
     } finally {
       setIsPurchasing(false);
+    }
+  };
+
+  const handleRedeem = async () => {
+    if (!redeemCode.trim()) {
+      toast({ title: 'Invalid code', description: 'Please enter a valid gift card code', variant: 'destructive' });
+      return;
+    }
+    setIsRedeeming(true);
+    try {
+      await axiosClient.post('/gift-cards/redeem', {
+        code: redeemCode,
+        amount: null // Full amount redemption for now
+      });
+      toast({ title: 'Success', description: 'Gift card redeemed to your wallet successfully!' });
+      setRedeemCode('');
+      queryClient.invalidateQueries({ queryKey: ['myGiftCards'] });
+      queryClient.invalidateQueries({ queryKey: ['walletBalance'] });
+    } catch (error: any) {
+      toast({ title: 'Redemption failed', description: error.message || 'Invalid or expired code', variant: 'destructive' });
+    } finally {
+      setIsRedeeming(false);
     }
   };
 
@@ -324,9 +350,41 @@ export default function GiftCards() {
               <div className="flex items-center gap-1.5 text-xs text-[#9CA3AF]">
                 <Crown className="w-3.5 h-3.5 text-[#D4AF37]" /> Luxury Experience
               </div>
+          </div>
+        </div>
+
+        {/* Redeem Form */}
+        <div className="bg-[#111827] rounded-3xl border border-[#D4AF37]/10 p-6 sm:p-8 mt-6 relative overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+          <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20 bg-[#D4AF37] blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+          
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+            <div className="w-8 h-8 rounded-lg border border-[#D4AF37]/30 flex items-center justify-center bg-[#D4AF37]/10">
+              <Gift className="w-4 h-4 text-[#D4AF37]" />
+            </div>
+            <h2 className="text-xl font-serif text-[#F9FAFB]">Redeem Gift Card</h2>
+          </div>
+
+          <div className="space-y-4 relative z-10">
+            <p className="text-sm text-[#9CA3AF]">Have a gift card code? Enter it below to add the balance to your wallet.</p>
+            <div className="flex gap-3">
+              <input 
+                type="text" 
+                value={redeemCode} 
+                onChange={e => setRedeemCode(e.target.value.toUpperCase())}
+                placeholder="XXXX-XXXX-XXXX"
+                className="flex-1 bg-[#0B0F18] border border-[#111827] rounded-xl py-3 px-4 text-[#F9FAFB] placeholder-[#9CA3AF]/50 focus:outline-none focus:border-[#D4AF37]/50 transition-colors uppercase tracking-widest font-mono text-sm"
+              />
+              <button 
+                onClick={handleRedeem}
+                disabled={isRedeeming || !redeemCode}
+                className="px-6 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center justify-center min-w-[100px]"
+              >
+                {isRedeeming ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Redeem'}
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
         {/* Right Card: My Gift Cards */}
         <div className="bg-[#111827] rounded-3xl border border-[#D4AF37]/10 p-6 sm:p-8 flex flex-col relative shadow-[0_8px_30px_rgba(0,0,0,0.5)]">

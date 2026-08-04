@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -88,7 +89,9 @@ export const ChatWidget = () => {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-surface-container-lowest/50">
-              {messages.map((msg, idx) => (
+              {messages.map((msg, idx) => {
+                const isBookingIntent = msg.role === 'assistant' && (msg.content.includes("Guest Portal") || msg.content.includes("Reserve a Time"));
+                return (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -102,9 +105,22 @@ export const ChatWidget = () => {
                       : 'bg-surface-container text-on-surface rounded-[20px] rounded-tl-[4px] border border-outline-variant/20'
                   }`}>
                     <p className="font-body-md text-[14px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    {isBookingIntent && (
+                      <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                        <Link 
+                          to="/book" 
+                          onClick={() => setIsOpen(false)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md text-xs rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all shadow-md shadow-primary/20"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                          Book Now
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
               {isLoading && (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}

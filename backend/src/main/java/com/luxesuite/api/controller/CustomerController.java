@@ -1,7 +1,9 @@
 package com.luxesuite.api.controller;
 
 import com.luxesuite.api.dto.CustomerDto;
+import com.luxesuite.api.dto.CustomerNoteDto;
 import com.luxesuite.api.service.CustomerService;
+import com.luxesuite.api.service.CustomerNoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final CustomerNoteService customerNoteService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'THERAPIST', 'STAFF')")
@@ -38,6 +41,12 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<CustomerDto> updateMyProfile(@Valid @RequestBody CustomerDto dto) {
         return ResponseEntity.ok(customerService.updateMyProfile(dto));
+    }
+
+    @GetMapping("/my/activity")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<List<com.luxesuite.api.dto.ActivityDto>> getMyActivity() {
+        return ResponseEntity.ok(customerService.getMyActivity());
     }
 
     @GetMapping("/{id}")
@@ -64,4 +73,20 @@ public class CustomerController {
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }
+
+    // --- Customer Notes (formula notes, allergies, preferences) ---
+
+    @GetMapping("/{id}/notes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'THERAPIST', 'STAFF')")
+    public ResponseEntity<List<CustomerNoteDto>> getCustomerNotes(@PathVariable Long id) {
+        return ResponseEntity.ok(customerNoteService.getNotesForCustomer(id));
+    }
+
+    @PostMapping("/{id}/notes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'THERAPIST', 'STAFF')")
+    public ResponseEntity<CustomerNoteDto> addCustomerNote(
+            @PathVariable Long id, @Valid @RequestBody CustomerNoteDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerNoteService.addNote(id, dto));
+    }
 }
+

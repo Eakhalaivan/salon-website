@@ -118,7 +118,7 @@ export default function Wallet() {
                 placeholder="Enter amount to add"
               />
               {!isAmountValid && topupAmount !== '' && (
-                <div className="flex items-center gap-1.5 text-error text-xs mt-2 absolute -bottom-6">
+                <div className="flex items-center gap-1.5 text-error text-xs mt-2 absolute -bottom-6" aria-live="polite">
                   <AlertCircle className="w-3.5 h-3.5" />
                   <span>Enter a valid amount.</span>
                 </div>
@@ -226,7 +226,7 @@ export default function Wallet() {
         </div>
       </section>
 
-      {/* Stripe Payment Modal Overlay */}
+      {/* Razorpay Payment Modal Overlay */}
       <AnimatePresence>
         {showPaymentModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -243,15 +243,19 @@ export default function Wallet() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
             >
               <div className="flex items-center justify-between p-6 border-b border-ink-200/50 bg-surface-container-low">
                 <div className="flex items-center gap-2">
                   <Landmark className="w-6 h-6 text-primary" />
-                  <span className="font-headline-md text-xl text-on-surface">Top Up Wallet</span>
+                  <span id="modal-title" className="font-headline-md text-xl text-on-surface">Top Up Wallet</span>
                 </div>
                 <button 
                   onClick={() => setShowPaymentModal(false)}
                   className="p-2 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-high transition-colors"
+                  aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
                 </button>

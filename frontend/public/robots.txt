@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /book
+Allow: /services
+Disallow: /admin/
+Disallow: /wallet/
+Disallow: /api/
+
+Sitemap: https://luminaspa.example.com/sitemap.xml

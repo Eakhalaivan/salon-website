@@ -231,7 +231,6 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
           onClick={(e) => {
             e.stopPropagation();
             setIsFavorited(!isFavorited);
-            // TODO: wire to real wishlist mutation once implemented
           }}
         >
           <motion.span 

@@ -44,6 +44,12 @@ public class SecurityConfig {
     @Value("${razorpay.key.secret:eZyRCiqqgfbu1lNVbB60CAFH}")
     private String razorpaySecret;
 
+    @Value("${stripe.webhook.secret:dummy_stripe_webhook_secret}")
+    private String stripeWebhookSecret;
+
+    @Value("${razorpay.webhook-secret:dummy_webhook_secret}")
+    private String razorpayWebhookSecret;
+
     @Bean
     public RateLimitFilter rateLimitFilter() {
         return new RateLimitFilter();
@@ -57,6 +63,12 @@ public class SecurityConfig {
             }
             if ("eZyRCiqqgfbu1lNVbB60CAFH".equals(razorpaySecret)) {
                 throw new IllegalStateException("FATAL: Burned Razorpay secret used in production!");
+            }
+            if ("dummy_stripe_webhook_secret".equals(stripeWebhookSecret) || "whsec_test_secret".equals(stripeWebhookSecret)) {
+                throw new IllegalStateException("FATAL: Dummy Stripe webhook secret used in production!");
+            }
+            if ("dummy_webhook_secret".equals(razorpayWebhookSecret)) {
+                throw new IllegalStateException("FATAL: Dummy Razorpay webhook secret used in production!");
             }
         }
     }
@@ -73,8 +85,8 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 .ignoringRequestMatchers(
                     "/api/v1/auth/**",
-                    "/api/v1/payments/**",
-                    "/api/v1/wallet/**"
+                    "/api/v1/payments/stripe/webhook",
+                    "/api/v1/payments/razorpay/webhook"
                 )
             )
             .headers(headers -> headers
@@ -88,6 +100,8 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/services").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/services/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/reviews", "/api/v1/reviews/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/appointments").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/payments/stripe/create-deposit-intent/**").permitAll()
                 .requestMatchers("/api/v1/events/stream").permitAll()
                 .requestMatchers("/api/v1/payments/stripe/webhook").permitAll()
                 .requestMatchers("/api/v1/payments/razorpay/webhook").permitAll()

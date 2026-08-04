@@ -3,6 +3,7 @@ package com.luxesuite.api.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 public class CustomerDto {
@@ -22,4 +23,5 @@ public class CustomerDto {
     private String notes;
     private Integer totalPoints;
     private String profilePhoto;
+    private LocalDate dateOfBirth;
 }

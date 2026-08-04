@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Optional;
+import io.micrometer.core.instrument.MeterRegistry;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class WalletService {
     private final InvoiceRepository invoiceRepository;
     private final SecurityUtils securityUtils;
     private final RazorpayClient razorpayClient;
+    private final MeterRegistry meterRegistry;
     
     @Value("${razorpay.key.secret:dummy_secret}")
     private String razorpaySecret;
@@ -73,6 +75,7 @@ public class WalletService {
             PaymentIntent intent = PaymentIntent.create(params);
             return intent.getClientSecret();
         } catch (Exception e) {
+            meterRegistry.counter("wallet.topup.failure", "gateway", "stripe").increment();
             throw new PaymentGatewayException("Failed to create Stripe PaymentIntent for Wallet Topup: " + e.getMessage(), e);
         }
     }
@@ -98,6 +101,7 @@ public class WalletService {
             Order order = razorpayClient.orders.create(orderRequest);
             return order.get("id");
         } catch (Exception e) {
+            meterRegistry.counter("wallet.topup.failure", "gateway", "razorpay").increment();
             throw new PaymentGatewayException("Failed to create Razorpay Order for Wallet Topup: " + e.getMessage(), e);
         }
     }
@@ -117,6 +121,7 @@ public class WalletService {
             Long customerId = securityUtils.getCurrentUserId();
             processTopup(customerId, amount, paymentId);
         } catch (Exception e) {
+            meterRegistry.counter("wallet.topup.failure", "gateway", "razorpay").increment();
             if (e instanceof BadRequestException) throw (BadRequestException) e;
             throw new BadRequestException("Signature verification failed: " + e.getMessage());
         }
@@ -138,6 +143,7 @@ public class WalletService {
                 .type("TOPUP")
                 .build();
         walletTransactionRepository.save(tx);
+        meterRegistry.counter("wallet.topup.success").increment();
     }
 
 

@@ -21,6 +21,7 @@ import jakarta.annotation.PostConstruct;
 import java.util.Map;
 import java.util.HashMap;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.math.BigDecimal;
 import com.luxesuite.api.exception.ApiException;
 import com.luxesuite.api.exception.ResourceNotFoundException;
@@ -45,6 +46,7 @@ public class BillingService {
     private final SubscriptionService subscriptionService;
     private final CustomerRepository customerRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final MeterRegistry meterRegistry;
 
     @Value("${stripe.key.secret}")
     private String stripeApiKey;
@@ -170,37 +172,66 @@ public class BillingService {
         return payment;
     }
 
+    @Transactional
     public String createStripePaymentIntent(Long invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found"));
+                
+        securityUtils.validateCustomerOwnership(invoice.getCustomer().getId());
+
+        // Calculate remaining balance
+        BigDecimal totalPaid = invoice.getPayments().stream()
+                .filter(p -> "SUCCESS".equals(p.getStatus()))
+                .map(Payment::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+        BigDecimal remainingAmount = invoice.getTotalAmount().subtract(totalPaid);
+        if (remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Invoice is already fully paid.");
+        }
+
         try {
-            Invoice invoice = invoiceRepository.findById(invoiceId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Invoice not found"));
-                    
-            securityUtils.validateCustomerOwnership(invoice.getCustomer().getId());
-
-            BigDecimal totalPaid = invoice.getPayments().stream()
-                    .filter(p -> "SUCCESS".equals(p.getStatus()))
-                    .map(Payment::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    
-            BigDecimal remainingAmount = invoice.getTotalAmount().subtract(totalPaid);
-            if (remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new BadRequestException("Invoice is already fully paid.");
-            }
-
             PaymentIntentCreateParams params =
-                PaymentIntentCreateParams.builder()
-                    .setAmount(remainingAmount.multiply(new BigDecimal(100)).longValue()) // Stripe uses cents
-                    .setCurrency("inr")
-                    .putMetadata("invoiceId", invoice.getId().toString())
-                    .build();
+                    PaymentIntentCreateParams.builder()
+                            .setAmount(remainingAmount.multiply(new BigDecimal("100")).longValue()) // Stripe takes amount in cents
+                            .setCurrency("usd") // Assuming USD for demonstration
+                            .putMetadata("invoiceId", invoiceId.toString())
+                            .build();
 
             PaymentIntent intent = PaymentIntent.create(params);
-            
             return intent.getClientSecret();
-        } catch (ApiException e) {
-            throw e;
         } catch (Exception e) {
-            throw new PaymentGatewayException("Failed to create Stripe PaymentIntent: " + e.getMessage(), e);
+            throw new PaymentGatewayException("Failed to create Stripe payment intent: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public String createStripeDepositIntent(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        if (Boolean.TRUE.equals(appointment.getIsDepositPaid())) {
+            throw new BadRequestException("Deposit is already paid.");
+        }
+
+        BigDecimal depositAmount = appointment.getDepositAmount();
+        if (depositAmount == null || depositAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("No deposit required for this appointment.");
+        }
+
+        try {
+            PaymentIntentCreateParams params =
+                    PaymentIntentCreateParams.builder()
+                            .setAmount(depositAmount.multiply(new BigDecimal("100")).longValue()) // Stripe takes amount in cents
+                            .setCurrency("usd") // Assuming USD for demonstration
+                            .putMetadata("appointmentId", appointmentId.toString())
+                            .putMetadata("type", "DEPOSIT")
+                            .build();
+
+            PaymentIntent intent = PaymentIntent.create(params);
+            return intent.getClientSecret();
+        } catch (Exception e) {
+            throw new PaymentGatewayException("Failed to create Stripe deposit intent: " + e.getMessage());
         }
     }
 
@@ -247,6 +278,7 @@ public class BillingService {
             Event event = Webhook.constructEvent(payload, sigHeader, stripeWebhookSecret);
 
             if ("payment_intent.succeeded".equals(event.getType())) {
+                meterRegistry.counter("payment.success", "gateway", "stripe").increment();
                 EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
                 if (dataObjectDeserializer.getObject().isPresent()) {
                     PaymentIntent paymentIntent = (PaymentIntent) dataObjectDeserializer.getObject().get();
@@ -256,6 +288,8 @@ public class BillingService {
                     String giftCardAmountStr = paymentIntent.getMetadata().get("giftCardAmount");
                     String subscriptionPlanIdStr = paymentIntent.getMetadata().get("subscriptionPlanId");
                     String subscriptionCustomerIdStr = paymentIntent.getMetadata().get("subscriptionCustomerId");
+                    String appointmentIdStr = paymentIntent.getMetadata().get("appointmentId");
+                    String paymentType = paymentIntent.getMetadata().get("type");
 
                     if (subscriptionPlanIdStr != null && subscriptionCustomerIdStr != null) {
                         Long planId = Long.parseLong(subscriptionPlanIdStr);
@@ -302,10 +336,19 @@ public class BillingService {
                         String recipientEmail = paymentIntent.getMetadata().get("recipientEmail");
                         String recipientName = paymentIntent.getMetadata().get("recipientName");
                         giftCardService.createGiftCard(amount, recipientEmail, recipientName);
+                    } else if (appointmentIdStr != null && "DEPOSIT".equals(paymentType)) {
+                        Long appointmentId = Long.parseLong(appointmentIdStr);
+                        Appointment appointment = appointmentRepository.findById(appointmentId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+                        
+                        appointment.setIsDepositPaid(true);
+                        // Status could be changed to CONFIRMED or something else here
+                        appointmentRepository.save(appointment);
                     }
                 }
             }
         } catch (Exception e) {
+            meterRegistry.counter("payment.failure", "gateway", "stripe").increment();
             throw new PaymentGatewayException("Webhook processing failed: " + e.getMessage(), e);
         }
     }
@@ -357,6 +400,7 @@ public class BillingService {
             String eventType = event.getString("event");
             
             if ("order.paid".equals(eventType) || "payment.captured".equals(eventType)) {
+                meterRegistry.counter("payment.success", "gateway", "razorpay").increment();
                 JSONObject paymentEntity = event.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
                 JSONObject notes = paymentEntity.optJSONObject("notes");
                 
@@ -401,6 +445,7 @@ public class BillingService {
                 }
             }
         } catch (Exception e) {
+            meterRegistry.counter("payment.failure", "gateway", "razorpay").increment();
             throw new PaymentGatewayException("Razorpay webhook processing failed: " + e.getMessage(), e);
         }
     }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.core.annotation.Timed;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -21,12 +22,14 @@ public class WalletController {
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
+    @Timed(value = "wallet.api.latency", description = "Latency of wallet endpoints")
     public ResponseEntity<WalletDto> getMyWallet() {
         return ResponseEntity.ok(walletService.getMyWallet());
     }
 
     @PostMapping("/topup")
     @PreAuthorize("hasRole('CUSTOMER')")
+    @Timed(value = "wallet.api.latency", description = "Latency of wallet endpoints")
     public ResponseEntity<Map<String, String>> createTopupIntent(@RequestBody WalletTopupRequest request) {
         String clientSecret = walletService.createTopupPaymentIntent(request.getAmount());
         return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
@@ -47,6 +50,7 @@ public class WalletController {
 
     @PostMapping("/razorpay/create-order")
     @PreAuthorize("hasRole('CUSTOMER')")
+    @Timed(value = "wallet.api.latency", description = "Latency of wallet endpoints")
     public ResponseEntity<Map<String, String>> createRazorpayOrder(@RequestBody WalletTopupRequest request) {
         String orderId = walletService.createRazorpayTopupOrder(request.getAmount());
         return ResponseEntity.ok(Map.of("orderId", orderId));
@@ -54,6 +58,7 @@ public class WalletController {
 
     @PostMapping("/razorpay/verify")
     @PreAuthorize("hasRole('CUSTOMER')")
+    @Timed(value = "wallet.api.latency", description = "Latency of wallet endpoints")
     public ResponseEntity<Map<String, String>> verifyRazorpayTopup(@RequestBody Map<String, String> payload) {
         String paymentId = payload.get("razorpay_payment_id");
         String orderId = payload.get("razorpay_order_id");

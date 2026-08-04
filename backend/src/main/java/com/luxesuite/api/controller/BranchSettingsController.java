@@ -61,6 +61,17 @@ public class BranchSettingsController {
         existing.setCurrency(settings.getCurrency());
         existing.setTimeZone(settings.getTimeZone());
         existing.setMaintenanceMode(settings.isMaintenanceMode());
+        
+        // Integrations & Branding
+        existing.setStripePublicKey(settings.getStripePublicKey());
+        existing.setStripeSecretKey(settings.getStripeSecretKey());
+        existing.setRazorpayKeyId(settings.getRazorpayKeyId());
+        existing.setRazorpayKeySecret(settings.getRazorpayKeySecret());
+        existing.setWhatsappApiKey(settings.getWhatsappApiKey());
+        existing.setWhatsappPhoneNumberId(settings.getWhatsappPhoneNumberId());
+        existing.setBrandLogoUrl(settings.getBrandLogoUrl());
+        existing.setPrimaryColor(settings.getPrimaryColor());
+        
         return ResponseEntity.ok(settingsRepository.save(existing));
     }
 }

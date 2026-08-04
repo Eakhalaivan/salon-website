@@ -6,6 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "customers")
@@ -37,6 +38,9 @@ public class Customer {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @Column(name = "profile_photo", columnDefinition = "TEXT")
     private String profilePhoto;

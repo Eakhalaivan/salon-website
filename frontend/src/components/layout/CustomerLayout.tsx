@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { NotificationBell } from '../ui/NotificationBell';
 
 const navItems = [
   { name: 'Dashboard', icon: 'dashboard', path: '/customer/dashboard' },
@@ -165,9 +166,7 @@ export const CustomerLayout = () => {
           <h2 className="font-headline-md text-on-surface tracking-tight">LUMINA SPA</h2>
           <div className="flex items-center justify-end gap-2">
             <ThemeToggle />
-            <button className="relative p-2 text-on-surface-variant hover:text-primary transition-colors hidden sm:block">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
+            <NotificationBell />
           </div>
         </header>
         
@@ -175,10 +174,7 @@ export const CustomerLayout = () => {
         <header className="hidden lg:flex h-20 w-full sticky top-0 z-40 bg-background/80 backdrop-blur-md items-center justify-end px-[40px] gap-[16px]">
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <button className="relative p-2 text-on-surface-variant hover:text-primary transition-colors mr-2">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background"></span>
-            </button>
+            <NotificationBell />
             <div className="flex items-center gap-4 bg-surface-container-low py-1.5 px-4 rounded-full border border-outline-variant/30">
               <div className="text-right">
                 <p className="font-label-md text-label-md text-on-surface leading-none">

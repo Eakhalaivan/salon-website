@@ -32,9 +32,23 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @org.springframework.data.jpa.repository.Query("SELECT DISTINCT a FROM Appointment a JOIN a.services s WHERE a.status = 'CONFIRMED' AND s.startTime BETWEEN :now AND :targetTime AND a.reminderSentAt IS NULL")
     List<Appointment> findUpcomingForReminder(@org.springframework.data.repository.query.Param("now") LocalDateTime now, @org.springframework.data.repository.query.Param("targetTime") LocalDateTime targetTime);
 
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT a FROM Appointment a JOIN a.services s WHERE a.status = 'CONFIRMED' AND s.startTime BETWEEN :windowStart AND :windowEnd AND (a.reminder24hSent IS NULL OR a.reminder24hSent = false)")
+    List<Appointment> findUpcomingFor24hReminder(@org.springframework.data.repository.query.Param("windowStart") LocalDateTime windowStart, @org.springframework.data.repository.query.Param("windowEnd") LocalDateTime windowEnd);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT a FROM Appointment a JOIN a.services s WHERE a.status = 'CONFIRMED' AND s.startTime BETWEEN :windowStart AND :windowEnd AND (a.reminder2hSent IS NULL OR a.reminder2hSent = false)")
+    List<Appointment> findUpcomingFor2hReminder(@org.springframework.data.repository.query.Param("windowStart") LocalDateTime windowStart, @org.springframework.data.repository.query.Param("windowEnd") LocalDateTime windowEnd);
+
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"customer", "branch", "services"})
     @org.springframework.data.jpa.repository.Query("SELECT DISTINCT a FROM Appointment a JOIN a.services s WHERE s.staff.id = :staffId AND s.startTime >= :startOfDay AND s.startTime < :endOfDay ORDER BY a.createdAt ASC")
     List<Appointment> findAppointmentsByStaffAndDate(@org.springframework.data.repository.query.Param("staffId") Long staffId, @org.springframework.data.repository.query.Param("startOfDay") LocalDateTime startOfDay, @org.springframework.data.repository.query.Param("endOfDay") LocalDateTime endOfDay);
 
     long countByBranchId(Long branchId);
+
+    // Rebooking nudge: completed appointments in a time window that haven't been nudged yet
+    @org.springframework.data.jpa.repository.Query("SELECT a FROM Appointment a WHERE a.status = 'COMPLETED' AND a.updatedAt BETWEEN :windowStart AND :windowEnd AND (a.rebookingNudgeSent IS NULL OR a.rebookingNudgeSent = false)")
+    List<Appointment> findRecentlyCompletedForRebooking(@org.springframework.data.repository.query.Param("windowStart") LocalDateTime windowStart, @org.springframework.data.repository.query.Param("windowEnd") LocalDateTime windowEnd);
+
+    // Win-back: customers whose last completed appointment was before a cutoff and have no future bookings
+    @org.springframework.data.jpa.repository.Query("SELECT a FROM Appointment a WHERE a.status = 'COMPLETED' AND a.customer.id NOT IN (SELECT a2.customer.id FROM Appointment a2 WHERE a2.status IN ('BOOKED', 'CONFIRMED') AND a2.createdAt > :now) AND a.updatedAt BETWEEN :lapsedStart AND :lapsedEnd")
+    List<Appointment> findLapsedCustomerAppointments(@org.springframework.data.repository.query.Param("now") LocalDateTime now, @org.springframework.data.repository.query.Param("lapsedStart") LocalDateTime lapsedStart, @org.springframework.data.repository.query.Param("lapsedEnd") LocalDateTime lapsedEnd);
 }

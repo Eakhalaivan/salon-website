@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>LuxeSuite Notification</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Inter', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #333;
+        }
+        .header h1 {
+            color: #d4af37; /* Luxe Gold */
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        .content {
+            padding: 30px 0;
+            line-height: 1.6;
+            color: #e5e5e5;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            font-size: 12px;
+            color: #888888;
+        }
+        .message-body {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LuxeSuite</h1>
+        </div>
+        <div class="content">
+            <div class="message-body" th:text="${message}">
+                <!-- Message content injected here -->
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 LuxeSuite. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

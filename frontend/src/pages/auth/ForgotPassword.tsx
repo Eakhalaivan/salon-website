@@ -59,13 +59,13 @@ export const ForgotPassword = () => {
           </div>
 
           {error && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-error/10 text-error text-sm rounded-xl border border-error/20 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-error/10 text-error text-sm rounded-xl border border-error/20 text-center" aria-live="polite">
               {error}
             </motion.div>
           )}
 
           {message && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-primary/10 text-primary text-sm rounded-xl border border-primary/20 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-primary/10 text-primary text-sm rounded-xl border border-primary/20 text-center" aria-live="polite">
               {message}
             </motion.div>
           )}

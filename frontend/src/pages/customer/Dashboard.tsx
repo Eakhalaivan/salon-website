@@ -31,10 +31,51 @@ export const Dashboard = () => {
     }
   });
 
+  const { data: upcomingAppointment } = useQuery({
+    queryKey: ['upcomingAppointment'],
+    queryFn: async () => {
+      try {
+        const res = await axiosClient.get('/appointments/my/upcoming');
+        return res.data;
+      } catch (err: any) {
+        if (err.response?.status === 204) return null;
+        throw err;
+      }
+    }
+  });
+
+  const { data: recentActivity } = useQuery({
+    queryKey: ['recentActivity'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/customers/my/activity');
+      return res.data;
+    }
+  });
+
   const balance = walletData?.balance || 0;
   const activeSubscription = membershipData?.content?.[0];
 
   const formattedBalance = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(balance);
+
+  const points = profile?.rewardPoints || 2450;
+  
+  let tierName = 'Bronze';
+  let tierColor = 'text-[#cd7f32]';
+  let tierBg = 'bg-[#cd7f32]/10 border-[#cd7f32]/30';
+  
+  if (points >= 10000) {
+    tierName = 'Platinum';
+    tierColor = 'text-[#e5e4e2]';
+    tierBg = 'bg-[#e5e4e2]/10 border-[#e5e4e2]/30';
+  } else if (points >= 5000) {
+    tierName = 'Gold';
+    tierColor = 'text-[#D4AF37]';
+    tierBg = 'bg-[#D4AF37]/10 border-[#D4AF37]/30';
+  } else if (points >= 2000) {
+    tierName = 'Silver';
+    tierColor = 'text-[#c0c0c0]';
+    tierBg = 'bg-[#c0c0c0]/10 border-[#c0c0c0]/30';
+  }
 
   return (
     <section className="px-[16px] lg:px-[40px] py-[32px] max-w-[1200px] mx-auto animate-fade-in">
@@ -52,20 +93,40 @@ export const Dashboard = () => {
         {/* Upcoming Appointment */}
         <div className="lg:col-span-1 bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col border border-outline-variant/30">
           <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-3">Upcoming Appointment</p>
-          <div className="mb-4">
-            <p className="font-body-lg text-body-lg font-bold text-on-surface">24 May 2024, 4:00 PM</p>
-            <p className="font-body-md text-body-md text-secondary">Swedish Massage</p>
-          </div>
-          <Link to="/book" className="mt-auto py-2 px-4 rounded-lg bg-primary-container/10 text-primary font-label-md text-label-md hover:bg-primary-container/20 transition-all border border-primary/20 text-center">
-            View Details
-          </Link>
+          {upcomingAppointment ? (
+            <>
+              <div className="mb-4">
+                <p className="font-body-lg text-body-lg font-bold text-on-surface">
+                  {new Date(upcomingAppointment.services[0].startTime).toLocaleString('en-IN', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit'
+                  })}
+                </p>
+                <p className="font-body-md text-body-md text-secondary">
+                  {upcomingAppointment.services[0].serviceId ? 'Spa Service' : 'Service'}
+                </p>
+              </div>
+              <Link to={`/customer/appointments/${upcomingAppointment.id}`} className="mt-auto py-2 px-4 rounded-lg bg-primary-container/10 text-primary font-label-md text-label-md hover:bg-primary-container/20 transition-all border border-primary/20 text-center">
+                View Details
+              </Link>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <span className="material-symbols-outlined text-outline/50 text-3xl mb-2">event_busy</span>
+              <p className="font-body-sm text-body-sm text-secondary mb-3">No upcoming appointments.</p>
+              <Link to="/book" className="px-4 py-1.5 rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-primary/5 transition-colors">
+                Book Now
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* Lure Points */}
-        <div className="bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border border-outline-variant/30">
-          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-2">Lure Points</p>
-          <p className="font-display-lg text-display-lg text-primary">2,450</p>
-          <Link to="/customer/profile" className="mt-4 text-primary font-label-md text-label-md hover:underline">View History</Link>
+        {/* Lure Points (Tier) */}
+        <div className={`bg-surface-container-lowest spa-card-shadow rounded-xl p-[16px] flex flex-col items-center justify-center text-center border relative overflow-hidden ${tierBg.split(' ')[1]}`}>
+          <div className={`absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full ${tierBg.split(' ')[0]}`}></div>
+          <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-1">Lure Points</p>
+          <div className={`font-display-sm text-xs uppercase tracking-[0.2em] mb-2 ${tierColor} font-bold drop-shadow-sm`}>{tierName} TIER</div>
+          <p className={`font-display-lg text-4xl ${tierColor}`}>{points.toLocaleString()}</p>
+          <Link to="/customer/profile" className={`mt-3 font-label-md text-label-md hover:underline ${tierColor}`}>View History</Link>
         </div>
 
         {/* Wallet Balance */}
@@ -169,46 +230,29 @@ export const Dashboard = () => {
           </div>
           <div className="bg-surface-container-lowest spa-card-shadow border border-outline-variant/30 rounded-xl overflow-hidden">
             <div className="divide-y divide-outline-variant/30">
-              
-              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-xl">event_available</span>
+              {recentActivity && recentActivity.length > 0 ? (
+                recentActivity.map((activity: any, i: number) => (
+                  <div key={i} className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-xl">{activity.icon}</span>
+                      </div>
+                      <div>
+                        <p className="font-body-md text-body-md font-bold text-on-surface">{activity.title}</p>
+                        <p className="font-label-sm text-label-sm text-secondary">{activity.description}</p>
+                      </div>
+                    </div>
+                    <span className="font-label-sm text-label-sm text-outline">
+                      {new Date(activity.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                    </span>
                   </div>
-                  <div>
-                    <p className="font-body-md text-body-md font-bold text-on-surface">Appointment Booked</p>
-                    <p className="font-label-sm text-label-sm text-secondary">Swedish Massage</p>
-                  </div>
+                ))
+              ) : (
+                <div className="p-8 flex flex-col items-center justify-center text-center">
+                  <span className="material-symbols-outlined text-outline/50 text-4xl mb-2">history</span>
+                  <p className="text-secondary text-sm">No recent activity yet.</p>
                 </div>
-                <span className="font-label-sm text-label-sm text-outline">22 May 2024</span>
-              </div>
-
-              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-xl">shopping_cart</span>
-                  </div>
-                  <div>
-                    <p className="font-body-md text-body-md font-bold text-on-surface">Order Placed</p>
-                    <p className="font-label-sm text-label-sm text-secondary">Botanical Body Oil</p>
-                  </div>
-                </div>
-                <span className="font-label-sm text-label-sm text-outline">20 May 2024</span>
-              </div>
-
-              <div className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-xl">loyalty</span>
-                  </div>
-                  <div>
-                    <p className="font-body-md text-body-md font-bold text-on-surface">Points Earned</p>
-                    <p className="font-label-sm text-label-sm text-secondary">Referral Bonus</p>
-                  </div>
-                </div>
-                <span className="font-label-sm text-label-sm text-outline">18 May 2024</span>
-              </div>
-
+              )}
             </div>
           </div>
         </section>

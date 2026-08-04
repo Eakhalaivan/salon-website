@@ -20,4 +20,14 @@ public class BranchSettings {
     private String currency;
     private String timeZone;
     private boolean maintenanceMode;
+    
+    // Integrations & Branding
+    private String stripePublicKey;
+    private String stripeSecretKey;
+    private String razorpayKeyId;
+    private String razorpayKeySecret;
+    private String whatsappApiKey;
+    private String whatsappPhoneNumberId;
+    private String brandLogoUrl;
+    private String primaryColor;
 }

@@ -4,7 +4,7 @@ import { useMySubscriptionsQuery, useSubscriptionPlansQuery } from '../../hooks/
 import { PricingCard } from '../../components/ui/PricingCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Modal } from '../../components/ui/Modal';
-import { StripeSubscriptionCheckout } from '../../components/payments/StripeSubscriptionCheckout';
+// import { StripeSubscriptionCheckout } from '../../components/payments/StripeSubscriptionCheckout';
 import { AnimatePresence } from 'framer-motion';
 
 export const Membership = () => {
@@ -215,6 +215,7 @@ export const Membership = () => {
                         {purchaseError}
                     </div>
                 )}
+                {/* Stripe is disabled per Phase 2 consolidation
                 <StripeSubscriptionCheckout 
                     planId={checkoutPlan.id}
                     planName={checkoutPlan.name}
@@ -232,6 +233,12 @@ export const Membership = () => {
                         }
                     }}
                 />
+                */}
+                <div className="text-center p-6 bg-surface-container-low rounded-xl">
+                    <span className="material-symbols-outlined text-4xl text-primary mb-2">construction</span>
+                    <h3 className="font-headline-md text-on-surface mb-2">Razorpay Subscriptions Coming Soon</h3>
+                    <p className="text-secondary text-sm">We are currently migrating our subscription billing to Razorpay. Please check back later or contact support.</p>
+                </div>
             </div>
         )}
       </Modal>
