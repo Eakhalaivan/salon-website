@@ -18,6 +18,6 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
     Page<Service> findByIsActiveTrueAndBusinessTypeIn(@org.springframework.data.repository.query.Param("types") java.util.List<String> types, Pageable pageable);
     Page<Service> findByIsActiveTrue(Pageable pageable);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT s.* FROM services s LEFT JOIN appointment_services as_rel ON s.id = as_rel.service_id WHERE s.is_active = true GROUP BY s.id ORDER BY COUNT(as_rel.id) DESC LIMIT :limit", nativeQuery = true)
-    List<Service> findTopServicesByBookingCountNative(@org.springframework.data.repository.query.Param("limit") int limit);
+    @org.springframework.data.jpa.repository.Query(value = "SELECT s.* FROM services s LEFT JOIN appointment_services as_rel ON s.id = as_rel.service_id WHERE s.is_active = true GROUP BY s.id ORDER BY COUNT(as_rel.id) DESC", nativeQuery = true)
+    List<Service> findTopServicesByBookingCountNative(Pageable pageable);
 }
