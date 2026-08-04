@@ -5,6 +5,68 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lumina Spa</title>
+    <meta name="description" content="Book your premium salon and spa appointments online at Lumina Spa." />
+    <link rel="canonical" href="https://luminaspa.example.com/" />
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Lumina Spa" />
+    <meta property="og:description" content="Book your premium salon and spa appointments online at Lumina Spa." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://luminaspa.example.com/" />
+    <meta property="og:image" content="https://luminaspa.example.com/og-image.jpg" />
+
+    <!-- Schema.org LocalBusiness JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HealthAndBeautyBusiness",
+      "name": "Lumina Spa",
+      "image": "https://luminaspa.example.com/logo.png",
+      "@id": "https://luminaspa.example.com/",
+      "url": "https://luminaspa.example.com/",
+      "telephone": "+1234567890",
+      "priceRange": "$$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Luxury Ave",
+        "addressLocality": "Beverly Hills",
+        "addressRegion": "CA",
+        "postalCode": "90210",
+        "addressCountry": "US"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "09:00",
+        "closes": "20:00"
+      },
+      "potentialAction": {
+        "@type": "ReserveAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://luminaspa.example.com/book",
+          "inLanguage": "en-US",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/IOSPlatform",
+            "http://schema.org/AndroidPlatform"
+          ]
+        },
+        "result": {
+          "@type": "Reservation",
+          "name": "Book Appointment"
+        }
+      }
+    }
+    </script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>

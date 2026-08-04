@@ -16,6 +16,10 @@ public class AppointmentItemDto {
     
     @NotNull(message = "Staff ID is required")
     private Long staffId;
+
+    private String staffFirstName;
+    private String staffLastName;
+    private String serviceName;
     
     @NotNull(message = "Start time is required")
     private LocalDateTime startTime;

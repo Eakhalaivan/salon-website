@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useMyInvoicesQuery } from '../../hooks/api/useBilling';
-import { StripeCheckout } from '../../components/payments/StripeCheckout';
+// import { StripeCheckout } from '../../components/payments/StripeCheckout';
 import { RazorpayCheckout } from '../../components/payments/RazorpayCheckout';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/use-toast';
@@ -242,8 +242,9 @@ export const Payments = () => {
           <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-headline-md text-headline-md text-on-surface">Saved Methods</h4>
-              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline">
-                <span className="material-symbols-outlined text-base">add</span> Add New
+              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors -mr-3">
+                <span className="material-symbols-outlined text-base">add</span>
+                <span>Add New</span>
               </button>
             </div>
             <div className="space-y-4">
@@ -294,15 +295,19 @@ export const Payments = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
             >
               <div className="flex items-center justify-between p-6 border-b border-ink-200/50 bg-surface-container-low">
                 <div className="flex items-center gap-2">
                   <Landmark className="w-6 h-6 text-primary" />
-                  <span className="font-headline-md text-xl text-on-surface">Pay Invoice</span>
+                  <span id="modal-title" className="font-headline-md text-xl text-on-surface">Pay Invoice</span>
                 </div>
                 <button 
                   onClick={() => setSelectedInvoice(null)}
                   className="p-2 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-high transition-colors"
+                  aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -316,6 +321,7 @@ export const Payments = () => {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Stripe is disabled per Phase 2 consolidation
                   <StripeCheckout
                     invoiceId={selectedInvoice.id}
                     amount={selectedInvoice.totalAmount}
@@ -328,6 +334,7 @@ export const Payments = () => {
                     <span className="flex-shrink-0 mx-4 text-secondary text-xs uppercase tracking-widest font-semibold">Or</span>
                     <div className="flex-grow border-t border-outline-variant/30"></div>
                   </div>
+                  */}
                   
                   <RazorpayCheckout
                     invoiceId={selectedInvoice.id}

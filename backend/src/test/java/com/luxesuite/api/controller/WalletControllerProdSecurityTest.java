@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -26,6 +27,7 @@ import org.springframework.test.context.TestPropertySource;
     "spring.jpa.hibernate.ddl-auto=create-drop",
     "razorpay.key.secret=prod_mock_secret",
     "razorpay.webhook-secret=prod_mock_webhook",
+    "stripe.webhook.secret=prod_mock_webhook",
     "jwt.secret=mock_prod_jwt_secret_must_be_very_long_for_hmac256"
 })
 public class WalletControllerProdSecurityTest {
@@ -44,6 +46,7 @@ public class WalletControllerProdSecurityTest {
 
         mockMvc.perform(post("/api/v1/wallet/topup/mock")
                 .secure(true)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
                 .andExpect(status().isNotFound());

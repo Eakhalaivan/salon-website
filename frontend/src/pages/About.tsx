@@ -126,7 +126,7 @@ export default function About() {
                 Every professional at LuxeSuite undergoes rigorous continuous education to stay at the forefront of wellness trends, ensuring you receive innovative and effective treatments every time you visit.
               </p>
               <motion.div whileHover={{ scale: 1.05 }} className="inline-block">
-                <div className="px-6 py-3 border border-primary text-primary rounded-full font-label-md cursor-pointer hover:bg-primary hover:text-on-primary transition-colors">
+                <div className="px-6 py-3 border border-primary text-primary rounded-full font-label-md cursor-pointer hover:bg-primary hover:text-surface transition-colors">
                   Meet the Team
                 </div>
               </motion.div>

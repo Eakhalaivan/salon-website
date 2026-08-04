@@ -78,14 +78,15 @@ export const TodaysAppointments = () => {
                     </p>
                   </td>
                   <td className="p-4">
-                    <p className="font-headline-sm text-on-surface">Customer #{apt.customerId}</p>
-                    <p className="text-label-sm text-on-surface-variant">Phone: +1 555-0199</p>
+                    <p className="font-headline-sm text-on-surface">{apt.customerFirstName} {apt.customerLastName}</p>
                   </td>
                   <td className="p-4">
-                    <div className="flex gap-2">
-                      <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-label-sm">
-                        {apt.services?.length || 0} Service(s)
-                      </span>
+                    <div className="flex flex-col gap-1">
+                      {apt.services?.map((svc: any) => (
+                        <span key={svc.id} className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-label-sm w-max">
+                          {svc.serviceName || 'Service'}
+                        </span>
+                      ))}
                     </div>
                   </td>
                   <td className="p-4">

@@ -98,6 +98,7 @@
   --color-on-primary-fixed: #261900;
   --color-tertiary: #c8c6c5;
   --color-tertiary-fixed-dim: #c8c6c5;
+  --color-secondary: #c8c6c5;
   --color-surface-container-high: #2a2a2a;
   --color-on-tertiary: #303030;
   --color-inverse-primary: #775a19;
@@ -428,6 +429,24 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-outline-variant) 50%, transparent);
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-outline-variant);
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-outline-variant) 50%, transparent) transparent;
   }
   .luxury-overlay {
     background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-surface) 40%, transparent) 0%, color-mix(in srgb, var(--color-surface) 90%, transparent) 100%);

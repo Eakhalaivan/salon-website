@@ -220,7 +220,7 @@ export const Profile = () => {
                       value={profile.firstName}
                       onChange={handleChange}
                       required
-                      className="w-full bg-surface-container-lowest border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
+                      className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
                     />
                   </div>
                   <div className="space-y-2 group/input">
@@ -231,7 +231,7 @@ export const Profile = () => {
                       value={profile.lastName}
                       onChange={handleChange}
                       required
-                      className="w-full bg-surface-container-lowest border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
+                      className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
                     />
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export const Profile = () => {
                       name="email"
                       value={profile.email}
                       disabled
-                      className="w-full bg-surface-container-low border-outline-variant/50 rounded-lg py-3 px-4 text-secondary/70 font-body-md cursor-not-allowed outline-none" 
+                      className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg py-3 px-4 text-secondary/70 font-body-md cursor-not-allowed outline-none" 
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-secondary/40 text-lg">lock</span>
                   </div>
@@ -258,7 +258,7 @@ export const Profile = () => {
                     name="phone"
                     value={profile.phone || ''}
                     onChange={handleChange}
-                    className="w-full bg-surface-container-lowest border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
+                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none" 
                   />
                 </div>
                 
@@ -269,7 +269,7 @@ export const Profile = () => {
                     value={profile.notes || ''}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full bg-surface-container-lowest border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none resize-y" 
+                    className="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-lg py-3 px-4 focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md outline-none resize-y" 
                     placeholder="E.g. prefer quiet rooms, allergic to lavender..."
                   ></textarea>
                 </div>

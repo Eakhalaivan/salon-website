@@ -20,6 +20,9 @@ public class AppointmentDto {
     @NotNull(message = "Branch ID is required")
     private Long branchId;
     
+    private String customerFirstName;
+    private String customerLastName;
+    
     private AppointmentStatus status;
     private BigDecimal totalPrice;
     private String notes;
@@ -28,8 +31,16 @@ public class AppointmentDto {
     private String cancellationReason;
     private Boolean isWalkIn;
     private String businessType;
+    private BigDecimal depositAmount;
+    private Boolean isDepositPaid;
     
-    @NotEmpty(message = "At least one service must be booked")
+    // Guest checkout fields
+    private String guestFirstName;
+    private String guestLastName;
+    private String guestEmail;
+    private String guestPhone;
+    
+    @NotNull(message = "Services are required")
     @Valid
     private List<AppointmentItemDto> services;
 }

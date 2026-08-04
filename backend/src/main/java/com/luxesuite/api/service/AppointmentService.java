@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +35,35 @@ public class AppointmentService {
     private final NotificationService notificationService;
     private final NotificationScheduler notificationScheduler;
     private final SseService sseService;
+    private final EmailService emailService;
 
     @Transactional
     public AppointmentDto createAppointment(AppointmentDto dto) {
-        Customer customer = customerRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-
-        securityUtils.validateCustomerOwnership(customer.getUser() != null ? customer.getUser().getId() : null);
+        Customer customer = null;
+        if (dto.getCustomerId() != null) {
+            customer = customerRepository.findById(dto.getCustomerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+            securityUtils.validateCustomerOwnership(customer.getUser() != null ? customer.getUser().getId() : null);
+        } else {
+            // Guest Flow
+            if (dto.getGuestFirstName() == null || dto.getGuestEmail() == null) {
+                throw new BadRequestException("Guest details are required if not logged in");
+            }
+            
+            // Look up by email first, or create new guest customer
+            java.util.Optional<Customer> existing = customerRepository.findByEmail(dto.getGuestEmail());
+            if (existing.isPresent()) {
+                customer = existing.get();
+            } else {
+                customer = new Customer();
+                customer.setFirstName(dto.getGuestFirstName());
+                customer.setLastName(dto.getGuestLastName());
+                customer.setEmail(dto.getGuestEmail());
+                customer.setPhone(dto.getGuestPhone());
+                customer.setTotalPoints(0);
+                customer = customerRepository.save(customer);
+            }
+        }
         Branch branch = branchRepository.findById(dto.getBranchId())
                 .orElseThrow(() -> new ResourceNotFoundException("Branch not found"));
 
@@ -96,8 +120,14 @@ public class AppointmentService {
             
             currentStartTime = endTime; // Sequence next service
         }
-
         appointment.setTotalPrice(totalPrice);
+        
+        // Calculate 20% deposit
+        BigDecimal deposit = totalPrice.multiply(new BigDecimal("0.20"));
+        appointment.setDepositAmount(deposit);
+        appointment.setIsDepositPaid(false);
+        // We leave the status as PENDING or BOOKED. If we had a PENDING_DEPOSIT status we would set it here.
+        // For now, we will leave it as BOOKED, or we can use a new status.
         
         if (hasSpa && hasSalon) {
             appointment.setBusinessType("BOTH");
@@ -113,6 +143,23 @@ public class AppointmentService {
         
         // Emit SSE event
         sseService.sendEventToAll("appointment_booked", savedAppointment.getId());
+        
+        // Send confirmation email
+        if (customer.getUser() != null && customer.getUser().getEmail() != null) {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a");
+            String formattedTime = dto.getServices().get(0).getStartTime().format(formatter);
+            String emailBody = String.format(
+                "Dear %s,\n\nYour sanctuary awaits. Your appointment at Lumina Spa has been successfully booked.\n\n" +
+                "When: %s\n" +
+                "Total Amount: $%.2f\n\n" +
+                "We look forward to guiding you through a moment of complete serenity.\n\n" +
+                "Warm regards,\nThe Lumina Spa Team",
+                customer.getUser().getFirstName(),
+                formattedTime,
+                totalPrice
+            );
+            emailService.sendEmail(customer.getUser().getEmail(), "Your Lumina Spa Booking Confirmation", emailBody);
+        }
         
         return mapToDto(savedAppointment);
     }
@@ -148,6 +195,25 @@ public class AppointmentService {
         return appointments.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public AppointmentDto getMyUpcomingAppointment() {
+        com.luxesuite.api.model.User user = securityUtils.getCurrentUser();
+        Customer customer = customerRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        
+        List<Appointment> upcoming = appointmentRepository.findByCustomerId(customer.getId()).stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.BOOKED 
+                        && a.getServices() != null && !a.getServices().isEmpty() 
+                        && a.getServices().get(0).getStartTime().isAfter(LocalDateTime.now()))
+                .sorted(Comparator.comparing(a -> a.getServices().get(0).getStartTime()))
+                .collect(Collectors.toList());
+                
+        if (upcoming.isEmpty()) {
+            return null; // Or throw exception, but frontend should handle null
+        }
+        return mapToDto(upcoming.get(0));
+    }
+
     @Transactional
     public AppointmentDto completeAppointment(Long appointmentId, List<com.luxesuite.api.dto.ProductUsageDto> usedProducts) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -174,22 +240,103 @@ public class AppointmentService {
         return mapToDto(savedAppointment);
     }
 
+    @Transactional
+    public AppointmentDto rescheduleAppointment(Long appointmentId, LocalDateTime newStartTime) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        securityUtils.validateCustomerOwnership(appointment.getCustomer().getUser() != null ? appointment.getCustomer().getUser().getId() : null);
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new BadRequestException("Cannot reschedule a completed or cancelled appointment.");
+        }
+
+        if (appointment.getServices().isEmpty()) {
+            throw new BadRequestException("Appointment has no services.");
+        }
+
+        LocalDateTime currentOriginalStartTime = appointment.getServices().get(0).getStartTime();
+        if (LocalDateTime.now().plusHours(24).isAfter(currentOriginalStartTime)) {
+            throw new BadRequestException("Appointments must be rescheduled at least 24 hours in advance.");
+        }
+
+        LocalDateTime currentStartTime = newStartTime;
+        for (AppointmentItem item : appointment.getServices()) {
+            LocalDateTime endTime = currentStartTime.plusMinutes(item.getService().getDurationMins());
+            
+            // Check conflicts (exclude the current appointment items)
+            List<AppointmentItem> conflicts = appointmentItemRepository.findOverlappingAppointments(
+                    item.getStaff().getId(), currentStartTime, endTime);
+            
+            boolean hasRealConflict = conflicts.stream()
+                    .anyMatch(c -> !c.getAppointment().getId().equals(appointmentId));
+                    
+            if (hasRealConflict) {
+                throw new ConflictException("Double booking detected for staff " + item.getStaff().getUser().getFirstName() + " at " + currentStartTime);
+            }
+
+            item.setStartTime(currentStartTime);
+            item.setEndTime(endTime);
+            currentStartTime = endTime;
+        }
+
+        appointment.setReminder24hSent(false);
+        appointment.setReminder2hSent(false);
+        appointment.setReminderSentAt(null);
+
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        sseService.sendEventToAll("appointment_updated", savedAppointment.getId());
+        
+        // Send email
+        if (appointment.getCustomer().getUser() != null && appointment.getCustomer().getUser().getEmail() != null) {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a");
+            String formattedTime = appointment.getServices().get(0).getStartTime().format(formatter);
+            String emailBody = String.format(
+                "Dear %s,\n\nYour appointment at Lumina Spa has been successfully rescheduled.\n\n" +
+                "New Time: %s\n\n" +
+                "We look forward to guiding you through a moment of complete serenity.\n\n" +
+                "Warm regards,\nThe Lumina Spa Team",
+                appointment.getCustomer().getUser().getFirstName(),
+                formattedTime
+            );
+            emailService.sendEmail(appointment.getCustomer().getUser().getEmail(), "Your Lumina Spa Appointment Rescheduled", emailBody);
+        }
+
+        return mapToDto(savedAppointment);
+    }
+
     private AppointmentDto mapToDto(Appointment appointment) {
         AppointmentDto dto = new AppointmentDto();
         dto.setId(appointment.getId());
-        dto.setCustomerId(appointment.getCustomer().getId());
+        dto.setCustomerId(appointment.getCustomer() != null ? appointment.getCustomer().getId() : null);
+        
+        if (appointment.getCustomer() != null) {
+            dto.setCustomerFirstName(appointment.getCustomer().getFirstName());
+            dto.setCustomerLastName(appointment.getCustomer().getLastName());
+        } else if (appointment.getNotes() != null && appointment.getNotes().contains("Guest:")) {
+             // Fallback for guest if not linked properly
+             dto.setCustomerFirstName("Guest");
+        }
+        
         dto.setBranchId(appointment.getBranch().getId());
         dto.setStatus(appointment.getStatus());
         dto.setTotalPrice(appointment.getTotalPrice());
         dto.setNotes(appointment.getNotes());
         dto.setCreatedAt(appointment.getCreatedAt());
         dto.setBusinessType(appointment.getBusinessType());
+        dto.setDepositAmount(appointment.getDepositAmount());
+        dto.setIsDepositPaid(appointment.getIsDepositPaid());
         
         List<AppointmentItemDto> itemDtos = appointment.getServices().stream().map(item -> {
             AppointmentItemDto itemDto = new AppointmentItemDto();
             itemDto.setId(item.getId());
             itemDto.setServiceId(item.getService().getId());
+            itemDto.setServiceName(item.getService().getName());
             itemDto.setStaffId(item.getStaff().getId());
+            if (item.getStaff().getUser() != null) {
+                itemDto.setStaffFirstName(item.getStaff().getUser().getFirstName());
+                itemDto.setStaffLastName(item.getStaff().getUser().getLastName());
+            }
             itemDto.setStartTime(item.getStartTime());
             itemDto.setEndTime(item.getEndTime());
             itemDto.setStatus(item.getStatus());

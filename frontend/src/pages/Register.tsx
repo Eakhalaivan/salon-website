@@ -157,6 +157,7 @@ export const Register = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="mb-8 p-4 bg-error/10 text-error text-sm rounded-xl border border-error/20 font-body-md text-center"
+              aria-live="polite"
             >
               {error}
             </motion.div>
@@ -164,31 +165,25 @@ export const Register = () => {
 
           <form className="space-y-5" onSubmit={handleRegister}>
             <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <Input 
-                  label="First Name"
-                  type="text" 
-                  name="firstName"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  error={!!fieldErrors.firstName}
-                  icon={<span className="material-symbols-outlined font-light text-[20px]">person</span>}
-                />
-                {fieldErrors.firstName && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.firstName}</p>}
-              </div>
-              <div className="flex flex-col">
-                <Input 
-                  label="Last Name"
-                  type="text" 
-                  name="lastName"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  error={!!fieldErrors.lastName}
-                />
-                {fieldErrors.lastName && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.lastName}</p>}
-              </div>
+              <Input 
+                label="First Name"
+                type="text" 
+                name="firstName"
+                required
+                value={formData.firstName}
+                onChange={handleChange}
+                error={fieldErrors.firstName}
+                icon={<span className="material-symbols-outlined font-light text-[20px]">person</span>}
+              />
+              <Input 
+                label="Last Name"
+                type="text" 
+                name="lastName"
+                required
+                value={formData.lastName}
+                onChange={handleChange}
+                error={fieldErrors.lastName}
+              />
             </motion.div>
 
             <motion.div variants={itemVariants}>
@@ -199,10 +194,9 @@ export const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                error={!!fieldErrors.email}
+                error={fieldErrors.email}
                 icon={<span className="material-symbols-outlined font-light text-[20px]">mail</span>}
               />
-              {fieldErrors.email && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.email}</p>}
             </motion.div>
             
             <motion.div variants={itemVariants}>
@@ -212,10 +206,9 @@ export const Register = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                error={!!fieldErrors.phone}
+                error={fieldErrors.phone}
                 icon={<span className="material-symbols-outlined font-light text-[20px]">call</span>}
               />
-              {fieldErrors.phone && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.phone}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="relative">
@@ -227,17 +220,17 @@ export const Register = () => {
                 minLength={8}
                 value={formData.password}
                 onChange={handleChange}
-                error={!!fieldErrors.password}
+                error={fieldErrors.password}
                 icon={<span className="material-symbols-outlined font-light text-[20px]">lock</span>}
               />
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center z-20"
+                aria-label="Toggle password visibility"
               >
                 <span className="material-symbols-outlined font-light text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
               </button>
-              {fieldErrors.password && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.password}</p>}
               {!fieldErrors.password && <p className="text-on-surface-variant/60 text-[11px] mt-1 ml-2">Must be 8+ characters, include uppercase, lowercase, & number</p>}
               {formData.password && (
                 <div className="mt-2 ml-1">
@@ -263,17 +256,17 @@ export const Register = () => {
                 minLength={8}
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                error={!!fieldErrors.confirmPassword}
+                error={fieldErrors.confirmPassword}
                 icon={<span className="material-symbols-outlined font-light text-[20px]">lock_reset</span>}
               />
               <button 
                 type="button" 
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center z-20"
+                aria-label="Toggle confirm password visibility"
               >
                 <span className="material-symbols-outlined font-light text-[20px]">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
               </button>
-              {fieldErrors.confirmPassword && <p className="text-error text-xs mt-1 ml-2">{fieldErrors.confirmPassword}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex items-center gap-3">

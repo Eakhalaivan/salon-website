@@ -9,6 +9,11 @@ import { ThemeToggle } from '../ui/ThemeToggle';
 import { useBranchStore } from '../../store/useBranchStore';
 import axiosClient from '../../api/axiosClient';
 import { ProviderTypeSelector } from '../common/ProviderTypeSelector';
+import { 
+  LayoutDashboard, Building2, BarChart3, Users, UserCog, CalendarRange, 
+  ClipboardCheck, Sparkles, Package, LineChart, Truck, Receipt, 
+  Banknote, Gift, PenTool, Settings, HelpCircle, LogOut, X, Menu
+} from 'lucide-react';
 
 interface Branch {
   id: number;
@@ -16,23 +21,23 @@ interface Branch {
 }
 
 const navItems = [
-  { name: 'Dashboard', icon: 'dashboard', path: '/admin/dashboard' },
-  { name: 'Branches', icon: 'business', path: '/admin/branches' },
-  { name: 'Branch Stats', icon: 'compare', path: '/admin/branch-comparison' },
-  { name: 'Customers', icon: 'auto_awesome', path: '/admin/customers' },
-  { name: 'Staff', icon: 'group', path: '/admin/staff' },
-  { name: 'Schedule', icon: 'calendar_month', path: '/admin/schedule' },
-  { name: 'Attendance', icon: 'how_to_reg', path: '/admin/attendance' },
-  { name: 'Services', icon: 'spa', path: '/admin/services' },
-  { name: 'Products', icon: 'inventory_2', path: '/admin/products' },
+  { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+  { name: 'Branches', icon: Building2, path: '/admin/branches' },
+  { name: 'Branch Stats', icon: BarChart3, path: '/admin/branch-comparison' },
+  { name: 'Customers', icon: Users, path: '/admin/customers' },
+  { name: 'Staff', icon: UserCog, path: '/admin/staff' },
+  { name: 'Schedule', icon: CalendarRange, path: '/admin/schedule' },
+  { name: 'Attendance', icon: ClipboardCheck, path: '/admin/attendance' },
+  { name: 'Services', icon: Sparkles, path: '/admin/services' },
+  { name: 'Products', icon: Package, path: '/admin/products' },
 
-  { name: 'Reports', icon: 'analytics', path: '/admin/reports' },
-  { name: 'Suppliers', icon: 'business', path: '/admin/suppliers' },
-  { name: 'Expenses', icon: 'payments', path: '/admin/expenses' },
-  { name: 'Payroll', icon: 'account_balance_wallet', path: '/admin/payroll' },
-  { name: 'Gift Cards', icon: 'redeem', path: '/admin/gift-cards' },
-  { name: 'CMS', icon: 'web', path: '/admin/cms' },
-  { name: 'Settings', icon: 'settings', path: '/admin/settings' },
+  { name: 'Reports', icon: LineChart, path: '/admin/reports' },
+  { name: 'Suppliers', icon: Truck, path: '/admin/suppliers' },
+  { name: 'Expenses', icon: Receipt, path: '/admin/expenses' },
+  { name: 'Payroll', icon: Banknote, path: '/admin/payroll' },
+  { name: 'Gift Cards', icon: Gift, path: '/admin/gift-cards' },
+  { name: 'CMS', icon: PenTool, path: '/admin/cms' },
+  { name: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
 export const AdminLayout = () => {
@@ -81,7 +86,7 @@ export const AdminLayout = () => {
           className="lg:hidden text-on-surface-variant p-1 -mr-2 rounded-full hover:bg-on-surface/10 transition-colors"
           onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(false); }}
         >
-          <span className="material-symbols-outlined font-light">close</span>
+          <X className="w-5 h-5" />
         </button>
       </div>
       
@@ -108,12 +113,10 @@ export const AdminLayout = () => {
                     exit={{ opacity: 0 }}
                   />
                 )}
-                <span 
-                  className="material-symbols-outlined transition-transform duration-300 group-hover:scale-110" 
-                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
-                >
-                  {item.icon}
-                </span>
+                <item.icon 
+                  className={clsx("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-primary" : "text-on-surface-variant")} 
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
                 {item.name}
               </>
             )}
@@ -146,14 +149,14 @@ export const AdminLayout = () => {
           </button>
         </div>
         <button className="flex w-full items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md rounded-lg">
-          <span className="material-symbols-outlined">help_outline</span>
+          <HelpCircle className="w-5 h-5" />
           Help
         </button>
         <button 
           onClick={handleLogout}
           className="flex w-full items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md rounded-xl"
         >
-          <span className="material-symbols-outlined">logout</span>
+          <LogOut className="w-5 h-5" />
           Logout
         </button>
       </div>
@@ -200,7 +203,7 @@ export const AdminLayout = () => {
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 -ml-2 text-on-surface hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center"
           >
-            <span className="material-symbols-outlined text-[24px]">menu</span>
+            <Menu className="w-6 h-6" />
           </button>
           <h2 className="font-headline-sm text-primary tracking-tight">LUMINA SPA</h2>
           <ThemeToggle />

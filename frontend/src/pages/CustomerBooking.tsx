@@ -15,6 +15,7 @@ import {
   BOOKING_STEPS,
   type BookingStep,
 } from '../store/useBookingStore';
+import { StripeDepositCheckout } from '../components/payments/StripeDepositCheckout';
 
 const steps = [
   { id: BOOKING_STEPS.CATEGORY, name: 'Category' },
@@ -55,7 +56,15 @@ export const CustomerBooking = () => {
 
   // --- Local ephemeral UI state (no need to persist) ---
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [successData, setSuccessData] = useState<{ services: any[], time: string | null, price: number } | null>(null);
+  const [pendingPaymentAppointment, setPendingPaymentAppointment] = useState<any>(null);
+  
+  // Guest checkout state
+  const [guestFirstName, setGuestFirstName] = useState('');
+  const [guestLastName, setGuestLastName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  
   const navigate = useNavigate();
 
   // --- Derive categories from server data (do not store in Zustand) ---
@@ -106,11 +115,21 @@ export const CustomerBooking = () => {
       setError('Please select an elegant moment for your arrival.');
       return;
     }
+    
+    if (!myProfile && (!guestFirstName || !guestEmail)) {
+      setError('Please provide your name and email to proceed.');
+      return;
+    }
+    
     setError(null);
 
     createAppointment.mutate(
       {
         customerId: myProfile?.id,
+        guestFirstName: !myProfile ? guestFirstName : undefined,
+        guestLastName: !myProfile ? guestLastName : undefined,
+        guestEmail: !myProfile ? guestEmail : undefined,
+        guestPhone: !myProfile ? guestPhone : undefined,
         branchId: 1,
         services: selectedServices.map((svcId) => ({
           serviceId: svcId,
@@ -120,9 +139,19 @@ export const CustomerBooking = () => {
         notes: 'Booked via customer portal',
       },
       {
-        onSuccess: () => {
-          resetBooking(); // Clear wizard state after successful booking
-          setSuccess(true);
+        onSuccess: (data: any) => {
+          if (data && data.depositAmount > 0 && !data.isDepositPaid) {
+            setPendingPaymentAppointment(data);
+          } else {
+            const selectedServiceObjects = services.filter(s => selectedServices.includes(s.id));
+            const totalPrice = selectedServiceObjects.reduce((acc, s) => acc + s.price, 0);
+            setSuccessData({
+              services: selectedServiceObjects,
+              time: selectedTime,
+              price: totalPrice
+            });
+            resetBooking(); // Clear wizard state after successful booking
+          }
         },
         onError: (err: any) => {
           let errMsg = 'Failed to book appointment.';
@@ -145,7 +174,45 @@ export const CustomerBooking = () => {
     exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
   };
 
-  if (success) {
+  if (pendingPaymentAppointment) {
+    const handlePaymentSuccess = () => {
+      const selectedServiceObjects = services.filter(s => selectedServices.includes(s.id));
+      const totalPrice = selectedServiceObjects.reduce((acc, s) => acc + s.price, 0);
+      setSuccessData({
+        services: selectedServiceObjects,
+        time: selectedTime,
+        price: totalPrice
+      });
+      setPendingPaymentAppointment(null);
+      resetBooking();
+    };
+
+    return (
+      <div className="min-h-[100svh] flex items-center justify-center bg-[var(--color-background)] relative overflow-hidden p-6 text-[var(--color-on-surface)] selection:bg-[var(--color-primary)]/30">
+        <AnimatedSection className="relative z-10 w-full max-w-lg">
+          <Card className="glass-panel text-center p-10 md:p-14 bg-[var(--color-surface)]/10 border-[var(--color-border)] backdrop-blur-xl">
+            <h2 className="font-display-lg text-4xl mb-4 text-[#F5F0E6]">Secure Your Ritual</h2>
+            <p className="font-body-lg text-[#F5F0E6]/60 mb-8 leading-relaxed">
+              A deposit of ₹{pendingPaymentAppointment.depositAmount} is required to secure your reservation.
+            </p>
+            <StripeDepositCheckout 
+              appointmentId={pendingPaymentAppointment.id} 
+              amount={pendingPaymentAppointment.depositAmount} 
+              onSuccess={handlePaymentSuccess} 
+              onError={(e) => setError(e.message)} 
+            />
+          </Card>
+        </AnimatedSection>
+      </div>
+    );
+  }
+
+  if (successData) {
+    const displayDate = successData.time ? new Date(successData.time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : '';
+    const displayTime = successData.time ? new Date(successData.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
+    const whatsappText = encodeURIComponent(`Hello Lumina Spa! My booking is confirmed for ${displayDate} at ${displayTime}. Total: $${successData.price.toFixed(2)}.`);
+    const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
+
     return (
       <div className="min-h-[100svh] flex items-center justify-center bg-[var(--color-background)] relative overflow-hidden p-6 text-[var(--color-on-surface)] selection:bg-[var(--color-primary)]/30">
         <div className="absolute inset-0 bg-scrim/80 z-0"></div>
@@ -155,7 +222,7 @@ export const CustomerBooking = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-20 z-0 mix-blend-luminosity"
         />
         <AnimatedSection className="relative z-10 w-full max-w-lg">
-          <Card className="glass-panel text-center p-14 bg-[var(--color-surface)]/10 border-[var(--color-border)] backdrop-blur-xl">
+          <Card className="glass-panel text-center p-10 md:p-14 bg-[var(--color-surface)]/10 border-[var(--color-border)] backdrop-blur-xl">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -165,17 +232,51 @@ export const CustomerBooking = () => {
               <span className="material-symbols-outlined text-[var(--color-primary)] text-5xl font-light">spa</span>
             </motion.div>
             <h2 className="font-display-lg text-4xl mb-4 text-[#F5F0E6]">Your Sanctuary Awaits</h2>
-            <p className="font-body-lg text-[#F5F0E6]/60 mb-10 leading-relaxed">
+            <p className="font-body-lg text-[#F5F0E6]/60 mb-8 leading-relaxed">
               Your ritual has been elegantly scheduled. We look forward to guiding you through a moment of complete serenity.
             </p>
-            <Button onClick={() => navigate('/customer/dashboard')} size="lg" className="w-full">
-              Return to Guest Portal
-            </Button>
+            
+            <div className="bg-white/5 rounded-2xl p-6 mb-10 text-left border border-white/10 shadow-inner">
+               <h3 className="font-display-sm text-xl text-primary mb-4 border-b border-white/10 pb-3">Reservation Summary</h3>
+               <div className="space-y-4 font-body-md text-[#F5F0E6]/90">
+                 <div className="flex justify-between items-center">
+                   <span className="text-[#F5F0E6]/50 font-label-md uppercase tracking-wider text-xs">Date</span>
+                   <span>{displayDate}</span>
+                 </div>
+                 <div className="flex justify-between items-center">
+                   <span className="text-[#F5F0E6]/50 font-label-md uppercase tracking-wider text-xs">Time</span>
+                   <span>{displayTime}</span>
+                 </div>
+                 <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                   <span className="text-[#F5F0E6]/50 font-label-md uppercase tracking-wider text-xs">Total Amount</span>
+                   <span className="text-primary font-display-sm text-xl">${successData.price.toFixed(2)}</span>
+                 </div>
+               </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <a 
+                href={whatsappUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white py-4 px-6 rounded-full font-label-md uppercase tracking-wider hover:bg-[#20bd5a] transition-all duration-300 shadow-lg hover:shadow-[#25D366]/20"
+              >
+                <span className="material-symbols-outlined text-[20px]">chat</span>
+                Get details on WhatsApp
+              </a>
+              <Button onClick={() => navigate(myProfile ? '/customer/dashboard' : '/')} size="lg" className="w-full">
+                {myProfile ? 'Return to Guest Portal' : 'Return to Home'}
+              </Button>
+            </div>
           </Card>
         </AnimatedSection>
       </div>
     );
   }
+
+  const selectedServiceObjects = services.filter(s => selectedServices.includes(s.id));
+  const totalDuration = selectedServiceObjects.reduce((acc, s) => acc + s.durationMins, 0);
+  const totalPrice = selectedServiceObjects.reduce((acc, s) => acc + s.price, 0);
 
   return (
     <div className="dark bg-[var(--color-background)] text-[var(--color-on-surface)] font-body-md overflow-x-hidden min-h-screen flex flex-col selection:bg-[var(--color-primary)]/20">
@@ -194,63 +295,82 @@ export const CustomerBooking = () => {
       </header>
 
       <main className="pt-36 pb-24 max-w-5xl mx-auto px-6 w-full flex-grow relative">
-        {/* Progress Indicator */}
-        <div className="max-w-2xl mx-auto mb-20 px-4">
-          <div className="flex justify-between items-center relative mb-6">
-            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/20 -z-10"></div>
+        {/* Premium Progress Indicator */}
+        <div className="max-w-3xl mx-auto mb-20 px-2 sm:px-8">
+          <div className="flex justify-between items-center relative">
+            {/* Connecting Track */}
+            <div className="absolute top-6 left-12 right-12 h-[2px] bg-outline-variant/30 z-0"></div>
             <motion.div
-              className="absolute top-1/2 left-0 h-[1px] bg-[var(--color-primary)] -z-10"
+              className="absolute top-6 left-12 h-[2px] bg-gradient-to-r from-primary/50 to-primary shadow-[0_0_8px_rgba(212,175,55,0.5)] z-0"
               initial={{ width: '0%' }}
-              animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              animate={{ width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 3rem)` }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             />
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={clsx(
-                  'flex flex-col items-center gap-4 group transition-all duration-300',
-                  step.id <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                )}
-                onClick={() => step.id < currentStep && setStep(step.id as BookingStep)}
-              >
-                <motion.div
-                  layout
+            {/* Steps */}
+            {steps.map((step, index) => {
+              const isActive = step.id === currentStep;
+              const isPast = step.id < currentStep;
+
+              return (
+                <div
+                  key={step.id}
                   className={clsx(
-                    'w-3 h-3 rounded-full transition-all duration-500',
-                    step.id === currentStep
-                      ? 'bg-[var(--color-primary)] ring-4 ring-primary/20 scale-125'
-                      : step.id < currentStep
-                      ? 'bg-[var(--color-primary)]'
-                      : 'bg-[var(--color-surface)] border border-[var(--color-border)]'
+                    'flex flex-col items-center gap-4 group transition-all duration-300 w-24 relative z-10',
+                    step.id <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
                   )}
-                />
-                <span
-                  className={clsx(
-                    'font-label-sm text-xs tracking-widest uppercase transition-colors duration-300',
-                    step.id === currentStep
-                      ? 'text-[var(--color-primary)] font-semibold'
-                      : step.id < currentStep
-                      ? 'text-[var(--color-on-surface-variant)]'
-                      : 'text-[var(--color-outline)]'
-                  )}
+                  onClick={() => step.id < currentStep && setStep(step.id as BookingStep)}
                 >
-                  {step.name}
-                </span>
-              </div>
-            ))}
+                  <motion.div
+                    layout
+                    className={clsx(
+                      'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 font-headline-sm text-lg relative',
+                      isActive
+                        ? 'bg-gradient-to-br from-primary to-primary-fixed-dim text-[#1A1A1A] shadow-[0_4px_20px_rgba(212,175,55,0.4)] scale-110'
+                        : isPast
+                        ? 'bg-[var(--color-background)] border border-primary/50 text-primary'
+                        : 'bg-[var(--color-background)] border border-outline-variant/30 text-outline'
+                    )}
+                  >
+                    {isPast ? (
+                      <span className="material-symbols-outlined text-[20px]">check</span>
+                    ) : (
+                      <span>{index + 1}</span>
+                    )}
+                    
+                    {isActive && (
+                      <div className="absolute -inset-2 border border-primary/20 rounded-full animate-[spin_4s_linear_infinite] pointer-events-none border-t-transparent"></div>
+                    )}
+                  </motion.div>
+                  <span
+                    className={clsx(
+                      'font-label-sm text-[11px] tracking-[0.2em] uppercase transition-colors duration-300 whitespace-nowrap',
+                      isActive
+                        ? 'text-primary font-bold'
+                        : isPast
+                        ? 'text-on-surface-variant'
+                        : 'text-outline'
+                    )}
+                  >
+                    {step.name}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {error && (
           <AnimatedSection>
-            <div className="max-w-3xl mx-auto mb-10 bg-error/10 text-error p-4 rounded-xl border border-error/20 text-center font-body-md shadow-sm">
+            <div className="max-w-3xl mx-auto mb-10 bg-error/10 text-error p-4 rounded-xl border border-error/20 text-center font-body-md shadow-sm" aria-live="polite">
               {error}
             </div>
           </AnimatedSection>
         )}
 
-        <AnimatePresence mode="wait">
-          {/* Step 1: Category */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
+              {/* Step 1: Category */}
           {currentStep === BOOKING_STEPS.CATEGORY && (
             <motion.section key="step1" variants={stepVariants} initial="hidden" animate="visible" exit="exit">
               <div className="text-center mb-16">
@@ -475,7 +595,44 @@ export const CustomerBooking = () => {
                     })}
                   </div>
 
+                  {!myProfile && (
+                    <div className="mb-8 pt-8 border-t border-[var(--color-border)]">
+                      <h3 className="font-display-sm text-xl mb-6">Guest Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input 
+                          type="text" 
+                          placeholder="First Name *"
+                          value={guestFirstName}
+                          onChange={(e) => setGuestFirstName(e.target.value)}
+                          className="w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-primary)] py-3 outline-none transition-colors"
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Last Name"
+                          value={guestLastName}
+                          onChange={(e) => setGuestLastName(e.target.value)}
+                          className="w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-primary)] py-3 outline-none transition-colors"
+                        />
+                        <input 
+                          type="email" 
+                          placeholder="Email Address *"
+                          value={guestEmail}
+                          onChange={(e) => setGuestEmail(e.target.value)}
+                          className="w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-primary)] py-3 outline-none transition-colors"
+                        />
+                        <input 
+                          type="tel" 
+                          placeholder="Phone Number"
+                          value={guestPhone}
+                          onChange={(e) => setGuestPhone(e.target.value)}
+                          className="w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-primary)] py-3 outline-none transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="pt-8 border-t border-[var(--color-border)]">
+                    {error && <div className="text-red-400 mb-4 text-center">{error}</div>}
                     <Button
                       onClick={handleBook}
                       disabled={createAppointment.isPending}
@@ -497,6 +654,47 @@ export const CustomerBooking = () => {
             </motion.section>
           )}
         </AnimatePresence>
+        </div>
+        
+        {/* Booking Summary Panel */}
+        {currentStep >= BOOKING_STEPS.RITUAL && (
+          <div className="w-full lg:w-80 shrink-0">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="sticky top-32"
+            >
+              <Card className="p-6 glass-panel border-[var(--color-border)] shadow-xl">
+                <h3 className="font-display-sm text-xl mb-4 border-b border-[var(--color-border)] pb-4">Booking Summary</h3>
+                
+                {selectedServiceObjects.length > 0 ? (
+                  <div className="space-y-4 mb-6">
+                    {selectedServiceObjects.map(s => (
+                      <div key={s.id} className="flex justify-between items-start text-sm">
+                        <span className="text-[var(--color-on-surface)] pr-4">{s.name}</span>
+                        <span className="text-[var(--color-primary)] whitespace-nowrap">₹{s.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[var(--color-on-surface-variant)] text-sm mb-6 italic">No rituals selected yet.</p>
+                )}
+                
+                <div className="space-y-3 border-t border-[var(--color-border)] pt-4 font-label-sm uppercase tracking-widest text-xs">
+                  <div className="flex justify-between text-[var(--color-on-surface-variant)]">
+                    <span>Duration</span>
+                    <span>{totalDuration} min</span>
+                  </div>
+                  <div className="flex justify-between text-[var(--color-on-surface)] font-bold">
+                    <span>Total</span>
+                    <span className="text-[var(--color-primary)] text-sm">₹{totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        )}
+      </div>
       </main>
     </div>
   );

@@ -58,6 +58,16 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAppointmentsByStaffAndDate(staffId, startOfDay, endOfDay));
     }
 
+    @GetMapping("/my/upcoming")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<AppointmentDto> getMyUpcomingAppointment() {
+        AppointmentDto upcoming = appointmentService.getMyUpcomingAppointment();
+        if (upcoming == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(upcoming);
+    }
+
     @PutMapping("/{id}/complete")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')")
     public ResponseEntity<AppointmentDto> completeAppointment(
@@ -65,5 +75,14 @@ public class AppointmentController {
             @Valid @RequestBody(required = false) List<com.luxesuite.api.dto.ProductUsageDto> usedProducts
     ) {
         return ResponseEntity.ok(appointmentService.completeAppointment(id, usedProducts));
+    }
+
+    @PostMapping("/{id}/reschedule")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'CUSTOMER')")
+    public ResponseEntity<AppointmentDto> rescheduleAppointment(
+            @PathVariable Long id,
+            @Valid @RequestBody com.luxesuite.api.dto.RescheduleRequestDto request
+    ) {
+        return ResponseEntity.ok(appointmentService.rescheduleAppointment(id, request.getNewStartTime()));
     }
 }

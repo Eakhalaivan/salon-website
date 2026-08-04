@@ -9,6 +9,7 @@ import { useAppointmentsByBranchQuery } from '../../hooks/api/useAppointments';
 import { useAdminProductsQuery } from '../../hooks/api/useProducts';
 import { useLiveAttendanceQuery } from '../../hooks/api/useAttendance';
 import { useServicesQuery } from '../../hooks/api/useServices';
+import { ShimmerSweep } from '../../components/ui/ShimmerSweep';
 
 interface DashboardStatsDto {
   totalAppointmentsToday: number;
@@ -58,12 +59,19 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-        <div>
-          <h2 className="font-display-md text-4xl text-on-surface mb-2">Welcome Back</h2>
+      <header className="relative overflow-hidden bg-surface-container-lowest border border-outline-variant/30 rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 shadow-sm">
+        <ShimmerSweep className="opacity-40" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="font-display-md text-4xl text-on-surface">Welcome Back</h2>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error/10 text-error border border-error/20">
+              <div className="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+              <span className="font-label-sm text-[10px] tracking-widest uppercase font-bold">Live</span>
+            </div>
+          </div>
           <p className="font-body-md text-on-surface-variant">Your Serenity awaits dashboard.</p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 relative z-10">
           <div className="text-right hidden sm:block">
             <p className="font-label-md text-on-surface font-bold">{user?.firstName || 'Admin User'}</p>
             <p className="font-label-sm text-on-surface-variant opacity-60">
@@ -221,10 +229,10 @@ export const AdminDashboard = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-secondary-container/30 flex items-center justify-center font-label-sm text-label-sm text-secondary">
-                          {apt.customerName?.[0] || 'C'}
+                          {apt.customerFirstName?.[0] || 'C'}
                         </div>
                         <div>
-                          <p className="font-label-md text-label-md text-on-surface">Customer #{apt.customerId}</p>
+                          <p className="font-label-md text-label-md text-on-surface">{apt.customerFirstName} {apt.customerLastName}</p>
                         </div>
                       </div>
                     </td>

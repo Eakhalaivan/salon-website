@@ -130,6 +130,7 @@ export const Login = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="mb-8 p-4 bg-error/10 text-error text-sm rounded-xl border border-error/20 font-body-md text-center"
+              aria-live="polite"
             >
               {error}
             </motion.div>

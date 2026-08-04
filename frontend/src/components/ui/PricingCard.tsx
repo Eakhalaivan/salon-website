@@ -66,7 +66,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         </div>
         <button 
           onClick={onSelect}
-          className="w-full py-4 rounded-full bg-primary-container hover:bg-gradient-to-r hover:from-[#D4AF37] hover:via-[#F5D06F] hover:to-[#B8860B] text-on-primary-container font-label-md shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all mt-auto"
+          className="w-full py-4 rounded-full border border-primary text-primary font-label-md hover:bg-primary/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all mt-auto"
         >
           {buttonText}
         </button>
@@ -77,7 +77,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   return (
     <motion.div 
       whileHover={{ y: hoverY }}
-      className="bg-surface-container-lowest spa-card-shadow rounded-2xl p-[32px] border border-outline-variant/20 transition-transform hover:scale-[1.02] duration-300 h-full flex flex-col"
+      className="bg-surface-container-lowest spa-card-shadow rounded-2xl p-[32px] border border-outline/50 transition-transform hover:scale-[1.02] duration-300 h-full flex flex-col"
     >
       {isActive && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-container/20 px-6 py-1.5 rounded-full border border-primary-container/30 shadow-sm">
@@ -112,7 +112,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       </div>
       <button 
         onClick={onSelect}
-        className="w-full py-4 rounded-full border border-primary-container text-primary-container font-label-md hover:bg-primary-container/5 transition-colors mt-auto"
+        className="w-full py-4 rounded-full border border-outline/80 text-on-surface font-label-md hover:bg-surface-container-high transition-colors mt-auto"
       >
         {buttonText}
       </button>

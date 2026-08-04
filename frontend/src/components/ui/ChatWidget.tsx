@@ -1,11 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+const SUGGESTIONS = [
+  "Book an appointment",
+  "View membership details",
+  "What are your hours?",
+  "Tell me about facials"
+];
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,12 +30,12 @@ export const ChatWidget = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (text: string = input) => {
+    if (!text.trim()) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = { role: 'user', content: text };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -50,68 +58,125 @@ export const ChatWidget = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute bottom-16 right-0 w-80 sm:w-96 h-[500px] bg-surface/95 backdrop-blur-xl border border-outline-variant/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            initial={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, type: 'spring', damping: 25, stiffness: 200 }}
+            className="absolute bottom-20 right-0 w-[360px] sm:w-[400px] h-[600px] max-h-[80vh] bg-surface-container-lowest/85 backdrop-blur-3xl border border-outline-variant/30 rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.2),0_0_0_1px_rgba(204,164,74,0.1)] flex flex-col overflow-hidden"
           >
-            {/* Header */}
-            <div className="bg-primary text-white p-4 flex justify-between items-center">
-              <div>
-                <h3 className="font-display-sm text-lg">Lumina Assistant</h3>
-                <p className="text-xs opacity-80">Online</p>
+            {/* Premium Header */}
+            <div className="bg-gradient-to-r from-surface-container via-surface-container to-surface-container-high border-b border-outline-variant/20 px-6 py-5 flex justify-between items-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
+                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>spa</span>
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface-container-lowest"></div>
+                </div>
+                <div>
+                  <h3 className="font-headline-md text-[16px] text-on-surface">Lumina Assistant</h3>
+                  <p className="text-[11px] text-primary font-bold uppercase tracking-widest mt-0.5">Online</p>
+                </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-primary-container/20 p-1 rounded-full transition-colors">
-                <span className="material-symbols-outlined font-light text-[20px]">close</span>
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="hover:bg-surface-container-highest p-2 rounded-full transition-colors text-on-surface-variant z-10"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-surface-container-lowest/50">
+              {messages.map((msg, idx) => {
+                const isBookingIntent = msg.role === 'assistant' && (msg.content.includes("Guest Portal") || msg.content.includes("Reserve a Time"));
+                return (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  key={idx} 
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[85%] px-5 py-3.5 shadow-sm ${
                     msg.role === 'user' 
-                      ? 'bg-primary text-white rounded-tr-sm' 
-                      : 'bg-surface-variant text-on-surface rounded-tl-sm'
+                      ? 'bg-gradient-to-br from-[#CCA44A] to-[#A37B24] text-white rounded-[20px] rounded-br-[4px]' 
+                      : 'bg-surface-container text-on-surface rounded-[20px] rounded-tl-[4px] border border-outline-variant/20'
                   }`}>
-                    <p className="font-body-md text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="font-body-md text-[14px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    {isBookingIntent && (
+                      <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                        <Link 
+                          to="/book" 
+                          onClick={() => setIsOpen(false)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md text-xs rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all shadow-md shadow-primary/20"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                          Book Now
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                </motion.div>
+                );
+              })}
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-surface-variant text-on-surface rounded-2xl rounded-tl-sm px-4 py-2 flex gap-1 items-center h-10">
-                    <span className="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                    <span className="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-surface-container text-on-surface rounded-[20px] rounded-tl-[4px] border border-outline-variant/20 px-5 py-4 flex gap-1.5 items-center h-12 shadow-sm">
+                    <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                    <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} className="h-2" />
+            </div>
+
+            {/* Suggestions & Input Area */}
+            <div className="bg-surface-container-lowest/90 backdrop-blur-md border-t border-outline-variant/20 flex flex-col z-20">
+              {/* Suggestion Chips */}
+              {messages.length < 5 && !isLoading && (
+                <div className="px-4 pt-3 pb-1 overflow-x-auto custom-scrollbar scroll-smooth">
+                  <div className="flex gap-2 pb-2 w-max">
+                    {SUGGESTIONS.map((suggestion, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSend(suggestion)}
+                        className="whitespace-nowrap px-4 py-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary rounded-full text-[12px] font-label-md transition-all duration-300 hover:shadow-sm"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
-            </div>
 
-            {/* Input */}
-            <div className="p-4 border-t border-outline-variant/20 bg-surface">
+              {/* Input Form */}
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex gap-2"
+                className="p-4 pt-2"
               >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about our rituals..."
-                  className="flex-1 bg-surface-variant/50 border border-outline-variant/30 rounded-full px-4 py-2 font-body-md text-sm focus:outline-none focus:border-primary/50 text-on-surface"
-                />
-                <button 
-                  type="submit"
-                  disabled={!input.trim() || isLoading}
-                  className="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50 hover:bg-primary/90 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]">send</span>
-                </button>
+                <div className="relative flex items-center group">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask Lumina anything..."
+                    className="w-full bg-surface-container border border-outline-variant/40 rounded-full pl-5 pr-12 py-3.5 font-body-md text-[14px] focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 text-on-surface transition-all shadow-inner"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={!input.trim() || isLoading}
+                    className="absolute right-1.5 bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-30 disabled:bg-surface-container-highest hover:bg-primary/90 transition-colors shadow-sm disabled:shadow-none"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">send</span>
+                  </button>
+                </div>
               </form>
             </div>
           </motion.div>
@@ -120,10 +185,12 @@ export const ChatWidget = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-primary text-white rounded-full shadow-[0_8px_20px_rgba(212,175,55,0.3)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_8px_30px_rgba(204,164,74,0.3)] hover:shadow-[0_12px_40px_rgba(204,164,74,0.4)] active:scale-95 group ${
+          isOpen ? 'bg-surface-container-high text-on-surface' : 'bg-gradient-to-br from-[#CCA44A] to-[#A37B24] text-white'
+        }`}
       >
-        <span className="material-symbols-outlined font-light text-[24px]">
-          {isOpen ? 'close' : 'chat_bubble'}
+        <span className="material-symbols-outlined font-light text-[28px] group-hover:scale-110 transition-transform duration-300">
+          {isOpen ? 'close' : 'spa'}
         </span>
       </button>
     </div>

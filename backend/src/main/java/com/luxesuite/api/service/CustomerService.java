@@ -10,6 +10,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.luxesuite.api.repository.AppointmentRepository;
+import com.luxesuite.api.repository.InvoiceRepository;
+import com.luxesuite.api.repository.LoyaltyTransactionRepository;
+import com.luxesuite.api.model.Appointment;
+import com.luxesuite.api.model.AppointmentStatus;
+import com.luxesuite.api.model.Invoice;
+import com.luxesuite.api.model.LoyaltyTransaction;
+import com.luxesuite.api.dto.ActivityDto;
+
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import com.luxesuite.api.dto.PageResponse;
@@ -22,6 +32,9 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final LoyaltyTransactionRepository loyaltyTransactionRepository;
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
@@ -64,6 +77,7 @@ public class CustomerService {
         if (dto.getPhone() != null) existing.setPhone(dto.getPhone());
         if (dto.getNotes() != null) existing.setNotes(dto.getNotes());
         if (dto.getProfilePhoto() != null) existing.setProfilePhoto(dto.getProfilePhoto());
+        if (dto.getDateOfBirth() != null) existing.setDateOfBirth(dto.getDateOfBirth());
         
         return mapToDto(customerRepository.save(existing));
     }
@@ -72,6 +86,37 @@ public class CustomerService {
         com.luxesuite.api.model.User user = securityUtils.getCurrentUser();
         return customerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found for current user"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ActivityDto> getMyActivity() {
+        Customer customer = getCurrentCustomer();
+        List<ActivityDto> activities = new java.util.ArrayList<>();
+
+        List<Appointment> appointments = appointmentRepository.findByCustomerId(customer.getId());
+        for (Appointment app : appointments) {
+            String title = "Appointment Booked";
+            if (app.getStatus() == AppointmentStatus.COMPLETED) {
+                title = "Appointment Completed";
+            } else if (app.getStatus() == AppointmentStatus.CANCELLED) {
+                title = "Appointment Cancelled";
+            }
+            String desc = app.getServices() != null && !app.getServices().isEmpty() ? app.getServices().get(0).getService().getName() : "Service";
+            activities.add(new ActivityDto("APPOINTMENT", title, desc, app.getCreatedAt(), "event_available"));
+        }
+
+        List<Invoice> invoices = invoiceRepository.findByCustomerId(customer.getId());
+        for (Invoice inv : invoices) {
+            activities.add(new ActivityDto("ORDER", "Order Placed", "Total: " + inv.getTotalAmount(), inv.getCreatedAt(), "shopping_cart"));
+        }
+
+        org.springframework.data.domain.Page<LoyaltyTransaction> pts = loyaltyTransactionRepository.findByCustomerId(customer.getId(), org.springframework.data.domain.PageRequest.of(0, 50));
+        for (LoyaltyTransaction pt : pts.getContent()) {
+            activities.add(new ActivityDto("LOYALTY", "Points " + (pt.getPointsDelta() > 0 ? "Earned" : "Redeemed"), pt.getReason(), pt.getCreatedAt(), "loyalty"));
+        }
+
+        activities.sort(java.util.Comparator.comparing(ActivityDto::getDate).reversed());
+        return activities.stream().limit(10).collect(Collectors.toList());
     }
 
     @Transactional
@@ -87,6 +132,7 @@ public class CustomerService {
         existing.setPhone(dto.getPhone());
         existing.setNotes(dto.getNotes());
         if (dto.getProfilePhoto() != null) existing.setProfilePhoto(dto.getProfilePhoto());
+        if (dto.getDateOfBirth() != null) existing.setDateOfBirth(dto.getDateOfBirth());
         
         return mapToDto(customerRepository.save(existing));
     }
@@ -108,6 +154,7 @@ public class CustomerService {
         dto.setNotes(customer.getNotes());
         dto.setTotalPoints(customer.getTotalPoints());
         dto.setProfilePhoto(customer.getProfilePhoto());
+        dto.setDateOfBirth(customer.getDateOfBirth());
         return dto;
     }
 
@@ -120,6 +167,7 @@ public class CustomerService {
         customer.setNotes(dto.getNotes());
         customer.setTotalPoints(dto.getTotalPoints() != null ? dto.getTotalPoints() : 0);
         customer.setProfilePhoto(dto.getProfilePhoto());
+        customer.setDateOfBirth(dto.getDateOfBirth());
         return customer;
     }
 }

@@ -24,13 +24,13 @@ export const ProviderTypeSelector = ({ compact = false }: Props) => {
   return (
     <div className="w-full">
       {!compact && (
-        <label className="block text-xs text-on-surface-variant mb-1.5 uppercase tracking-wider font-label-sm">
+        <label className="block text-xs text-on-surface-variant mb-1 uppercase tracking-wider font-label-sm">
           Provider Type
         </label>
       )}
 
       <div
-        className="flex rounded-xl overflow-hidden border border-outline-variant/30 bg-surface-container-high/50"
+        className="flex p-1 gap-1 rounded-xl border border-outline-variant/30 bg-surface-container-high/50"
         role="group"
         aria-label="Provider type filter"
       >
@@ -44,16 +44,16 @@ export const ProviderTypeSelector = ({ compact = false }: Props) => {
               title={opt.label}
               aria-pressed={isActive}
               className={[
-                'relative flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'relative flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all duration-200 focus:outline-none rounded-lg',
                 isActive
-                  ? 'text-on-primary z-10'
+                  ? 'text-on-primary z-10 font-bold'
                   : 'text-on-surface-variant hover:text-on-surface hover:bg-on-surface/5',
               ].join(' ')}
             >
               {isActive && (
                 <motion.div
                   layoutId="provider-pill"
-                  className="absolute inset-0 bg-primary rounded-lg"
+                  className="absolute inset-0 bg-primary rounded-lg shadow-sm"
                   style={{ zIndex: -1 }}
                   transition={{ type: 'spring', bounce: 0.25, duration: 0.3 }}
                 />
