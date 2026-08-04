@@ -18,7 +18,7 @@ interface DashboardStats {
 export const ManagerDashboard = () => {
   const { user } = useAuthStore();
   const { selectedBranchId } = useBranchStore();
-  const branchId = selectedBranchId || user?.branchId;
+  const branchId = selectedBranchId || (user as any)?.branchId;
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);

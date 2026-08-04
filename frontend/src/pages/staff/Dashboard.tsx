@@ -46,7 +46,7 @@ export const Dashboard = () => {
   // Generate Daily Brief
   const sortedAppointments = appointments ? [...appointments].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
   const dailyBrief = sortedAppointments.length > 0 
-    ? `You have ${sortedAppointments.length} appointment${sortedAppointments.length > 1 ? 's' : ''} scheduled today. Your first client arrives at ${new Date(sortedAppointments[0].services?.[0]?.startTime || sortedAppointments[0].createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}. ${completedToday === sortedAppointments.length ? "All appointments completed, great job!" : "Have a wonderful shift!"}`
+    ? `You have ${sortedAppointments.length} appointment${sortedAppointments.length > 1 ? 's' : ''} scheduled today. Your first client arrives at ${new Date((sortedAppointments[0].services?.[0]?.startTime || sortedAppointments[0].createdAt) as string).toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'})}. ${completedToday === sortedAppointments.length ? "All appointments completed, great job!" : "Have a wonderful shift!"}`
     : "You have no appointments scheduled for today. Enjoy your free time or assist with operations.";
 
   const handleSaveNote = () => {

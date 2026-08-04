@@ -135,7 +135,7 @@ describe('CustomerBooking Flow', () => {
   });
 
   it('handles booking confirmation', async () => {
-    const mockMutate = vi.fn((data, options) => {
+    const mockMutate = vi.fn((_data, options) => {
       options.onSuccess();
     });
     

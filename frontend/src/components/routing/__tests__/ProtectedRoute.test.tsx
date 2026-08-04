@@ -11,7 +11,7 @@ vi.mock('../../../store/useAuthStore', () => {
   const useAuthStore = vi.fn();
   return {
     useAuthStore,
-    selectHasHydrated: (state: any) => true,
+    selectHasHydrated: (_state: any) => true,
   };
 });
 
