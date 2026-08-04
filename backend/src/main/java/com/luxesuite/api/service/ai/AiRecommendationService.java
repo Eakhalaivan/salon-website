@@ -36,7 +36,7 @@ public class AiRecommendationService {
         List<Appointment> pastAppointments = appointmentRepository.findByCustomerId(customerId);
         
         // 1. Deterministic heuristic fallback: find popular services
-        List<Service> allServices = serviceRepository.findTopServicesByBookingCountNative(10);
+        List<Service> allServices = serviceRepository.findTopServicesByBookingCountNative(org.springframework.data.domain.PageRequest.of(0, 10));
         
         // Exclude services they've already had recently (simple heuristic)
         List<Long> recentServiceIds = pastAppointments.stream()
