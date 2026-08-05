@@ -5,6 +5,7 @@ import { useAuthStore, selectUser } from '../../store/useAuthStore';
 
 export const Dashboard = () => {
   const user = useAuthStore(selectUser);
+  const role = useAuthStore((s) => s.role);
 
   const { data: profile } = useQuery({
     queryKey: ['customerProfile'],
@@ -12,7 +13,7 @@ export const Dashboard = () => {
       const res = await axiosClient.get('/customers/my');
       return res.data;
     },
-    enabled: !!user,
+    enabled: !!user && role === 'CUSTOMER',
   });
 
   const { data: walletData } = useQuery({
@@ -20,7 +21,8 @@ export const Dashboard = () => {
     queryFn: async () => {
       const res = await axiosClient.get('/wallet/me');
       return res.data;
-    }
+    },
+    enabled: !!user && role === 'CUSTOMER',
   });
 
   const { data: membershipData, isLoading: isLoadingMembership } = useQuery({
@@ -28,7 +30,8 @@ export const Dashboard = () => {
     queryFn: async () => {
       const res = await axiosClient.get('/subscriptions/my');
       return res.data;
-    }
+    },
+    enabled: !!user && role === 'CUSTOMER',
   });
 
   const { data: upcomingAppointment } = useQuery({
@@ -41,7 +44,8 @@ export const Dashboard = () => {
         if (err.response?.status === 204) return null;
         throw err;
       }
-    }
+    },
+    enabled: !!user && role === 'CUSTOMER',
   });
 
   const { data: recentActivity } = useQuery({
@@ -49,7 +53,8 @@ export const Dashboard = () => {
     queryFn: async () => {
       const res = await axiosClient.get('/customers/my/activity');
       return res.data;
-    }
+    },
+    enabled: !!user && role === 'CUSTOMER',
   });
 
   const balance = walletData?.balance || 0;

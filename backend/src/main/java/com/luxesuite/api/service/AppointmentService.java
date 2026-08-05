@@ -305,6 +305,25 @@ public class AppointmentService {
         return mapToDto(savedAppointment);
     }
 
+    @Transactional
+    public AppointmentDto updateStatus(Long appointmentId, AppointmentStatus newStatus) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new BadRequestException("Cannot change status of a completed or cancelled appointment.");
+        }
+
+        appointment.setStatus(newStatus);
+        for (AppointmentItem item : appointment.getServices()) {
+            item.setStatus(newStatus);
+        }
+
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        sseService.sendEventToAll("appointment_updated", savedAppointment.getId());
+        return mapToDto(savedAppointment);
+    }
+
     private AppointmentDto mapToDto(Appointment appointment) {
         AppointmentDto dto = new AppointmentDto();
         dto.setId(appointment.getId());
@@ -318,7 +337,7 @@ public class AppointmentService {
              dto.setCustomerFirstName("Guest");
         }
         
-        dto.setBranchId(appointment.getBranch().getId());
+        dto.setBranchId(appointment.getBranch() != null ? appointment.getBranch().getId() : null);
         dto.setStatus(appointment.getStatus());
         dto.setTotalPrice(appointment.getTotalPrice());
         dto.setNotes(appointment.getNotes());
@@ -330,10 +349,10 @@ public class AppointmentService {
         List<AppointmentItemDto> itemDtos = appointment.getServices().stream().map(item -> {
             AppointmentItemDto itemDto = new AppointmentItemDto();
             itemDto.setId(item.getId());
-            itemDto.setServiceId(item.getService().getId());
-            itemDto.setServiceName(item.getService().getName());
-            itemDto.setStaffId(item.getStaff().getId());
-            if (item.getStaff().getUser() != null) {
+            itemDto.setServiceId(item.getService() != null ? item.getService().getId() : null);
+            itemDto.setServiceName(item.getService() != null ? item.getService().getName() : null);
+            itemDto.setStaffId(item.getStaff() != null ? item.getStaff().getId() : null);
+            if (item.getStaff() != null && item.getStaff().getUser() != null) {
                 itemDto.setStaffFirstName(item.getStaff().getUser().getFirstName());
                 itemDto.setStaffLastName(item.getStaff().getUser().getLastName());
             }

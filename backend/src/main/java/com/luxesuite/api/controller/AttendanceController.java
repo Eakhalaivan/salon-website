@@ -18,25 +18,25 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @PostMapping("/clock-in/{staffId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'THERAPIST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'STAFF', 'RECEPTIONIST', 'THERAPIST')")
     public ResponseEntity<AttendanceDto> clockIn(@PathVariable Long staffId, @RequestBody ClockInRequest request) {
         return ResponseEntity.ok(attendanceService.clockIn(staffId, request));
     }
 
     @PostMapping("/clock-out/{staffId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'THERAPIST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'STAFF', 'RECEPTIONIST', 'THERAPIST')")
     public ResponseEntity<AttendanceDto> clockOut(@PathVariable Long staffId) {
         return ResponseEntity.ok(attendanceService.clockOut(staffId));
     }
 
     @GetMapping("/staff/{staffId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'THERAPIST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'STAFF', 'RECEPTIONIST', 'THERAPIST')")
     public ResponseEntity<List<AttendanceDto>> getAttendanceForStaff(@PathVariable Long staffId) {
         return ResponseEntity.ok(attendanceService.getAttendanceForStaff(staffId));
     }
 
     @GetMapping("/live")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'STAFF', 'RECEPTIONIST', 'THERAPIST')")
     public ResponseEntity<List<AttendanceDto>> getLiveAttendance() {
         return ResponseEntity.ok(attendanceService.getLiveAttendance());
     }

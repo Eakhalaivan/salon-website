@@ -80,4 +80,14 @@ public class SecurityUtils {
         }
         return staff.getBranch().getId();
     }
+
+    public boolean isCurrentStaff(Long staffId) {
+        try {
+            User currentUser = getCurrentUser();
+            Staff staff = staffRepository.findByUserId(currentUser.getId()).orElse(null);
+            return staff != null && staff.getId().equals(staffId);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,12 +49,12 @@ public class AppointmentController {
     }
 
     @GetMapping("/staff/{staffId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'THERAPIST', 'STAFF')")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsByStaff(
             @PathVariable Long staffId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         return ResponseEntity.ok(appointmentService.getAppointmentsByStaffAndDate(staffId, startOfDay, endOfDay));
     }
@@ -84,5 +85,13 @@ public class AppointmentController {
             @Valid @RequestBody com.luxesuite.api.dto.RescheduleRequestDto request
     ) {
         return ResponseEntity.ok(appointmentService.rescheduleAppointment(id, request.getNewStartTime()));
+    }
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'THERAPIST', 'STAFF')")
+    public ResponseEntity<AppointmentDto> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody com.luxesuite.api.dto.UpdateAppointmentStatusDto request
+    ) {
+        return ResponseEntity.ok(appointmentService.updateStatus(id, request.getStatus()));
     }
 }

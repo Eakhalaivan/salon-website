@@ -14,11 +14,11 @@ spring:
     driver-class-name: ${DB_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
     hikari:
       maximum-pool-size: ${DB_MAX_POOL_SIZE:20}
-      minimum-idle: 10
-      idle-timeout: 60000
+      minimum-idle: 2
+      idle-timeout: 30000
       connection-timeout: 20000
-      max-lifetime: 300000
-      keepalive-time: 120000
+      max-lifetime: 60000
+      keepalive-time: 30000
 
   data:
     redis:
@@ -41,6 +41,8 @@ spring:
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:false}
     baseline-on-migrate: true
+    properties:
+      flyway.mysql.generate-lock: false
 
 server:
   port: ${PORT:8080}

@@ -142,7 +142,7 @@ public class PayrollService {
     private PayrollRecordDto mapToDto(PayrollRecord record) {
         PayrollRecordDto dto = new PayrollRecordDto();
         dto.setId(record.getId());
-        dto.setStaffId(record.getStaff().getId());
+        dto.setStaffId(record.getStaff() != null ? record.getStaff().getId() : null);
         dto.setPeriodStart(record.getPeriodStart());
         dto.setPeriodEnd(record.getPeriodEnd());
         dto.setBaseSalary(record.getBaseSalary());

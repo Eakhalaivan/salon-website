@@ -137,7 +137,7 @@ export const Profile = () => {
           {/* Left Column: Personal Card & Stats */}
           <div className="lg:col-span-4 space-y-gutter">
             {/* Profile Card */}
-            <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] text-center border border-outline-variant/10 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] text-center border border-outline-variant/40 relative overflow-hidden group hover:-translate-y-1 hover:border-[#CCA44A]/40 transition-all duration-300">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-primary-container"></div>
               <div className="relative inline-block mb-6">
                 <div className="w-32 h-32 rounded-full border-2 border-primary-container p-1 relative z-10 mx-auto transition-transform duration-500 group-hover:scale-105">
@@ -178,7 +178,7 @@ export const Profile = () => {
             </div>
 
             {/* Luxe Points Balance */}
-            <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 relative overflow-hidden hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 relative overflow-hidden hover:-translate-y-1 hover:border-[#CCA44A]/40 transition-all duration-300">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <p className="text-secondary font-label-sm text-label-sm uppercase tracking-widest mb-1">Lumina Points</p>
@@ -187,7 +187,7 @@ export const Profile = () => {
                   </h4>
                 </div>
                 <div className="w-12 h-12 bg-primary-container/10 rounded-xl flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>sparkles</span>
+                  <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                 </div>
               </div>
               <p className="text-secondary font-body-md mt-4">
@@ -204,7 +204,7 @@ export const Profile = () => {
 
           {/* Right Column: Personal Information Form */}
           <div className="lg:col-span-8">
-            <div className="bg-surface-container-lowest rounded-xl p-6 lg:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10">
+            <div className="bg-surface-container-lowest rounded-xl p-6 lg:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 hover:border-[#CCA44A]/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-outline-variant/20 gap-4">
                 <h4 className="font-headline-md text-headline-md text-on-surface">Personal Information</h4>
                 <span className="text-secondary font-label-sm text-label-sm uppercase tracking-widest">Last updated: Today</span>

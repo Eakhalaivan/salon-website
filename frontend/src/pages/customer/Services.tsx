@@ -160,6 +160,30 @@ export const Services = () => {
   );
 };
 
+const getServiceFallbackImage = (service: any) => {
+  if (service.imageUrl) return service.imageUrl;
+  const name = (service.name || '').toLowerCase();
+  const cat = (service.category || '').toLowerCase();
+
+  if (cat.includes('massage') || name.includes('massage') || name.includes('rub') || name.includes('therapy')) {
+    return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop';
+  }
+  if (cat.includes('skin') || cat.includes('facial') || name.includes('facial') || name.includes('glow') || name.includes('peel')) {
+    return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop'; 
+  }
+  if (cat.includes('hair') || name.includes('hair') || name.includes('style') || name.includes('cut') || name.includes('color')) {
+    return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop';
+  }
+  if (cat.includes('nail') || name.includes('manicure') || name.includes('pedicure') || name.includes('polish')) {
+    return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format&fit=crop';
+  }
+  if (cat.includes('grooming') || name.includes('shave') || name.includes('beard') || name.includes('trim')) {
+    return 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=600&auto=format&fit=crop';
+  }
+  
+  return 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop';
+};
+
 const CategoryButton = ({ cat, isActive, onClick }: { cat: string, isActive: boolean, onClick: () => void }) => {
   const { ripples, addRipple } = useRipple();
 
@@ -217,7 +241,7 @@ const ServiceCard = ({ service, index, onBook }: { service: any, index: number, 
           className="w-full h-full"
         >
           <img 
-            src={service.imageUrl || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop'} 
+            src={getServiceFallbackImage(service)} 
             alt={service.name}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-[1.07] group-hover:brightness-105 transition-all duration-700 ease-out"

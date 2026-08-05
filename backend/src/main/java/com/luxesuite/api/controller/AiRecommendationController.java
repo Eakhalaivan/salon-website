@@ -20,7 +20,7 @@ public class AiRecommendationController {
     private final AiRecommendationService recommendationService;
 
     @GetMapping("/services/{customerId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN', 'RECEPTIONIST')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN', 'RECEPTIONIST', 'THERAPIST')")
     public ResponseEntity<List<AiRecommendationDto>> getRecommendations(@PathVariable Long customerId) {
         return ResponseEntity.ok(recommendationService.getRecommendationsForCustomer(customerId));
     }

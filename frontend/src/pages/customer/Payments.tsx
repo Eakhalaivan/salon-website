@@ -8,6 +8,7 @@ import { useToast } from '../../components/ui/use-toast';
 import axiosClient from '../../api/axiosClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Landmark } from 'lucide-react';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const Payments = () => {
   const [page, setPage] = useState(0);
@@ -22,7 +23,8 @@ export const Payments = () => {
     queryFn: async () => {
       const res = await axiosClient.get('/customers/my');
       return res.data;
-    }
+    },
+    enabled: !!useAuthStore.getState().user && useAuthStore.getState().role === 'CUSTOMER',
   });
   
   const { toast } = useToast();
@@ -69,7 +71,7 @@ export const Payments = () => {
         {/* Summary Bento Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
           {/* Total Spent */}
-          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:border-[#CCA44A]/40">
             <div className="flex items-center justify-between mb-4">
               <span className="text-secondary font-label-md text-label-md uppercase tracking-wider">Total Spent</span>
               <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -83,7 +85,7 @@ export const Payments = () => {
           </div>
           
           {/* Total Invoices */}
-          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:border-[#CCA44A]/40">
             <div className="flex items-center justify-between mb-4">
               <span className="text-secondary font-label-md text-label-md uppercase tracking-wider">Total Invoices</span>
               <div className="p-2 bg-secondary-container rounded-lg text-on-secondary-container">
@@ -97,7 +99,7 @@ export const Payments = () => {
           </div>
           
           {/* Pending Amount */}
-          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:border-[#CCA44A]/40">
             <div className="flex items-center justify-between mb-4">
               <span className="text-secondary font-label-md text-label-md uppercase tracking-wider">Pending Amount</span>
               <div className="p-2 bg-error-container rounded-lg text-on-error-container">
@@ -111,7 +113,7 @@ export const Payments = () => {
           </div>
           
           {/* Luse Points */}
-          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/10 flex flex-col justify-between relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+          <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/40 flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:border-[#CCA44A]/40">
             <div className="flex items-center justify-between mb-4">
               <span className="text-secondary font-label-md text-label-md uppercase tracking-wider">Lumina Points</span>
               <div className="p-2 bg-primary-fixed rounded-lg text-on-primary-fixed">

@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/leave-requests")
-@PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'ADMIN', 'THERAPIST', 'RECEPTIONIST')")
 public class LeaveRequestController {
     
     @Autowired

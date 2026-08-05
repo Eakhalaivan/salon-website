@@ -44,6 +44,7 @@ public class DataLoader {
             if (true) {
                 // Ensure roles exist
                 Role adminRole = roleRepository.findByName("ADMIN").orElseGet(() -> roleRepository.save(Role.builder().name("ADMIN").build()));
+                Role managerRole = roleRepository.findByName("MANAGER").orElseGet(() -> roleRepository.save(Role.builder().name("MANAGER").build()));
                 Role staffRole = roleRepository.findByName("THERAPIST").orElseGet(() -> roleRepository.save(Role.builder().name("THERAPIST").build()));
                 Role customerRole = roleRepository.findByName("CUSTOMER").orElseGet(() -> roleRepository.save(Role.builder().name("CUSTOMER").build()));
 
@@ -134,6 +135,23 @@ public class DataLoader {
                         .build();
                 invoiceRepository.save(testInvoice);
                 log.info("✅ Seeded test invoice ID: {} for Customer", testInvoice.getId());
+
+                // Create Manager staff profile (links MANAGER user -> branch, required by
+                // BranchSettingsController and other branch-scoped endpoints)
+                User managerUser = userRepository.findByEmail("manager@luxesuite.com").orElse(null);
+                if (managerUser != null) {
+                    Staff managerProfile = staffRepository.findByUserId(managerUser.getId()).orElse(null);
+                    if (managerProfile == null) {
+                        managerProfile = Staff.builder()
+                                .user(managerUser)
+                                .branch(branch)
+                                .baseSalary(new BigDecimal("4500.00"))
+                                .commissionRate(new BigDecimal("0.00"))
+                                .build();
+                        staffRepository.save(managerProfile);
+                        log.info("✅ Manager profile created and linked to branch {}", branch.getId());
+                    }
+                }
 
                 // Seed Services
                 if (serviceRepository.count() == 0) {

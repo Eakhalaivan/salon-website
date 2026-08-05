@@ -81,8 +81,113 @@ public class CacheConfig implements CachingConfigurer {
         fallbackCacheManager.setAllowNullValues(true);
 
         // CompositeCacheManager: tries Redis first, falls back to in-memory
-        CompositeCacheManager composite = new CompositeCacheManager(redisCacheManager, fallbackCacheManager);
-        composite.setFallbackToNoOpCache(true);
-        return composite;
+        // We use a custom FailSafeCacheManager to catch Redis exceptions and fallback seamlessly
+        return new FailSafeCacheManager(redisCacheManager, fallbackCacheManager);
+    }
+
+    private static class FailSafeCacheManager implements CacheManager {
+        private final CacheManager primary;
+        private final CacheManager fallback;
+
+        public FailSafeCacheManager(CacheManager primary, CacheManager fallback) {
+            this.primary = primary;
+            this.fallback = fallback;
+        }
+
+        @Override
+        public Cache getCache(String name) {
+            Cache primaryCache = primary != null ? primary.getCache(name) : null;
+            Cache fallbackCache = fallback != null ? fallback.getCache(name) : null;
+            if (primaryCache == null && fallbackCache == null) return null;
+            return new FailSafeCache(primaryCache, fallbackCache);
+        }
+
+        @Override
+        public java.util.Collection<String> getCacheNames() {
+            return primary != null ? primary.getCacheNames() : java.util.Collections.emptyList();
+        }
+    }
+
+    private static class FailSafeCache implements Cache {
+        private final Cache primary;
+        private final Cache fallback;
+
+        public FailSafeCache(Cache primary, Cache fallback) {
+            this.primary = primary;
+            this.fallback = fallback;
+        }
+
+        @Override
+        public String getName() {
+            return primary != null ? primary.getName() : fallback.getName();
+        }
+
+        @Override
+        public Object getNativeCache() {
+            return primary != null ? primary.getNativeCache() : fallback.getNativeCache();
+        }
+
+        @Override
+        public ValueWrapper get(Object key) {
+            if (primary != null) {
+                try { return primary.get(key); }
+                catch (Exception e) { log.warn("Redis GET failed: {}", e.getMessage()); }
+            }
+            return fallback != null ? fallback.get(key) : null;
+        }
+
+        @Override
+        public <T> T get(Object key, Class<T> type) {
+            if (primary != null) {
+                try { return primary.get(key, type); }
+                catch (Exception e) { log.warn("Redis GET failed: {}", e.getMessage()); }
+            }
+            return fallback != null ? fallback.get(key, type) : null;
+        }
+
+        @Override
+        public <T> T get(Object key, java.util.concurrent.Callable<T> valueLoader) {
+            if (primary != null) {
+                try { return primary.get(key, valueLoader); }
+                catch (Exception e) { log.warn("Redis GET failed: {}", e.getMessage()); }
+            }
+            return fallback != null ? fallback.get(key, valueLoader) : null;
+        }
+
+        @Override
+        public void put(Object key, Object value) {
+            if (primary != null) {
+                try { primary.put(key, value); }
+                catch (Exception e) { log.warn("Redis PUT failed: {}", e.getMessage()); }
+            }
+            if (fallback != null) fallback.put(key, value);
+        }
+
+        @Override
+        public ValueWrapper putIfAbsent(Object key, Object value) {
+            if (primary != null) {
+                try { return primary.putIfAbsent(key, value); }
+                catch (Exception e) { log.warn("Redis PUT failed: {}", e.getMessage()); }
+            }
+            return fallback != null ? fallback.putIfAbsent(key, value) : null;
+        }
+
+        @Override
+        public void evict(Object key) {
+            if (primary != null) {
+                try { primary.evict(key); }
+                catch (Exception e) { log.warn("Redis EVICT failed: {}", e.getMessage()); }
+            }
+            if (fallback != null) fallback.evict(key);
+        }
+
+        @Override
+        public void clear() {
+            if (primary != null) {
+                try { primary.clear(); }
+                catch (Exception e) { log.warn("Redis CLEAR failed: {}", e.getMessage()); }
+            }
+            if (fallback != null) fallback.clear();
+        }
     }
 }

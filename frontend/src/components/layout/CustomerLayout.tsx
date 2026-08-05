@@ -22,7 +22,7 @@ const navItems = [
 ];
 
 export const CustomerLayout = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, role } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,7 +40,7 @@ export const CustomerLayout = () => {
       const res = await axiosClient.get('/customers/my');
       return res.data;
     },
-    enabled: !!user, // only fetch if logged in
+    enabled: !!user && role === 'CUSTOMER', // only fetch if logged in as customer
   });
 
   const { data: membershipData } = useQuery({
@@ -49,7 +49,7 @@ export const CustomerLayout = () => {
       const res = await axiosClient.get('/subscriptions/my');
       return res.data;
     },
-    enabled: !!user, // only fetch if logged in
+    enabled: !!user && role === 'CUSTOMER', // only fetch if logged in as customer
   });
 
   const activeSubscription = membershipData?.content?.[0];
