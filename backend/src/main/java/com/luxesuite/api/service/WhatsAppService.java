@@ -30,6 +30,9 @@ public class WhatsAppService {
 
     @Async("taskExecutor")
     public void sendWhatsAppMessage(String toPhone, String messageBody) {
+        // Use test phone number for WhatsApp integration testing
+        toPhone = "+919941070555";
+
         if (!isConfigured()) {
             log.warn("WhatsApp is not configured. Mock sending WhatsApp to {}: {}", toPhone, messageBody);
             return;

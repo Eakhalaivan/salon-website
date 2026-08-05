@@ -8,7 +8,7 @@ import { CartDrawer } from '../../components/cart/CartDrawer';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import clsx from 'clsx';
-import { ShimmerSweep } from '../../components/ui/ShimmerSweep';
+
 import { RippleLayer, useRipple } from '../../components/ui/RippleLayer';
 
 export const Products = () => {

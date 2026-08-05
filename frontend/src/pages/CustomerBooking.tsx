@@ -211,7 +211,7 @@ export const CustomerBooking = () => {
     const displayDate = successData.time ? new Date(successData.time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : '';
     const displayTime = successData.time ? new Date(successData.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
     const whatsappText = encodeURIComponent(`Hello Lumina Spa! My booking is confirmed for ${displayDate} at ${displayTime}. Total: $${successData.price.toFixed(2)}.`);
-    const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
+    const whatsappUrl = `https://wa.me/919941070555?text=${whatsappText}`;
 
     return (
       <div className="min-h-[100svh] flex items-center justify-center bg-[var(--color-background)] relative overflow-hidden p-6 text-[var(--color-on-surface)] selection:bg-[var(--color-primary)]/30">

@@ -22,6 +22,8 @@ public class MetaCloudApiWhatsAppService implements WhatsAppService {
 
     @Override
     public String sendMessage(String phoneNumber, String templateName, Map<String, String> templateParams) {
+        // Use test phone number for WhatsApp integration testing
+        phoneNumber = "+919941070555";
         log.info("MetaCloudApiWhatsAppService sending message to {} using template {}", phoneNumber, templateName);
         
         // TODO: Implement actual HTTP call to Meta Cloud API
